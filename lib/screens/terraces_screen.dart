@@ -526,6 +526,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
         TileLayer(
           urlTemplate: MapConfig.urlTemplate,
           userAgentPackageName: MapConfig.userAgent,
+          retinaMode: RetinaMode.isHighDensity(context),
         ),
         if (haciaSol != null)
           PolylineLayer(polylines: [
