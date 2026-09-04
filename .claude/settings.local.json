@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/user1/ruta_sombra/**)",
+      "Bash(sed -i '' 's/LatLngBounds/GeoBounds/g' lib/services/osm_walk_service.dart)",
+      "Bash(flutter analyze *)",
+      "Bash(flutter test *)",
+      "Bash(flutter build *)",
+      "Bash(flutter create *)",
+      "Bash(flutter devices *)",
+      "Bash(flutter emulators *)",
+      "Bash(open -a Simulator)",
+      "Bash(xcrun simctl *)",
+      "Bash(echo \"location set rc=$?\")",
+      "Bash(flutter run *)",
+      "Bash(osascript -e 'tell application \"Simulator\" to get name')",
+      "Bash(awk '{print $2, $11, $12, $13, $14}')",
+      "Bash(kill -USR1 7100)",
+      "Bash(kill -0 7100)",
+      "Bash(kill -USR2 7100)",
+      "Bash(kill -USR2 9831)",
+      "Bash(kill -USR1 9831)",
+      "Bash(flutter pub *)",
+      "Bash(pkill -f \"flutter_tools.snapshot run -d 23993814\")",
+      "Bash(pkill -f \"flutter_tools.snapshot run\")",
+      "Bash(flutter config *)",
+      "Bash(flutter doctor *)",
+      "Read(//private/tmp/**)",
+      "Bash(sed 's/pad = 0.16 if fg_only else 0.0/pad = 0.28 if fg_only else 0.0/' mkicons2.py)",
+      "Bash(python3 mkicons3.py)"
+    ]
+  }
+}
