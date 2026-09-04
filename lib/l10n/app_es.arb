@@ -1,0 +1,86 @@
+{
+  "@@locale": "es",
+  "appTitle": "Terrazeo",
+  "terracesNearby": "Terrazas cerca",
+  "noBars": "No se han encontrado bares cerca.",
+  "thisSpot": "Este punto",
+  "zoomInForTerraces": "Acércate en el mapa para ver terrazas.",
+  "back": "Volver",
+  "refresh": "Actualizar",
+  "language": "Idioma",
+  "languageSystem": "Automático (sistema)",
+
+  "movedToOpenSpace": "Calculado en el espacio abierto más cercano al local.",
+  "terraceNotConfirmed": "Terraza no confirmada en el mapa.",
+  "networkError": "No se han podido descargar los datos. Revisa la conexión e inténtalo de nuevo.",
+  "noAemet": "Sin datos de AEMET ahora mismo.",
+
+  "now": "Ahora",
+
+  "comfortVeryNice": "Muy agradable",
+  "comfortNice": "Agradable",
+  "comfortSoSo": "Regular",
+  "comfortBad": "Incómodo",
+
+  "headlineNice": "Se está bien aquí ahora",
+  "headlineBreeze": "Se está bien, con algo de brisa",
+  "headlineStrongSun": "Aquí pega mucho el sol",
+  "headlineHotShade": "Hace calor incluso a la sombra",
+  "headlineCoolBetterSun": "Fresco: mejor una terraza al sol",
+  "headlineWindy": "Ahora mismo hace demasiado viento",
+  "headlineCold": "Hace fresco para estar en la terraza",
+  "headlineNight": "De noche",
+
+  "flagStrongSun": "sol fuerte",
+  "flagShade": "a la sombra",
+  "flagWindy": "ventoso",
+  "flagBreeze": "brisa",
+  "flagSheltered": "resguardado",
+  "flagCool": "fresco",
+  "flagHot": "calor",
+  "feelsLike": "sensación {deg} °C",
+  "@feelsLike": { "placeholders": { "deg": { "type": "int" } } },
+
+  "statusPleno": "Al sol",
+  "statusSolConNubes": "Sol con nubes",
+  "statusNublado": "Nublado",
+  "statusSombra": "En sombra",
+  "statusNoche": "De noche",
+
+  "sunUntilSunset": "sol {h} h {m} min",
+  "@sunUntilSunset": {
+    "placeholders": { "h": { "type": "int" }, "m": { "type": "int" } }
+  },
+
+  "windCalm": "En calma",
+  "windLight": "Brisa ligera",
+  "windBreezy": "Algo de viento",
+  "windWindy": "Viento",
+  "windVeryWindy": "Mucho viento",
+  "windSpeedFrom": "{kmh} km/h del {cardinal}",
+  "@windSpeedFrom": {
+    "placeholders": { "kmh": { "type": "int" }, "cardinal": { "type": "String" } }
+  },
+  "windSpeed": "{kmh} km/h",
+  "@windSpeed": { "placeholders": { "kmh": { "type": "int" } } },
+  "gusts": "Rachas de hasta {kmh} km/h",
+  "@gusts": { "placeholders": { "kmh": { "type": "int" } } },
+  "temperature": "{deg} °C",
+  "@temperature": { "placeholders": { "deg": { "type": "int" } } },
+
+  "sourceForecast": "Predicción AEMET",
+  "sourceObservation": "Observación AEMET",
+
+  "distanceM": "{m} m",
+  "@distanceM": { "placeholders": { "m": { "type": "int" } } },
+  "distanceKm": "{km} km",
+  "@distanceKm": { "placeholders": { "km": { "type": "String" } } },
+  "about": "Acerca de",
+  "dataSources": "Fuentes de datos",
+  "openSourceLicenses": "Licencias de código abierto",
+  "aboutIntro": "Busca terrazas y mira si ahora mismo se está a gusto: sol o sombra, viento y temperatura.",
+  "creditMap": "Mapa y edificios: © colaboradores de OpenStreetMap (ODbL).",
+  "creditTiles": "Teselas del mapa: OpenStreetMap.",
+  "creditWeather": "Datos meteorológicos: elaboración propia a partir de datos de AEMET.",
+  "creditSun": "Posición del sol: algoritmo de Jean Meeus."
+}
