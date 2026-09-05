@@ -241,4 +241,16 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get headlineChillyShade => 'Fa fresca i sense sol aquí';
+
+  @override
+  String get removeAdsPromptTitle => 'Sense anuncis?';
+
+  @override
+  String get removeAdsPromptBody => 'Treu-los per sempre amb un únic pagament.';
+
+  @override
+  String get notNow => 'Ara no';
+
+  @override
+  String get adsRemovedMockDone => 'Anuncis trets (simulat).';
 }

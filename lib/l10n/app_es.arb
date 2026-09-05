@@ -9,19 +9,15 @@
   "refresh": "Actualizar",
   "language": "Idioma",
   "languageSystem": "Automático (sistema)",
-
   "movedToOpenSpace": "Calculado en el espacio abierto más cercano al local.",
   "terraceNotConfirmed": "Terraza no confirmada en el mapa.",
   "networkError": "No se han podido descargar los datos. Revisa la conexión e inténtalo de nuevo.",
   "noAemet": "Sin datos de AEMET ahora mismo.",
-
   "now": "Ahora",
-
   "comfortVeryNice": "Muy agradable",
   "comfortNice": "Agradable",
   "comfortSoSo": "Regular",
   "comfortBad": "Incómodo",
-
   "headlineNice": "Se está bien aquí ahora",
   "headlineBreeze": "Se está bien, con algo de brisa",
   "headlineStrongSun": "Aquí pega mucho el sol",
@@ -30,7 +26,6 @@
   "headlineWindy": "Ahora mismo hace demasiado viento",
   "headlineCold": "Hace fresco para estar en la terraza",
   "headlineNight": "De noche",
-
   "flagStrongSun": "sol fuerte",
   "flagShade": "a la sombra",
   "flagWindy": "ventoso",
@@ -39,19 +34,29 @@
   "flagCool": "fresco",
   "flagHot": "calor",
   "feelsLike": "sensación {deg} °C",
-  "@feelsLike": { "placeholders": { "deg": { "type": "int" } } },
-
+  "@feelsLike": {
+    "placeholders": {
+      "deg": {
+        "type": "int"
+      }
+    }
+  },
   "statusPleno": "Al sol",
   "statusSolConNubes": "Sol con nubes",
   "statusNublado": "Nublado",
   "statusSombra": "En sombra",
   "statusNoche": "De noche",
-
   "sunUntilSunset": "sol {h} h {m} min",
   "@sunUntilSunset": {
-    "placeholders": { "h": { "type": "int" }, "m": { "type": "int" } }
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
   },
-
   "windCalm": "En calma",
   "windLight": "Brisa ligera",
   "windBreezy": "Algo de viento",
@@ -59,24 +64,65 @@
   "windVeryWindy": "Mucho viento",
   "windSpeedFrom": "{kmh} km/h del {cardinal}",
   "@windSpeedFrom": {
-    "placeholders": { "kmh": { "type": "int" }, "cardinal": { "type": "String" } }
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      },
+      "cardinal": {
+        "type": "String"
+      }
+    }
   },
   "windSpeed": "{kmh} km/h",
-  "@windSpeed": { "placeholders": { "kmh": { "type": "int" } } },
+  "@windSpeed": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
   "gusts": "Rachas de hasta {kmh} km/h",
   "windShelteredByBuildings": "Resguardado por edificios · {kmh} km/h en campo abierto",
-  "@windShelteredByBuildings": { "placeholders": { "kmh": { "type": "int" } } },
-  "@gusts": { "placeholders": { "kmh": { "type": "int" } } },
+  "@windShelteredByBuildings": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
+  "@gusts": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
   "temperature": "{deg} °C",
-  "@temperature": { "placeholders": { "deg": { "type": "int" } } },
-
+  "@temperature": {
+    "placeholders": {
+      "deg": {
+        "type": "int"
+      }
+    }
+  },
   "sourceForecast": "Predicción AEMET",
   "sourceObservation": "Observación AEMET",
-
   "distanceM": "{m} m",
-  "@distanceM": { "placeholders": { "m": { "type": "int" } } },
+  "@distanceM": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
   "distanceKm": "{km} km",
-  "@distanceKm": { "placeholders": { "km": { "type": "String" } } },
+  "@distanceKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
   "about": "Acerca de",
   "dataSources": "Fuentes de datos",
   "openSourceLicenses": "Licencias de código abierto",
@@ -92,5 +138,9 @@
   "adsSectionTitle": "Anuncios",
   "adsAlreadyRemoved": "Ya has quitado los anuncios. ¡Gracias!",
   "headlineSunnyCold": "Aquí da un sol muy agradable",
-  "headlineChillyShade": "Hace fresco y sin sol aquí"
+  "headlineChillyShade": "Hace fresco y sin sol aquí",
+  "removeAdsPromptTitle": "¿Sin anuncios?",
+  "removeAdsPromptBody": "Quítalos para siempre con un único pago.",
+  "notNow": "Ahora no",
+  "adsRemovedMockDone": "Anuncios quitados (simulado)."
 }

@@ -9,19 +9,15 @@
   "refresh": "Refresh",
   "language": "Language",
   "languageSystem": "Automatic (system)",
-
   "movedToOpenSpace": "Calculated at the open space closest to the venue.",
   "terraceNotConfirmed": "Terrace not confirmed on the map.",
   "networkError": "Couldn't download data. Check your connection and try again.",
   "noAemet": "No AEMET data right now.",
-
   "now": "Now",
-
   "comfortVeryNice": "Very nice",
   "comfortNice": "Nice",
   "comfortSoSo": "So-so",
   "comfortBad": "Uncomfortable",
-
   "headlineNice": "It's nice here right now",
   "headlineBreeze": "Nice, with a bit of a breeze",
   "headlineStrongSun": "The sun really beats down here",
@@ -30,7 +26,6 @@
   "headlineWindy": "Too windy right now",
   "headlineCold": "Too chilly to sit outside",
   "headlineNight": "Night",
-
   "flagStrongSun": "strong sun",
   "flagShade": "in shade",
   "flagWindy": "windy",
@@ -39,15 +34,12 @@
   "flagCool": "cool",
   "flagHot": "hot",
   "feelsLike": "feels like {deg} °C",
-
   "statusPleno": "In the sun",
   "statusSolConNubes": "Sun with clouds",
   "statusNublado": "Cloudy",
   "statusSombra": "In shade",
   "statusNoche": "Night",
-
   "sunUntilSunset": "sun {h} h {m} min",
-
   "windCalm": "Calm",
   "windLight": "Light breeze",
   "windBreezy": "Some wind",
@@ -57,12 +49,16 @@
   "windSpeed": "{kmh} km/h",
   "gusts": "Gusts up to {kmh} km/h",
   "windShelteredByBuildings": "Sheltered by buildings · {kmh} km/h in the open",
-  "@windShelteredByBuildings": { "placeholders": { "kmh": { "type": "int" } } },
+  "@windShelteredByBuildings": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
   "temperature": "{deg} °C",
-
   "sourceForecast": "AEMET forecast",
   "sourceObservation": "AEMET observation",
-
   "distanceM": "{m} m",
   "distanceKm": "{km} km",
   "about": "About",
@@ -80,5 +76,9 @@
   "adsSectionTitle": "Ads",
   "adsAlreadyRemoved": "You already removed ads. Thank you!",
   "headlineSunnyCold": "Lovely sun here",
-  "headlineChillyShade": "Chilly and shaded here"
+  "headlineChillyShade": "Chilly and shaded here",
+  "removeAdsPromptTitle": "No ads?",
+  "removeAdsPromptBody": "Remove them for good with a one-time payment.",
+  "notNow": "Not now",
+  "adsRemovedMockDone": "Ads removed (mock)."
 }

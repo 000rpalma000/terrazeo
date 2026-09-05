@@ -241,4 +241,17 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get headlineChillyShade => 'Fresco e all’ombra qui';
+
+  @override
+  String get removeAdsPromptTitle => 'Senza pubblicità?';
+
+  @override
+  String get removeAdsPromptBody =>
+      'Rimuovila per sempre con un pagamento unico.';
+
+  @override
+  String get notNow => 'Non ora';
+
+  @override
+  String get adsRemovedMockDone => 'Pubblicità rimossa (simulato).';
 }
