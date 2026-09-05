@@ -56,6 +56,8 @@
   "windSpeedFrom": "{kmh} km/h da {cardinal}",
   "windSpeed": "{kmh} km/h",
   "gusts": "Raffiche fino a {kmh} km/h",
+  "windShelteredByBuildings": "Riparato dagli edifici · {kmh} km/h in campo aperto",
+  "@windShelteredByBuildings": { "placeholders": { "kmh": { "type": "int" } } },
   "temperature": "{deg} °C",
 
   "sourceForecast": "Previsione AEMET",

@@ -11,6 +11,7 @@ import 'package:terrazeo/services/open_meteo_service.dart';
 import 'package:terrazeo/services/osm_area_service.dart';
 import 'package:terrazeo/services/sun_service.dart';
 import 'package:terrazeo/services/weather_service.dart';
+import 'package:terrazeo/services/wind_shelter_service.dart';
 import 'package:terrazeo/widgets/report_widgets.dart';
 
 void main() {
@@ -237,6 +238,71 @@ void main() {
     expect(WeatherService.plausibleEspana(LatLng(51.5074, -0.1278)), isFalse); // Londres
     expect(WeatherService.plausibleEspana(LatLng(40.7128, -74.0060)), isFalse); // NYC
     expect(WeatherService.plausibleEspana(LatLng(-34.6037, -58.3816)), isFalse); // Buenos Aires
+  });
+
+  group('WindShelterService', () {
+    final punto = LatLng(41.3900, 2.1700);
+    // Edificio cuadrado ~20 m, borde sur a ~18 m al norte del punto, 16 m alto.
+    final edificioAlNorte = BuildingFootprint(
+      ring: [
+        LatLng(41.39016, 2.16988),
+        LatLng(41.39016, 2.17012),
+        LatLng(41.39034, 2.17012),
+        LatLng(41.39034, 2.16988),
+      ],
+      heightM: 16,
+    );
+    const svc = WindShelterService();
+
+    test('sin dirección de viento -> no ajusta nada', () {
+      expect(svc.abrigo(punto, [edificioAlNorte], null), 0);
+    });
+
+    test('edificio a barlovento -> resguardo notable', () {
+      // viento del norte (0°): el edificio está justo a barlovento.
+      expect(svc.abrigo(punto, [edificioAlNorte], 0), greaterThan(0.35));
+    });
+
+    test('mismo edificio a sotavento -> sin resguardo', () {
+      // viento del sur (180°): el edificio queda detrás, no protege.
+      expect(svc.abrigo(punto, [edificioAlNorte], 180), lessThan(0.05));
+    });
+
+    test('un cobertizo bajo no cuenta como pantalla', () {
+      final bajo = BuildingFootprint(ring: edificioAlNorte.ring, heightM: 2);
+      expect(svc.abrigo(punto, [bajo], 0), 0);
+    });
+
+    test('vientoLocal descuenta el resguardo', () {
+      expect(WindShelterService.vientoLocal(20, 0), 20);
+      expect(WindShelterService.vientoLocal(20, 0.5), closeTo(11, 0.001));
+      expect(WindShelterService.vientoLocal(20, 1), closeTo(2, 0.001));
+    });
+  });
+
+  test('evaluarConfort: en calor, un sitio resguardado pierde la brisa', () {
+    // Verano, calor, sombra: con brisa sería el combo ideal (muy agradable);
+    // si los edificios cortan esa brisa, baja a "agradable".
+    final v = DateTime(2026, 7, 21, 14);
+    final conBrisa = evaluarConfort(
+      sunStatus: SunStatus.sombraPorEdificios,
+      windKmh: 14,
+      tempC: 30,
+      instante: v,
+      latitud: 41.39,
+      abrigo: 0,
+    );
+    final resguardado = evaluarConfort(
+      sunStatus: SunStatus.sombraPorEdificios,
+      windKmh: 3, // la brisa ya no llega
+      tempC: 30,
+      instante: v,
+      latitud: 41.39,
+      abrigo: 0.6,
+    );
+    expect(conBrisa.level, ComfortLevel.muyAgradable);
+    expect(resguardado.level, ComfortLevel.agradable);
+    expect(resguardado.flags, contains(ComfortFlag.resguardado));
   });
 
   test('OpenMeteoService: bloque "hourly" -> lista ordenada', () {

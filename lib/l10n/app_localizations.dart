@@ -392,6 +392,12 @@ abstract class AppLocalizations {
   /// **'Rachas de hasta {kmh} km/h'**
   String gusts(int kmh);
 
+  /// No description provided for @windShelteredByBuildings.
+  ///
+  /// In es, this message translates to:
+  /// **'Resguardado por edificios · {kmh} km/h en campo abierto'**
+  String windShelteredByBuildings(int kmh);
+
   /// No description provided for @temperature.
   ///
   /// In es, this message translates to:

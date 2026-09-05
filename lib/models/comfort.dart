@@ -55,8 +55,12 @@ ComfortVerdict evaluarConfort({
   required double latitud,
   double? windKmh,
   double? tempC,
+  double abrigo = 0,
 }) {
   final w = windKmh ?? 0.0;
+  // Si los edificios cortan el viento de forma clara, el sitio es "resguardado"
+  // aunque el pronóstico regional traiga algo de brisa (que aquí ya no llega).
+  final resguardadoPorEdificios = abrigo >= 0.35;
   final haySombra =
       sunStatus == SunStatus.sombraPorEdificios || sunStatus == SunStatus.nublado;
   final solPleno = sunStatus == SunStatus.pleno;
@@ -73,7 +77,7 @@ ComfortVerdict evaluarConfort({
   if (haySombra) flags.add(ComfortFlag.sombra);
   if (w >= 30) {
     flags.add(ComfortFlag.ventoso);
-  } else if (w >= 8) {
+  } else if (w >= 8 && !resguardadoPorEdificios) {
     flags.add(ComfortFlag.brisa);
   } else {
     flags.add(ComfortFlag.resguardado);

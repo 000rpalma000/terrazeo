@@ -165,6 +165,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String windShelteredByBuildings(int kmh) {
+    return 'Resguardado por edificios · $kmh km/h en campo abierto';
+  }
+
+  @override
   String temperature(int deg) {
     return '$deg °C';
   }

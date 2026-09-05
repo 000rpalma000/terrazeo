@@ -56,6 +56,8 @@
   "windSpeedFrom": "{kmh} km/h del {cardinal}",
   "windSpeed": "{kmh} km/h",
   "gusts": "Ratxes de fins a {kmh} km/h",
+  "windShelteredByBuildings": "Arrecerat pels edificis · {kmh} km/h en camp obert",
+  "@windShelteredByBuildings": { "placeholders": { "kmh": { "type": "int" } } },
   "temperature": "{deg} °C",
 
   "sourceForecast": "Predicció AEMET",
