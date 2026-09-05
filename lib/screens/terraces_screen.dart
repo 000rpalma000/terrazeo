@@ -22,6 +22,7 @@ import '../services/ads_service.dart';
 import '../services/search_gate.dart';
 import '../services/shadow_service.dart';
 import '../services/sun_service.dart';
+import '../services/wind_shelter_service.dart';
 import '../widgets/report_widgets.dart';
 
 class TerracesScreen extends StatefulWidget {
@@ -39,6 +40,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
   final _osm = OsmAreaService();
   final _sun = const SunService();
   final _shadow = const ShadowService();
+  final _viento = const WindShelterService();
   final _tiempo = WeatherService();
 
   LatLng _centro = LocationService.fallback;
@@ -349,12 +351,24 @@ class _TerracesScreenState extends State<TerracesScreen> {
       tapadoPorEdificio: tapado,
       cloudFraction: cloud,
     );
+
+    // Viento local: el pronóstico regional, descontado el resguardo que dan
+    // los edificios a barlovento.
+    final vientoReg = w?.windSpeedKmh;
+    final abrigo = vientoReg == null
+        ? 0.0
+        : _viento.abrigo(punto, edificios, w?.windDirectionDeg?.toDouble());
+    final vientoLoc = vientoReg == null
+        ? null
+        : WindShelterService.vientoLocal(vientoReg, abrigo);
+
     final comfort = evaluarConfort(
       sunStatus: status,
-      windKmh: w?.windSpeedKmh,
+      windKmh: vientoLoc,
       tempC: w?.temperatureC,
       instante: hora,
       latitud: punto.latitude,
+      abrigo: abrigo,
     );
 
     Duration? restante;
@@ -375,7 +389,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
       sunAzimuthDeg: pos.azimuthDeg,
       cloudFraction: cloud,
       solRestante: restante,
-      windSpeedKmh: w?.windSpeedKmh,
+      windSpeedKmh: vientoLoc,
+      windSpeedRegionalKmh: vientoReg,
+      windShelterFactor: abrigo,
       windGustKmh: w?.windGustKmh,
       windDirectionDeg: w?.windDirectionDeg,
       windDirectionCardinal: w?.windDirectionCardinal,
@@ -823,6 +839,16 @@ class _TerracesScreenState extends State<TerracesScreen> {
                       if (r.windGustKmh != null)
                         Text(l10n.gusts(r.windGustKmh!.round()),
                             style: Theme.of(context).textTheme.bodySmall),
+                      if (r.resguardadoPorEdificios &&
+                          r.windSpeedRegionalKmh != null)
+                        Text(
+                          l10n.windShelteredByBuildings(
+                              r.windSpeedRegionalKmh!.round()),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(fontStyle: FontStyle.italic),
+                        ),
                     ],
                   ),
                 ),

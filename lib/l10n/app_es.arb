@@ -64,6 +64,8 @@
   "windSpeed": "{kmh} km/h",
   "@windSpeed": { "placeholders": { "kmh": { "type": "int" } } },
   "gusts": "Rachas de hasta {kmh} km/h",
+  "windShelteredByBuildings": "Resguardado por edificios · {kmh} km/h en campo abierto",
+  "@windShelteredByBuildings": { "placeholders": { "kmh": { "type": "int" } } },
   "@gusts": { "placeholders": { "kmh": { "type": "int" } } },
   "temperature": "{deg} °C",
   "@temperature": { "placeholders": { "deg": { "type": "int" } } },

@@ -31,8 +31,18 @@ class PointReport {
   /// Minutos de sol que quedan hasta el ocaso (si es de día).
   final Duration? solRestante;
 
-  // --- Tiempo (AEMET) ---
+  // --- Tiempo ---
+  /// Viento que se estima *en el sitio*, ya descontado el resguardo de los
+  /// edificios cercanos. Es el que se usa para el veredicto y la lista.
   final double? windSpeedKmh;
+
+  /// Viento del pronóstico regional (AEMET / Open-Meteo), sin corregir.
+  final double? windSpeedRegionalKmh;
+
+  /// Cuánto resguardan los edificios a barlovento: 0 = a cielo abierto,
+  /// 1 = totalmente a resguardo.
+  final double windShelterFactor;
+
   final double? windGustKmh;
   final int? windDirectionDeg;
   final String? windDirectionCardinal;
@@ -51,11 +61,23 @@ class PointReport {
     this.cloudFraction,
     this.solRestante,
     this.windSpeedKmh,
+    this.windSpeedRegionalKmh,
+    this.windShelterFactor = 0,
     this.windGustKmh,
     this.windDirectionDeg,
     this.windDirectionCardinal,
     this.temperatureC,
   });
+
+  /// El viento local es bastante menor que el regional por culpa de los
+  /// edificios (para mostrar una nota de "resguardado por edificios").
+  bool get resguardadoPorEdificios {
+    final loc = windSpeedKmh, reg = windSpeedRegionalKmh;
+    return windShelterFactor >= 0.35 &&
+        loc != null &&
+        reg != null &&
+        reg - loc >= 4;
+  }
 
   WindStrength get windStrength =>
       WindStrengthInfo.fromKmh(windSpeedKmh ?? 0);
