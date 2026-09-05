@@ -210,4 +210,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditSun => 'Sun position: algorithm by Jean Meeus.';
+
+  @override
+  String get adTitle => 'Ad (test)';
+
+  @override
+  String get adBody =>
+      'A real ad would go here. This is just to test how often it shows up.';
+
+  @override
+  String get removeAdsButton => 'Remove ads · €1.99';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get adsSectionTitle => 'Ads';
+
+  @override
+  String get adsAlreadyRemoved => 'You already removed ads. Thank you!';
+
+  @override
+  String get headlineSunnyCold => 'Lovely sun here';
+
+  @override
+  String get headlineChillyShade => 'Chilly and shaded here';
 }

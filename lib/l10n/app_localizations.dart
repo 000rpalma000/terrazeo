@@ -469,6 +469,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Posición del sol: algoritmo de Jean Meeus.'**
   String get creditSun;
+
+  /// No description provided for @adTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicidad (prueba)'**
+  String get adTitle;
+
+  /// No description provided for @adBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí iría un anuncio real. Esto es solo para probar cada cuánto aparece.'**
+  String get adBody;
+
+  /// No description provided for @removeAdsButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar anuncios · 1,99 €'**
+  String get removeAdsButton;
+
+  /// No description provided for @close.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrar'**
+  String get close;
+
+  /// No description provided for @adsSectionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Anuncios'**
+  String get adsSectionTitle;
+
+  /// No description provided for @adsAlreadyRemoved.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya has quitado los anuncios. ¡Gracias!'**
+  String get adsAlreadyRemoved;
+
+  /// No description provided for @headlineSunnyCold.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí da un sol muy agradable'**
+  String get headlineSunnyCold;
+
+  /// No description provided for @headlineChillyShade.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace fresco y sin sol aquí'**
+  String get headlineChillyShade;
 }
 
 class _AppLocalizationsDelegate

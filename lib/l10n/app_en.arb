@@ -70,5 +70,13 @@
   "creditMap": "Map and buildings: © OpenStreetMap contributors (ODbL).",
   "creditTiles": "Map tiles: OpenStreetMap.",
   "creditWeather": "Weather data: derived from AEMET data.",
-  "creditSun": "Sun position: algorithm by Jean Meeus."
+  "creditSun": "Sun position: algorithm by Jean Meeus.",
+  "adTitle": "Ad (test)",
+  "adBody": "A real ad would go here. This is just to test how often it shows up.",
+  "removeAdsButton": "Remove ads · €1.99",
+  "close": "Close",
+  "adsSectionTitle": "Ads",
+  "adsAlreadyRemoved": "You already removed ads. Thank you!",
+  "headlineSunnyCold": "Lovely sun here",
+  "headlineChillyShade": "Chilly and shaded here"
 }

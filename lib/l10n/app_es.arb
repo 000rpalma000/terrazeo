@@ -82,5 +82,13 @@
   "creditMap": "Mapa y edificios: © colaboradores de OpenStreetMap (ODbL).",
   "creditTiles": "Teselas del mapa: OpenStreetMap.",
   "creditWeather": "Datos meteorológicos: elaboración propia a partir de datos de AEMET.",
-  "creditSun": "Posición del sol: algoritmo de Jean Meeus."
+  "creditSun": "Posición del sol: algoritmo de Jean Meeus.",
+  "adTitle": "Publicidad (prueba)",
+  "adBody": "Aquí iría un anuncio real. Esto es solo para probar cada cuánto aparece.",
+  "removeAdsButton": "Quitar anuncios · 1,99 €",
+  "close": "Cerrar",
+  "adsSectionTitle": "Anuncios",
+  "adsAlreadyRemoved": "Ya has quitado los anuncios. ¡Gracias!",
+  "headlineSunnyCold": "Aquí da un sol muy agradable",
+  "headlineChillyShade": "Hace fresco y sin sol aquí"
 }

@@ -38,28 +38,86 @@ void main() {
     );
   });
 
-  test('evaluarConfort: sol fuerte y calor -> incómodo', () {
+  const bcn = 41.39; // Barcelona, hemisferio norte
+  final veranoNorte = DateTime(2026, 7, 21, 14); // pico de verano boreal
+  final inviernoNorte = DateTime(2026, 1, 19, 13); // pico de invierno boreal
+
+  test('evaluarConfort: en verano, sol pleno y sin viento -> incómodo', () {
     final v = evaluarConfort(
-        sunStatus: SunStatus.pleno, tempC: 33, windKmh: 3);
+      sunStatus: SunStatus.pleno,
+      windKmh: 3,
+      instante: veranoNorte,
+      latitud: bcn,
+    );
+    expect(v.buscaSombra, isTrue);
     expect(v.flags, contains(ComfortFlag.solFuerte));
-    expect(v.level, anyOf(ComfortLevel.incomodo, ComfortLevel.justo));
-    expect(v.headline,
-        anyOf(ComfortHeadline.solFuerte, ComfortHeadline.calorSombra));
+    expect(v.level, ComfortLevel.incomodo);
+    expect(v.headline, ComfortHeadline.solFuerte);
   });
 
-  test('evaluarConfort: templado a la sombra con brisa -> agradable', () {
+  test('evaluarConfort: en verano, sombra con brisa -> el combo ideal', () {
     final v = evaluarConfort(
-        sunStatus: SunStatus.sombraPorEdificios, tempC: 25, windKmh: 12);
-    expect(v.level,
-        anyOf(ComfortLevel.muyAgradable, ComfortLevel.agradable));
+      sunStatus: SunStatus.sombraPorEdificios,
+      windKmh: 12,
+      instante: veranoNorte,
+      latitud: bcn,
+    );
+    expect(v.level, ComfortLevel.muyAgradable);
     expect(v.flags, contains(ComfortFlag.brisa));
+    expect(v.headline, ComfortHeadline.brisaAgradable);
   });
 
-  test('evaluarConfort: mucho viento -> incómodo y ventoso', () {
+  test('evaluarConfort: mucho viento -> incómodo y ventoso aunque haya sombra', () {
     final v = evaluarConfort(
-        sunStatus: SunStatus.pleno, tempC: 24, windKmh: 40);
+      sunStatus: SunStatus.sombraPorEdificios,
+      windKmh: 45,
+      instante: veranoNorte,
+      latitud: bcn,
+    );
     expect(v.level, ComfortLevel.incomodo);
     expect(v.headline, ComfortHeadline.ventoso);
+  });
+
+  test('evaluarConfort: 22°C no pesa igual en invierno que en verano', () {
+    final enInvierno = evaluarConfort(
+      sunStatus: SunStatus.pleno,
+      windKmh: 5,
+      tempC: 22,
+      instante: inviernoNorte,
+      latitud: bcn,
+    );
+    expect(enInvierno.buscaSombra, isFalse);
+    expect(enInvierno.level, ComfortLevel.muyAgradable);
+    expect(enInvierno.headline, ComfortHeadline.solAgradable);
+
+    final enVerano = evaluarConfort(
+      sunStatus: SunStatus.pleno,
+      windKmh: 5,
+      tempC: 25, // el propio ejemplo del usuario: 25° en verano sí pide sombra
+      instante: veranoNorte,
+      latitud: bcn,
+    );
+    expect(enVerano.buscaSombra, isTrue);
+    expect(enVerano.level, ComfortLevel.incomodo);
+    expect(enVerano.headline, ComfortHeadline.solFuerte);
+  });
+
+  test('evaluarConfort: enero es pleno verano en el hemisferio sur', () {
+    final buenosAires = evaluarConfort(
+      sunStatus: SunStatus.pleno,
+      windKmh: 5,
+      instante: inviernoNorte, // 19 de enero
+      latitud: -34.6, // Buenos Aires: allí es pleno verano
+    );
+    expect(buenosAires.buscaSombra, isTrue);
+
+    final barcelona = evaluarConfort(
+      sunStatus: SunStatus.pleno,
+      windKmh: 5,
+      instante: inviernoNorte,
+      latitud: bcn, // misma fecha, hemisferio norte: pleno invierno
+    );
+    expect(barcelona.buscaSombra, isFalse);
   });
 
   test('SunService: mediodía de verano en Barcelona, sol alto', () {

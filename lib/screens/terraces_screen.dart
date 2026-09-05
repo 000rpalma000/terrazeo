@@ -18,6 +18,8 @@ import 'about_screen.dart';
 import '../services/locale_controller.dart';
 import '../services/location_service.dart';
 import '../services/osm_area_service.dart';
+import '../services/ads_service.dart';
+import '../services/search_gate.dart';
 import '../services/shadow_service.dart';
 import '../services/sun_service.dart';
 import '../widgets/report_widgets.dart';
@@ -70,6 +72,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
   @override
   void initState() {
     super.initState();
+    AdsService.instancia.inicializar();
     _arrancar();
   }
 
@@ -101,6 +104,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
       await _asegurarCobertura(_centro, 420);
       _recalcularVisible();
+
+      // Monetización: cada N búsquedas (abrir/actualizar) toca anuncio.
+      if (await SearchGate().registrarBusqueda()) {
+        await AdsService.instancia.mostrarSiListo();
+      }
     } catch (_) {
       if (mounted) setState(() => _error = true);
     } finally {
@@ -346,8 +354,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
     );
     final comfort = evaluarConfort(
       sunStatus: status,
-      tempC: w?.temperatureC,
       windKmh: w?.windSpeedKmh,
+      tempC: w?.temperatureC,
+      instante: hora,
+      latitud: punto.latitude,
     );
 
     Duration? restante;
@@ -759,14 +769,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
                   visualDensity: VisualDensity.compact,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-              Chip(
-                label: Text(
-                  l10n.feelsLike(r.comfort.sensacionC.round()),
-                  style: const TextStyle(fontSize: 11),
-                ),
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
             ],
           ),
         ],
@@ -930,10 +932,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
         ComfortHeadline.agradable => l10n.headlineNice,
         ComfortHeadline.brisaAgradable => l10n.headlineBreeze,
         ComfortHeadline.solFuerte => l10n.headlineStrongSun,
-        ComfortHeadline.calorSombra => l10n.headlineHotShade,
-        ComfortHeadline.frescoMejorSol => l10n.headlineCoolBetterSun,
+        ComfortHeadline.solAgradable => l10n.headlineSunnyCold,
+        ComfortHeadline.frioViento => l10n.headlineChillyShade,
         ComfortHeadline.ventoso => l10n.headlineWindy,
-        ComfortHeadline.frio => l10n.headlineCold,
         ComfortHeadline.noche => l10n.headlineNight,
       };
 
@@ -943,8 +944,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
         ComfortFlag.ventoso => l10n.flagWindy,
         ComfortFlag.brisa => l10n.flagBreeze,
         ComfortFlag.resguardado => l10n.flagSheltered,
-        ComfortFlag.fresco => l10n.flagCool,
-        ComfortFlag.calor => l10n.flagHot,
       };
 
   static String _hhmm(DateTime t, DateTime ahora) {
