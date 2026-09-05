@@ -16,6 +16,10 @@
 		<string>6.0</string>
 		<key>CFBundleName</key>
 		<string>terrazeo</string>
+		<!-- AdMob: ID de PRUEBA de Google. Cambiar por el propio (gratis en
+		     admob.google.com) antes de publicar. -->
+		<key>GADApplicationIdentifier</key>
+		<string>ca-app-pub-3940256099942544~1458002511</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>

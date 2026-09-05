@@ -70,5 +70,13 @@
   "creditMap": "Mappa ed edifici: © contributori di OpenStreetMap (ODbL).",
   "creditTiles": "Riquadri della mappa: OpenStreetMap.",
   "creditWeather": "Dati meteo: elaborati a partire dai dati AEMET.",
-  "creditSun": "Posizione del sole: algoritmo di Jean Meeus."
+  "creditSun": "Posizione del sole: algoritmo di Jean Meeus.",
+  "adTitle": "Pubblicità (test)",
+  "adBody": "Qui apparirebbe una pubblicità reale. Serve solo per provare la frequenza.",
+  "removeAdsButton": "Rimuovi pubblicità · 1,99 €",
+  "close": "Chiudi",
+  "adsSectionTitle": "Pubblicità",
+  "adsAlreadyRemoved": "Hai già rimosso la pubblicità. Grazie!",
+  "headlineSunnyCold": "Un sole molto piacevole qui",
+  "headlineChillyShade": "Fresco e all’ombra qui"
 }

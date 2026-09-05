@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../services/search_gate.dart';
 
-/// Pantalla "Acerca de": descripción, fuentes de datos y licencias.
-class AboutScreen extends StatelessWidget {
+/// Pantalla "Acerca de": descripción, fuentes de datos, licencias y anuncios.
+class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key, this.version = '1.0.0'});
 
   final String version;
+
+  @override
+  State<AboutScreen> createState() => _AboutScreenState();
+}
+
+class _AboutScreenState extends State<AboutScreen> {
+  final _gate = SearchGate();
+  bool? _sinAnuncios;
+
+  @override
+  void initState() {
+    super.initState();
+    _gate.anunciosEliminados().then((v) {
+      if (mounted) setState(() => _sinAnuncios = v);
+    });
+  }
+
+  Future<void> _quitarAnuncios() async {
+    await _gate.eliminarAnunciosMock();
+    if (mounted) setState(() => _sinAnuncios = true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +42,7 @@ class AboutScreen extends StatelessWidget {
         children: [
           Text(l10n.appTitle, style: t.headlineSmall),
           const SizedBox(height: 4),
-          Text('v$version', style: t.bodySmall),
+          Text('v${widget.version}', style: t.bodySmall),
           const SizedBox(height: 16),
           Text(l10n.aboutIntro, style: t.bodyMedium),
           const SizedBox(height: 28),
@@ -37,9 +59,19 @@ class AboutScreen extends StatelessWidget {
             onPressed: () => showLicensePage(
               context: context,
               applicationName: l10n.appTitle,
-              applicationVersion: 'v$version',
+              applicationVersion: 'v${widget.version}',
             ),
           ),
+          const SizedBox(height: 28),
+          Text(l10n.adsSectionTitle, style: t.titleMedium),
+          const SizedBox(height: 8),
+          if (_sinAnuncios == true)
+            Text(l10n.adsAlreadyRemoved, style: t.bodyMedium)
+          else if (_sinAnuncios == false)
+            FilledButton.tonal(
+              onPressed: _quitarAnuncios,
+              child: Text(l10n.removeAdsButton),
+            ),
         ],
       ),
     );

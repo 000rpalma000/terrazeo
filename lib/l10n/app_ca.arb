@@ -70,5 +70,13 @@
   "creditMap": "Mapa i edificis: © col·laboradors d’OpenStreetMap (ODbL).",
   "creditTiles": "Tessel·les del mapa: OpenStreetMap.",
   "creditWeather": "Dades meteorològiques: elaboració pròpia a partir de dades de l'AEMET.",
-  "creditSun": "Posició del sol: algorisme de Jean Meeus."
+  "creditSun": "Posició del sol: algorisme de Jean Meeus.",
+  "adTitle": "Publicitat (prova)",
+  "adBody": "Aquí aniria un anunci real. Això és només per provar cada quant apareix.",
+  "removeAdsButton": "Treu anuncis · 1,99 €",
+  "close": "Tanca",
+  "adsSectionTitle": "Anuncis",
+  "adsAlreadyRemoved": "Ja has tret els anuncis. Gràcies!",
+  "headlineSunnyCold": "Aquí fa un sol molt agradable",
+  "headlineChillyShade": "Fa fresca i sense sol aquí"
 }

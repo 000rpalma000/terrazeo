@@ -211,4 +211,29 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get creditSun => 'Posición del sol: algoritmo de Jean Meeus.';
+
+  @override
+  String get adTitle => 'Publicidad (prueba)';
+
+  @override
+  String get adBody =>
+      'Aquí iría un anuncio real. Esto es solo para probar cada cuánto aparece.';
+
+  @override
+  String get removeAdsButton => 'Quitar anuncios · 1,99 €';
+
+  @override
+  String get close => 'Cerrar';
+
+  @override
+  String get adsSectionTitle => 'Anuncios';
+
+  @override
+  String get adsAlreadyRemoved => 'Ya has quitado los anuncios. ¡Gracias!';
+
+  @override
+  String get headlineSunnyCold => 'Aquí da un sol muy agradable';
+
+  @override
+  String get headlineChillyShade => 'Hace fresco y sin sol aquí';
 }
