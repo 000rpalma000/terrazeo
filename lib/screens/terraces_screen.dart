@@ -103,11 +103,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
       await _asegurarCobertura(_centro, 420);
       _recalcularVisible();
-
-      // Monetización: cada N búsquedas (abrir/actualizar) toca anuncio.
-      if (await SearchGate().registrarBusqueda()) {
-        await AdsService.instancia.mostrarSiListo();
-      }
     } catch (_) {
       if (mounted) setState(() => _error = true);
     } finally {
@@ -422,6 +417,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
   void _seleccionarBar(PointReport r) {
     setState(() => _seleccion = r);
     _map.move(r.punto, _map.camera.zoom.clamp(16, 18));
+    unawaited(_contarConsulta());
   }
 
   void _tapMapa(LatLng p) {
@@ -439,6 +435,59 @@ class _TerracesScreenState extends State<TerracesScreen> {
         lineas: lineasCerca,
         pos: _sun.posicion(p, hora),
         ocaso: _sun.ocaso(p, hora)));
+    unawaited(_contarConsulta());
+  }
+
+  /// Cada consulta de un sitio cuenta; cada N, anuncio + oferta de quitarlos.
+  Future<void> _contarConsulta() async {
+    if (!await SearchGate().registrarConsulta()) return;
+    final visto = await AdsService.instancia.mostrarSiListo();
+    if (visto && mounted) await _ofrecerQuitarAnuncios();
+  }
+
+  Future<void> _ofrecerQuitarAnuncios() async {
+    final l10n = AppLocalizations.of(context);
+    final quitar = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.removeAdsPromptTitle,
+                  style: Theme.of(ctx).textTheme.titleMedium),
+              const SizedBox(height: 6),
+              Text(l10n.removeAdsPromptBody,
+                  style: Theme.of(ctx).textTheme.bodyMedium),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: Text(l10n.notNow),
+                  ),
+                  const Spacer(),
+                  FilledButton.tonal(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: Text(l10n.removeAdsButton),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (quitar == true) {
+      await SearchGate().eliminarAnunciosMock();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.adsRemovedMockDone)),
+        );
+      }
+    }
   }
 
   Future<void> _elegirIdioma() async {

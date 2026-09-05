@@ -523,6 +523,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Hace fresco y sin sol aquí'**
   String get headlineChillyShade;
+
+  /// No description provided for @removeAdsPromptTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Sin anuncios?'**
+  String get removeAdsPromptTitle;
+
+  /// No description provided for @removeAdsPromptBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Quítalos para siempre con un único pago.'**
+  String get removeAdsPromptBody;
+
+  /// No description provided for @notNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora no'**
+  String get notNow;
+
+  /// No description provided for @adsRemovedMockDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Anuncios quitados (simulado).'**
+  String get adsRemovedMockDone;
 }
 
 class _AppLocalizationsDelegate

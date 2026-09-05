@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -54,30 +56,37 @@ class AdsService {
     );
   }
 
-  /// Muestra el anuncio si ya está listo; si no, no interrumpe (y deja uno
-  /// precargándose para la próxima vez). Nunca bloquea el uso de la app.
-  Future<void> mostrarSiListo() async {
+  /// Muestra el anuncio si ya está listo y espera a que el usuario lo cierre.
+  /// Devuelve `true` si se llegó a mostrar (y ya se ha cerrado), `false` si no
+  /// había ninguno disponible. Nunca bloquea el uso de la app.
+  Future<bool> mostrarSiListo() async {
     final ad = _anuncio;
     if (ad == null) {
       _precargar();
-      return;
+      return false;
     }
     _anuncio = null;
+    final cerrado = Completer<void>();
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (a) {
         a.dispose();
         _precargar();
+        if (!cerrado.isCompleted) cerrado.complete();
       },
       onAdFailedToShowFullScreenContent: (a, error) {
         a.dispose();
         _precargar();
+        if (!cerrado.isCompleted) cerrado.complete();
       },
     );
     try {
       await ad.show();
+      await cerrado.future;
+      return true;
     } catch (e) {
       debugPrint('[ads] no se pudo mostrar el anuncio: $e');
       _precargar();
+      return false;
     }
   }
 }

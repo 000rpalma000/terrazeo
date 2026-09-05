@@ -1,21 +1,23 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Cuenta las "búsquedas" del usuario y decide cuándo toca mostrar un
-/// anuncio, con estado persistente (sobrevive a cerrar la app).
+/// Cuenta las "consultas" del usuario (abrir la ficha de un sitio para ver
+/// cómo se está en él) y decide cuándo toca un anuncio, con estado persistente
+/// (sobrevive a cerrar la app).
 ///
-/// Modelo de monetización: cada [cadaN] búsquedas se muestra un anuncio.
-/// Comprar "quitar anuncios" pone [anunciosEliminados] a `true` para siempre.
+/// Modelo: cada [cadaN] consultas confirmadas se muestra un anuncio. Abrir la
+/// app **no** cuenta. Comprar "quitar anuncios" pone [anunciosEliminados] a
+/// `true` para siempre.
 ///
 /// De momento la "compra" es un mock local (solo guarda la preferencia). El
 /// cobro real (in_app_purchase + producto en App Store Connect / Play
 /// Console) se conecta más adelante sin cambiar esta clase por fuera.
 class SearchGate {
   static const cadaN = 3;
-  static const _kContador = 'search_gate_contador';
+  static const _kContador = 'search_gate_consultas';
   static const _kSinAnuncios = 'search_gate_sin_anuncios';
 
-  /// Registra una búsqueda y devuelve `true` si toca mostrar un anuncio.
-  Future<bool> registrarBusqueda() async {
+  /// Registra una consulta y devuelve `true` si toca mostrar un anuncio.
+  Future<bool> registrarConsulta() async {
     final sp = await SharedPreferences.getInstance();
     if (sp.getBool(_kSinAnuncios) ?? false) return false;
 

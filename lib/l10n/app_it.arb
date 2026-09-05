@@ -9,19 +9,15 @@
   "refresh": "Aggiorna",
   "language": "Lingua",
   "languageSystem": "Automatico (sistema)",
-
   "movedToOpenSpace": "Calcolato nello spazio aperto più vicino al locale.",
   "terraceNotConfirmed": "Terrazza non confermata sulla mappa.",
   "networkError": "Impossibile scaricare i dati. Controlla la connessione e riprova.",
   "noAemet": "Nessun dato AEMET al momento.",
-
   "now": "Adesso",
-
   "comfortVeryNice": "Molto piacevole",
   "comfortNice": "Piacevole",
   "comfortSoSo": "Così così",
   "comfortBad": "Scomodo",
-
   "headlineNice": "Qui adesso si sta bene",
   "headlineBreeze": "Si sta bene, con un po' di brezza",
   "headlineStrongSun": "Qui il sole picchia forte",
@@ -30,7 +26,6 @@
   "headlineWindy": "Troppo vento in questo momento",
   "headlineCold": "Troppo fresco per stare fuori",
   "headlineNight": "Notte",
-
   "flagStrongSun": "sole forte",
   "flagShade": "all'ombra",
   "flagWindy": "ventoso",
@@ -39,15 +34,12 @@
   "flagCool": "fresco",
   "flagHot": "caldo",
   "feelsLike": "percepiti {deg} °C",
-
   "statusPleno": "Al sole",
   "statusSolConNubes": "Sole con nuvole",
   "statusNublado": "Nuvoloso",
   "statusSombra": "All'ombra",
   "statusNoche": "Notte",
-
   "sunUntilSunset": "sole {h} h {m} min",
-
   "windCalm": "Calmo",
   "windLight": "Brezza leggera",
   "windBreezy": "Un po' di vento",
@@ -57,12 +49,16 @@
   "windSpeed": "{kmh} km/h",
   "gusts": "Raffiche fino a {kmh} km/h",
   "windShelteredByBuildings": "Riparato dagli edifici · {kmh} km/h in campo aperto",
-  "@windShelteredByBuildings": { "placeholders": { "kmh": { "type": "int" } } },
+  "@windShelteredByBuildings": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
   "temperature": "{deg} °C",
-
   "sourceForecast": "Previsione AEMET",
   "sourceObservation": "Osservazione AEMET",
-
   "distanceM": "{m} m",
   "distanceKm": "{km} km",
   "about": "Informazioni",
@@ -80,5 +76,9 @@
   "adsSectionTitle": "Pubblicità",
   "adsAlreadyRemoved": "Hai già rimosso la pubblicità. Grazie!",
   "headlineSunnyCold": "Un sole molto piacevole qui",
-  "headlineChillyShade": "Fresco e all’ombra qui"
+  "headlineChillyShade": "Fresco e all’ombra qui",
+  "removeAdsPromptTitle": "Senza pubblicità?",
+  "removeAdsPromptBody": "Rimuovila per sempre con un pagamento unico.",
+  "notNow": "Non ora",
+  "adsRemovedMockDone": "Pubblicità rimossa (simulato)."
 }
