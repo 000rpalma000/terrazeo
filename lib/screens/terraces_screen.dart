@@ -13,7 +13,7 @@ import '../models/point_report.dart';
 import '../models/shadow_map.dart';
 import '../models/sun_status.dart';
 import '../models/weather_conditions.dart';
-import '../services/aemet_service.dart';
+import '../services/weather_service.dart';
 import 'about_screen.dart';
 import '../services/locale_controller.dart';
 import '../services/location_service.dart';
@@ -39,7 +39,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
   final _osm = OsmAreaService();
   final _sun = const SunService();
   final _shadow = const ShadowService();
-  final _aemet = AemetService();
+  final _tiempo = WeatherService();
 
   LatLng _centro = LocationService.fallback;
 
@@ -80,7 +80,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
   void dispose() {
     _debounce?.cancel();
     _osm.dispose();
-    _aemet.dispose();
+    _tiempo.dispose();
     _map.dispose();
     super.dispose();
   }
@@ -95,12 +95,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
       _centro = u.punto;
       _map.move(_centro, 16);
 
-      final res = await Future.wait([
-        _aemet.condicionesActuales().catchError((_) => null),
-        _aemet.previsionHoraria().catchError((_) => <WeatherConditions>[]),
-      ]);
-      _ahora = res[0] as WeatherConditions?;
-      _prevision = res[1] as List<WeatherConditions>;
+      final t = await _tiempo.condicionesYPrevision(_centro);
+      _ahora = t.ahora;
+      _prevision = t.prevision;
 
       await _asegurarCobertura(_centro, 420);
       _recalcularVisible();

@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
+import 'package:path_provider/path_provider.dart';
 
+import '../models/geo.dart';
 import '../models/weather_conditions.dart';
 
 /// Cliente de la API OpenData de AEMET.
@@ -171,6 +175,181 @@ class AemetService {
     if (obs == null) return horaActual;
     if (horaActual == null) return obs;
     return obs.copyWith(sky: horaActual.sky);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Resolución por coordenadas (para funcionar en cualquier punto de España,
+  // no solo Barcelona). El municipio / estación se eligen por cercanía a
+  // partir de los maestros de AEMET, cacheados en disco.
+  // ---------------------------------------------------------------------------
+
+  /// Código del municipio AEMET más cercano a [p] y su distancia en metros.
+  /// `null` si no se pudo cargar el maestro.
+  Future<({String codigo, double distanciaM})?> municipioCercano(LatLng p) async {
+    try {
+      return _masCercanoEnLista(await _municipiosMin(), p);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Indicativo (idema) de la estación de observación más cercana a [p] y su
+  /// distancia en metros. `null` si no se pudo cargar el maestro.
+  Future<({String codigo, double distanciaM})?> estacionCercana(LatLng p) async {
+    try {
+      return _masCercanoEnLista(await _estacionesMin(), p);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<WeatherConditions>> previsionHorariaEnPunto(LatLng p) async {
+    final m = await municipioCercano(p);
+    if (m == null) return const [];
+    return previsionHoraria(municipio: m.codigo);
+  }
+
+  Future<WeatherConditions?> observacionActualEnPunto(LatLng p) async {
+    final e = await estacionCercana(p);
+    if (e == null) return null;
+    return observacionActual(idema: e.codigo);
+  }
+
+  /// Igual que [condicionesActuales] pero eligiendo estación y municipio por
+  /// cercanía a [p].
+  Future<WeatherConditions?> condicionesActualesEnPunto(LatLng p) async {
+    WeatherConditions? obs;
+    List<WeatherConditions> prevision = const [];
+    try {
+      obs = await observacionActualEnPunto(p);
+    } catch (_) {}
+    try {
+      prevision = await previsionHorariaEnPunto(p);
+    } catch (_) {}
+
+    final horaActual = _masCercana(prevision, DateTime.now());
+    if (obs == null) return horaActual;
+    if (horaActual == null) return obs;
+    return obs.copyWith(sky: horaActual.sky);
+  }
+
+  /// Convierte "411734N" / "020412E" (grados-minutos-segundos pegados, con letra
+  /// de hemisferio) a grados decimales. Formato fijo 2+2+2 dígitos.
+  static double? parseDms(String s) {
+    final limpio = s.trim().toUpperCase();
+    if (limpio.length < 7) return null;
+    final hemi = limpio[limpio.length - 1];
+    final digitos = limpio.substring(0, limpio.length - 1);
+    if (digitos.length != 6 || int.tryParse(digitos) == null) return null;
+    final g = int.parse(digitos.substring(0, 2));
+    final m = int.parse(digitos.substring(2, 4));
+    final seg = int.parse(digitos.substring(4, 6));
+    final valor = g + m / 60 + seg / 3600;
+    return (hemi == 'S' || hemi == 'W' || hemi == 'O') ? -valor : valor;
+  }
+
+  /// De una lista de `{c: codigo, a: lat, o: lon}` devuelve el más cercano a [p].
+  static ({String codigo, double distanciaM})? _masCercanoEnLista(
+    List<Map<String, dynamic>> lista,
+    LatLng p,
+  ) {
+    Map<String, dynamic>? mejor;
+    double? mejorD;
+    for (final m in lista) {
+      final lat = (m['a'] as num?)?.toDouble();
+      final lon = (m['o'] as num?)?.toDouble();
+      if (lat == null || lon == null) continue;
+      final d = Geo.distancia(p, LatLng(lat, lon));
+      if (mejorD == null || d < mejorD) {
+        mejorD = d;
+        mejor = m;
+      }
+    }
+    if (mejor == null || mejorD == null) return null;
+    return (codigo: mejor['c'] as String, distanciaM: mejorD);
+  }
+
+  Future<List<Map<String, dynamic>>> _municipiosMin() => _maestroConCache(
+        'municipios.json',
+        '/maestro/municipios',
+        (e) {
+          final m = e as Map;
+          final codigo = m['id']?.toString();
+          final lat = double.tryParse(m['latitud_dec']?.toString() ?? '');
+          final lon = double.tryParse(m['longitud_dec']?.toString() ?? '');
+          if (codigo == null || lat == null || lon == null) return null;
+          return {
+            'c': codigo.replaceFirst(RegExp('^id'), ''),
+            'a': lat,
+            'o': lon,
+          };
+        },
+      );
+
+  Future<List<Map<String, dynamic>>> _estacionesMin() => _maestroConCache(
+        'estaciones.json',
+        '/valores/climatologicos/inventarioestaciones/todasestaciones',
+        (e) {
+          final m = e as Map;
+          final idema = m['indicativo']?.toString();
+          final lat = parseDms(m['latitud']?.toString() ?? '');
+          final lon = parseDms(m['longitud']?.toString() ?? '');
+          if (idema == null || lat == null || lon == null) return null;
+          return {'c': idema, 'a': lat, 'o': lon};
+        },
+      );
+
+  static const _ttlMaestro = Duration(days: 60);
+  Directory? _dirCache;
+
+  Future<Directory?> _cacheDir() async {
+    if (_dirCache != null) return _dirCache;
+    try {
+      final base = await getApplicationSupportDirectory();
+      final d = Directory('${base.path}/aemet_cache');
+      if (!await d.exists()) await d.create(recursive: true);
+      return _dirCache = d;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Descarga un maestro de AEMET (lista grande y casi estática), lo reduce a
+  /// `{c, a, o}` por entrada y lo guarda en disco. En llamadas siguientes lee
+  /// del disco mientras no caduque el TTL.
+  Future<List<Map<String, dynamic>>> _maestroConCache(
+    String archivo,
+    String path,
+    Map<String, dynamic>? Function(dynamic) reducir,
+  ) async {
+    final dir = await _cacheDir();
+    final file = dir == null ? null : File('${dir.path}/$archivo');
+
+    if (file != null && await file.exists()) {
+      final edad = DateTime.now().difference(await file.lastModified());
+      if (edad < _ttlMaestro) {
+        try {
+          final cache = jsonDecode(await file.readAsString()) as List;
+          return cache.cast<Map<String, dynamic>>();
+        } catch (_) {}
+      }
+    }
+
+    final raw = await _fetch(path);
+    if (raw is! List) {
+      throw Exception('AEMET: formato inesperado en $path');
+    }
+    final min = <Map<String, dynamic>>[];
+    for (final e in raw) {
+      final r = reducir(e);
+      if (r != null) min.add(r);
+    }
+    if (file != null && min.isNotEmpty) {
+      try {
+        await file.writeAsString(jsonEncode(min));
+      } catch (_) {}
+    }
+    return min;
   }
 
   static WeatherConditions? _masCercana(
