@@ -9,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Terrazeo';
+  String get appTitle => 'Terrazeo v2';
 
   @override
   String get terracesNearby => 'Terrasses à proximité';

@@ -6,7 +6,7 @@ import '../widgets/intro_sheet.dart';
 
 /// Pantalla "Acerca de": descripción, fuentes de datos, licencias y anuncios.
 class AboutScreen extends StatefulWidget {
-  const AboutScreen({super.key, this.version = '0.2.0'});
+  const AboutScreen({super.key, this.version = '2.0.0'});
 
   final String version;
 
