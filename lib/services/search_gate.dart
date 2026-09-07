@@ -1,23 +1,23 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Cuenta las "consultas" del usuario (abrir la ficha de un sitio para ver
-/// cómo se está en él) y decide cuándo toca un anuncio, con estado persistente
+/// Cuenta los toques del usuario en el mapa (tocar un punto, un sitio o una
+/// fila de la lista) y decide cuándo toca un anuncio, con estado persistente
 /// (sobrevive a cerrar la app).
 ///
-/// Modelo: cada [cadaN] consultas confirmadas se muestra un anuncio. Abrir la
-/// app **no** cuenta. Comprar "quitar anuncios" pone [anunciosEliminados] a
-/// `true` para siempre.
+/// Modelo: cada [cadaN] toques se muestra un anuncio. Abrir la app **no**
+/// cuenta. Comprar "quitar anuncios" pone [anunciosEliminados] a `true` para
+/// siempre.
 ///
 /// De momento la "compra" es un mock local (solo guarda la preferencia). El
 /// cobro real (in_app_purchase + producto en App Store Connect / Play
 /// Console) se conecta más adelante sin cambiar esta clase por fuera.
 class SearchGate {
   static const cadaN = 3;
-  static const _kContador = 'search_gate_consultas';
+  static const _kContador = 'search_gate_toques';
   static const _kSinAnuncios = 'search_gate_sin_anuncios';
 
-  /// Registra una consulta y devuelve `true` si toca mostrar un anuncio.
-  Future<bool> registrarConsulta() async {
+  /// Registra un toque y devuelve `true` si toca mostrar un anuncio.
+  Future<bool> registrarToque() async {
     final sp = await SharedPreferences.getInstance();
     if (sp.getBool(_kSinAnuncios) ?? false) return false;
 

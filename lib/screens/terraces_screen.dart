@@ -417,10 +417,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
   void _seleccionarBar(PointReport r) {
     setState(() => _seleccion = r);
     _map.move(r.punto, _map.camera.zoom.clamp(16, 18));
-    unawaited(_contarConsulta());
+    unawaited(_contarToque());
   }
 
   void _tapMapa(LatLng p) {
+    unawaited(_contarToque());
     if (_edificios.isEmpty && _lineas.isEmpty) return;
     final hora = _horaSel ?? DateTime.now();
     final edifCerca =
@@ -435,12 +436,22 @@ class _TerracesScreenState extends State<TerracesScreen> {
         lineas: lineasCerca,
         pos: _sun.posicion(p, hora),
         ocaso: _sun.ocaso(p, hora)));
-    unawaited(_contarConsulta());
+    unawaited(_contarToque());
   }
 
-  /// Cada consulta de un sitio cuenta; cada N, anuncio + oferta de quitarlos.
-  Future<void> _contarConsulta() async {
-    if (!await SearchGate().registrarConsulta()) return;
+  DateTime? _ultimoToque;
+
+  /// Cada toque en el mapa (o en un sitio) cuenta; cada N, anuncio + oferta de
+  /// quitarlos. Se ignoran repeticiones en <400 ms para que un solo toque que
+  /// dispara dos handlers (marcador + mapa) cuente una sola vez.
+  Future<void> _contarToque() async {
+    final ahora = DateTime.now();
+    if (_ultimoToque != null &&
+        ahora.difference(_ultimoToque!).inMilliseconds < 400) {
+      return;
+    }
+    _ultimoToque = ahora;
+    if (!await SearchGate().registrarToque()) return;
     final visto = await AdsService.instancia.mostrarSiListo();
     if (visto && mounted) await _ofrecerQuitarAnuncios();
   }
