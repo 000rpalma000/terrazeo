@@ -253,4 +253,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adsRemovedMockDone => 'Ads removed (mock).';
+
+  @override
+  String get introTitle => 'Is it nice out there?';
+
+  @override
+  String get introBody1 =>
+      'Tap a point on the map and see how pleasant it is there right now: sun or shade, wind and temperature. Your favourite bar, your square, or anywhere.';
+
+  @override
+  String get introBody2 =>
+      'Turn on the venues layer (data from OpenStreetMap) to also see how pleasant each bar\'s terrace is.';
+
+  @override
+  String get introButton => 'Got it';
+
+  @override
+  String get showIntro => 'Show the intro';
+
+  @override
+  String get localesLayer => 'Venues layer';
+
+  @override
+  String get tapMapHint => 'Tap the map to check how it feels at that spot.';
 }

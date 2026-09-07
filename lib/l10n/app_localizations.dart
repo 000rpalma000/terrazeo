@@ -547,6 +547,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Anuncios quitados (simulado).'**
   String get adsRemovedMockDone;
+
+  /// No description provided for @introTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Se está bien ahí fuera?'**
+  String get introTitle;
+
+  /// No description provided for @introBody1.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca un punto del mapa y mira qué tal se está ahí ahora mismo: sol o sombra, viento y temperatura. Tu bar preferido, tu plaza o un sitio cualquiera.'**
+  String get introBody1;
+
+  /// No description provided for @introBody2.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa la capa de locales (datos de OpenStreetMap) para ver también qué tal se está en la terraza de cada bar.'**
+  String get introBody2;
+
+  /// No description provided for @introButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get introButton;
+
+  /// No description provided for @showIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver la introducción'**
+  String get showIntro;
+
+  /// No description provided for @localesLayer.
+  ///
+  /// In es, this message translates to:
+  /// **'Capa de locales'**
+  String get localesLayer;
+
+  /// No description provided for @tapMapHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el mapa para ver qué tal se está en ese punto.'**
+  String get tapMapHint;
 }
 
 class _AppLocalizationsDelegate

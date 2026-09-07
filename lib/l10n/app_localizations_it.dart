@@ -254,4 +254,28 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get adsRemovedMockDone => 'Pubblicità rimossa (simulato).';
+
+  @override
+  String get introTitle => 'Si sta bene là fuori?';
+
+  @override
+  String get introBody1 =>
+      'Tocca un punto sulla mappa e scopri quanto si sta bene lì in questo momento: sole o ombra, vento e temperatura. Il tuo bar preferito, la tua piazza o un posto qualsiasi.';
+
+  @override
+  String get introBody2 =>
+      'Attiva il livello dei locali (dati di OpenStreetMap) per vedere anche quanto si sta bene nel dehors di ogni bar.';
+
+  @override
+  String get introButton => 'Ho capito';
+
+  @override
+  String get showIntro => 'Rivedi l\'introduzione';
+
+  @override
+  String get localesLayer => 'Livello dei locali';
+
+  @override
+  String get tapMapHint =>
+      'Tocca la mappa per vedere come si sta in quel punto.';
 }
