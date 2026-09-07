@@ -80,5 +80,9 @@
   "removeAdsPromptTitle": "Sense anuncis?",
   "removeAdsPromptBody": "Treu-los per sempre amb un únic pagament.",
   "notNow": "Ara no",
-  "adsRemovedMockDone": "Anuncis trets (simulat)."
+  "adsRemovedMockDone": "Anuncis trets (simulat).",
+  "introTitle": "S'hi està bé, a fora?",
+  "introBody1": "Toca un punt del mapa i mira què tal s'hi està ara mateix: sol o ombra, vent i temperatura. El teu bar preferit, la teva plaça o un lloc qualsevol.",
+  "introButton": "Entesos",
+  "showIntro": "Mostra la introducció"
 }

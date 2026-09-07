@@ -80,5 +80,9 @@
   "removeAdsPromptTitle": "Sans publicités ?",
   "removeAdsPromptBody": "Supprimez-les définitivement avec un paiement unique.",
   "notNow": "Pas maintenant",
-  "adsRemovedMockDone": "Publicités supprimées (simulé)."
+  "adsRemovedMockDone": "Publicités supprimées (simulé).",
+  "introTitle": "Fait-il bon dehors ?",
+  "introBody1": "Touchez un point sur la carte et voyez s'il y fait bon en ce moment : soleil ou ombre, vent et température. Votre bar préféré, votre place, ou n'importe où.",
+  "introButton": "Compris",
+  "showIntro": "Revoir l'intro"
 }

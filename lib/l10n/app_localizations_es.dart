@@ -253,4 +253,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get adsRemovedMockDone => 'Anuncios quitados (simulado).';
+
+  @override
+  String get introTitle => '¿Se está bien ahí fuera?';
+
+  @override
+  String get introBody1 =>
+      'Toca un punto del mapa y mira qué tal se está ahí ahora mismo: sol o sombra, viento y temperatura. Tu bar preferido, tu plaza o un sitio cualquiera.';
+
+  @override
+  String get introButton => 'Entendido';
+
+  @override
+  String get showIntro => 'Ver la introducción';
 }
