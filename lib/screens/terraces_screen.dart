@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/map_config.dart';
 import '../l10n/app_localizations.dart';
@@ -23,6 +24,7 @@ import '../services/search_gate.dart';
 import '../services/shadow_service.dart';
 import '../services/sun_service.dart';
 import '../services/wind_shelter_service.dart';
+import '../widgets/intro_sheet.dart';
 import '../widgets/report_widgets.dart';
 
 class TerracesScreen extends StatefulWidget {
@@ -61,6 +63,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
   List<PointReport> _terrazas = const [];
   PointReport? _seleccion; // detalle abierto (bar o punto libre)
 
+  /// Capa de locales (terrazas) visible. Si está apagada, la app es solo
+  /// "toca un punto y mira qué tal se está".
+  bool _capaLocales = true;
+  static const _kCapaLocales = 'capa_locales';
+
   bool _cargando = true; // carga inicial (overlay)
   bool _cargandoZona = false; // descarga incremental al mover el mapa
   bool _error = false;
@@ -75,7 +82,30 @@ class _TerracesScreenState extends State<TerracesScreen> {
   void initState() {
     super.initState();
     AdsService.instancia.inicializar();
+    _cargarPrefs();
     _arrancar();
+  }
+
+  Future<void> _cargarPrefs() async {
+    final sp = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() => _capaLocales = sp.getBool(_kCapaLocales) ?? true);
+    }
+    if (!await introYaVisto() && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) mostrarIntro(context);
+      });
+    }
+  }
+
+  Future<void> _toggleCapaLocales() async {
+    setState(() {
+      _capaLocales = !_capaLocales;
+      if (!_capaLocales && _seleccion?.bar != null) _seleccion = null;
+    });
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kCapaLocales, _capaLocales);
+    _recalcularVisible();
   }
 
   @override
@@ -270,33 +300,36 @@ class _TerracesScreenState extends State<TerracesScreen> {
     final pos = _sun.posicion(centroV, hora);
     final ocaso = _sun.ocaso(centroV, hora);
 
-    var visibles =
-        _baresPorId.values.where((b) => bounds.contains(b.punto)).toList();
-    if (visibles.length > _maxTerrazas) {
-      visibles.sort((a, b) => Geo.distancia(centroV, a.punto)
-          .compareTo(Geo.distancia(centroV, b.punto)));
-      visibles = visibles.sublist(0, _maxTerrazas);
-    }
-
-    final reports = [
-      for (final b in visibles)
-        _evaluar(b.punto,
+    // Con la capa de locales apagada no se evalúan las terrazas (ahorra el
+    // grueso del cálculo); la app queda como "toca un punto".
+    final reports = <PointReport>[];
+    if (_capaLocales) {
+      var visibles =
+          _baresPorId.values.where((b) => bounds.contains(b.punto)).toList();
+      if (visibles.length > _maxTerrazas) {
+        visibles.sort((a, b) => Geo.distancia(centroV, a.punto)
+            .compareTo(Geo.distancia(centroV, b.punto)));
+        visibles = visibles.sublist(0, _maxTerrazas);
+      }
+      for (final b in visibles) {
+        reports.add(_evaluar(b.punto,
             bar: b,
             hora: hora,
             shadow: shadow,
             edificios: edifCerca,
             lineas: lineasCerca,
             pos: pos,
-            ocaso: ocaso),
-    ];
-    reports.sort((a, b) {
-      var c = a.comfort.level.index.compareTo(b.comfort.level.index);
-      if (c != 0) return c;
-      c = (a.bar?.prioridadTipo ?? 2).compareTo(b.bar?.prioridadTipo ?? 2);
-      if (c != 0) return c;
-      return Geo.distancia(centroV, a.punto)
-          .compareTo(Geo.distancia(centroV, b.punto));
-    });
+            ocaso: ocaso));
+      }
+      reports.sort((a, b) {
+        var c = a.comfort.level.index.compareTo(b.comfort.level.index);
+        if (c != 0) return c;
+        c = (a.bar?.prioridadTipo ?? 2).compareTo(b.bar?.prioridadTipo ?? 2);
+        if (c != 0) return c;
+        return Geo.distancia(centroV, a.punto)
+            .compareTo(Geo.distancia(centroV, b.punto));
+      });
+    }
 
     setState(() {
       _terrazas = reports;
@@ -546,6 +579,13 @@ class _TerracesScreenState extends State<TerracesScreen> {
             onPressed: _elegirIdioma,
           ),
           IconButton(
+            tooltip: l10n.localesLayer,
+            isSelected: _capaLocales,
+            icon: const Icon(Icons.local_cafe_outlined),
+            selectedIcon: const Icon(Icons.local_cafe),
+            onPressed: _toggleCapaLocales,
+          ),
+          IconButton(
             tooltip: l10n.refresh,
             icon: const Icon(Icons.refresh),
             onPressed: _cargando ? null : _arrancar,
@@ -621,20 +661,21 @@ class _TerracesScreenState extends State<TerracesScreen> {
           ]),
         MarkerLayer(
           markers: [
-            for (final r in _terrazas)
-              Marker(
-                point: r.bar!.punto,
-                width: 26,
-                height: 26,
-                child: GestureDetector(
-                  onTap: () => _seleccionarBar(r),
-                  child: Icon(
-                    Icons.local_cafe,
-                    size: r.bar?.osmId == sel?.bar?.osmId ? 26 : 20,
-                    color: _colorConfort(r.comfort.level),
+            if (_capaLocales)
+              for (final r in _terrazas)
+                Marker(
+                  point: r.bar!.punto,
+                  width: 26,
+                  height: 26,
+                  child: GestureDetector(
+                    onTap: () => _seleccionarBar(r),
+                    child: Icon(
+                      Icons.local_cafe,
+                      size: r.bar?.osmId == sel?.bar?.osmId ? 26 : 20,
+                      color: _colorConfort(r.comfort.level),
+                    ),
                   ),
                 ),
-              ),
             if (sel != null && sel.bar == null)
               Marker(
                 point: sel.punto,
@@ -668,6 +709,24 @@ class _TerracesScreenState extends State<TerracesScreen> {
   }
 
   Widget _lista(AppLocalizations l10n) {
+    if (!_capaLocales) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            child: Text(l10n.tapMapHint,
+                style: Theme.of(context).textTheme.bodyMedium),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SizedBox(height: 34, child: _chipsHora(l10n)),
+          ),
+          const SizedBox(height: 12),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

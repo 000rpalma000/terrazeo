@@ -80,5 +80,12 @@
   "removeAdsPromptTitle": "Sense anuncis?",
   "removeAdsPromptBody": "Treu-los per sempre amb un únic pagament.",
   "notNow": "Ara no",
-  "adsRemovedMockDone": "Anuncis trets (simulat)."
+  "adsRemovedMockDone": "Anuncis trets (simulat).",
+  "introTitle": "S'hi està bé, a fora?",
+  "introBody1": "Toca un punt del mapa i mira què tal s'hi està ara mateix: sol o ombra, vent i temperatura. El teu bar preferit, la teva plaça o un lloc qualsevol.",
+  "introBody2": "Activa la capa de locals (dades d'OpenStreetMap) per veure també què tal s'està a la terrassa de cada bar.",
+  "introButton": "Entesos",
+  "showIntro": "Mostra la introducció",
+  "localesLayer": "Capa de locals",
+  "tapMapHint": "Toca el mapa per veure què tal s'hi està."
 }

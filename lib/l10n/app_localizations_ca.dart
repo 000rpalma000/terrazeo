@@ -253,4 +253,27 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get adsRemovedMockDone => 'Anuncis trets (simulat).';
+
+  @override
+  String get introTitle => 'S\'hi està bé, a fora?';
+
+  @override
+  String get introBody1 =>
+      'Toca un punt del mapa i mira què tal s\'hi està ara mateix: sol o ombra, vent i temperatura. El teu bar preferit, la teva plaça o un lloc qualsevol.';
+
+  @override
+  String get introBody2 =>
+      'Activa la capa de locals (dades d\'OpenStreetMap) per veure també què tal s\'està a la terrassa de cada bar.';
+
+  @override
+  String get introButton => 'Entesos';
+
+  @override
+  String get showIntro => 'Mostra la introducció';
+
+  @override
+  String get localesLayer => 'Capa de locals';
+
+  @override
+  String get tapMapHint => 'Toca el mapa per veure què tal s\'hi està.';
 }

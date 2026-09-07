@@ -142,5 +142,12 @@
   "removeAdsPromptTitle": "¿Sin anuncios?",
   "removeAdsPromptBody": "Quítalos para siempre con un único pago.",
   "notNow": "Ahora no",
-  "adsRemovedMockDone": "Anuncios quitados (simulado)."
+  "adsRemovedMockDone": "Anuncios quitados (simulado).",
+  "introTitle": "¿Se está bien ahí fuera?",
+  "introBody1": "Toca un punto del mapa y mira qué tal se está ahí ahora mismo: sol o sombra, viento y temperatura. Tu bar preferido, tu plaza o un sitio cualquiera.",
+  "introBody2": "Activa la capa de locales (datos de OpenStreetMap) para ver también qué tal se está en la terraza de cada bar.",
+  "introButton": "Entendido",
+  "showIntro": "Ver la introducción",
+  "localesLayer": "Capa de locales",
+  "tapMapHint": "Toca el mapa para ver qué tal se está en ese punto."
 }

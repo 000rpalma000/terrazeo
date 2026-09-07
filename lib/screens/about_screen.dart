@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/search_gate.dart';
+import '../widgets/intro_sheet.dart';
 
 /// Pantalla "Acerca de": descripción, fuentes de datos, licencias y anuncios.
 class AboutScreen extends StatefulWidget {
-  const AboutScreen({super.key, this.version = '1.0.0'});
+  const AboutScreen({super.key, this.version = '0.2.0'});
 
   final String version;
 
@@ -45,6 +46,15 @@ class _AboutScreenState extends State<AboutScreen> {
           Text('v${widget.version}', style: t.bodySmall),
           const SizedBox(height: 16),
           Text(l10n.aboutIntro, style: t.bodyMedium),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.help_outline),
+              label: Text(l10n.showIntro),
+              onPressed: () => mostrarIntro(context, marcarVisto: false),
+            ),
+          ),
           const SizedBox(height: 28),
           Text(l10n.dataSources, style: t.titleMedium),
           const SizedBox(height: 8),

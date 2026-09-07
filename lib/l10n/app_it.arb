@@ -80,5 +80,12 @@
   "removeAdsPromptTitle": "Senza pubblicità?",
   "removeAdsPromptBody": "Rimuovila per sempre con un pagamento unico.",
   "notNow": "Non ora",
-  "adsRemovedMockDone": "Pubblicità rimossa (simulato)."
+  "adsRemovedMockDone": "Pubblicità rimossa (simulato).",
+  "introTitle": "Si sta bene là fuori?",
+  "introBody1": "Tocca un punto sulla mappa e scopri quanto si sta bene lì in questo momento: sole o ombra, vento e temperatura. Il tuo bar preferito, la tua piazza o un posto qualsiasi.",
+  "introBody2": "Attiva il livello dei locali (dati di OpenStreetMap) per vedere anche quanto si sta bene nel dehors di ogni bar.",
+  "introButton": "Ho capito",
+  "showIntro": "Rivedi l'introduzione",
+  "localesLayer": "Livello dei locali",
+  "tapMapHint": "Tocca la mappa per vedere come si sta in quel punto."
 }
