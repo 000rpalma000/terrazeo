@@ -42,4 +42,5 @@ const idiomasDisponibles = <OpcionIdioma>[
   OpcionIdioma(Locale('en'), 'English'),
   OpcionIdioma(Locale('fr'), 'Français'),
   OpcionIdioma(Locale('it'), 'Italiano'),
+  OpcionIdioma(Locale('de'), 'Deutsch'),
 ];
