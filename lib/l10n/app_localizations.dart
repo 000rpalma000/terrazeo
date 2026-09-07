@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In es, this message translates to:
-  /// **'Terrazeo'**
+  /// **'Terrazeo v2'**
   String get appTitle;
 
   /// No description provided for @terracesNearby.
