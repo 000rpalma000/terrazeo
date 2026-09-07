@@ -80,5 +80,9 @@
   "removeAdsPromptTitle": "No ads?",
   "removeAdsPromptBody": "Remove them for good with a one-time payment.",
   "notNow": "Not now",
-  "adsRemovedMockDone": "Ads removed (mock)."
+  "adsRemovedMockDone": "Ads removed (mock).",
+  "introTitle": "Is it nice out there?",
+  "introBody1": "Tap a point on the map and see how pleasant it is there right now: sun or shade, wind and temperature. Your favourite bar, your square, or anywhere.",
+  "introButton": "Got it",
+  "showIntro": "Show the intro"
 }

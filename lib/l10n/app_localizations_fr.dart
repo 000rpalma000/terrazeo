@@ -257,4 +257,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adsRemovedMockDone => 'Publicités supprimées (simulé).';
+
+  @override
+  String get introTitle => 'Fait-il bon dehors ?';
+
+  @override
+  String get introBody1 =>
+      'Touchez un point sur la carte et voyez s\'il y fait bon en ce moment : soleil ou ombre, vent et température. Votre bar préféré, votre place, ou n\'importe où.';
+
+  @override
+  String get introButton => 'Compris';
+
+  @override
+  String get showIntro => 'Revoir l\'intro';
 }

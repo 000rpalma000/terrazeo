@@ -255,4 +255,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get adsRemovedMockDone => 'Werbung entfernt (simuliert).';
+
+  @override
+  String get introTitle => 'Ist es draußen schön?';
+
+  @override
+  String get introBody1 =>
+      'Tippe auf einen Punkt der Karte und sieh, wie angenehm es dort gerade ist: Sonne oder Schatten, Wind und Temperatur. Deine Lieblingsbar, dein Platz oder irgendwo.';
+
+  @override
+  String get introButton => 'Verstanden';
+
+  @override
+  String get showIntro => 'Einführung anzeigen';
 }

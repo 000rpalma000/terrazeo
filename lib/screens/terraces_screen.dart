@@ -23,6 +23,7 @@ import '../services/search_gate.dart';
 import '../services/shadow_service.dart';
 import '../services/sun_service.dart';
 import '../services/wind_shelter_service.dart';
+import '../widgets/intro_sheet.dart';
 import '../widgets/report_widgets.dart';
 
 class TerracesScreen extends StatefulWidget {
@@ -75,6 +76,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
   void initState() {
     super.initState();
     AdsService.instancia.inicializar();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) mostrarIntro(context);
+    });
     _arrancar();
   }
 
