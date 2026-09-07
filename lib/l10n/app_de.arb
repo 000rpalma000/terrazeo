@@ -1,0 +1,146 @@
+{
+  "@@locale": "de",
+  "appTitle": "Terrazeo",
+  "terracesNearby": "Terrassen in der Nähe",
+  "noBars": "Keine Bars in der Nähe gefunden.",
+  "thisSpot": "Dieser Ort",
+  "zoomInForTerraces": "Zoome in die Karte, um Terrassen zu sehen.",
+  "back": "Zurück",
+  "refresh": "Aktualisieren",
+  "language": "Sprache",
+  "languageSystem": "Automatisch (System)",
+  "movedToOpenSpace": "Berechnet am nächstgelegenen offenen Platz zum Lokal.",
+  "terraceNotConfirmed": "Terrasse auf der Karte nicht bestätigt.",
+  "networkError": "Daten konnten nicht geladen werden. Prüfe die Verbindung und versuche es erneut.",
+  "noAemet": "Zurzeit keine AEMET-Daten.",
+  "now": "Jetzt",
+  "comfortVeryNice": "Sehr angenehm",
+  "comfortNice": "Angenehm",
+  "comfortSoSo": "Geht so",
+  "comfortBad": "Ungemütlich",
+  "headlineNice": "Hier ist es gerade angenehm",
+  "headlineBreeze": "Angenehm, mit etwas Brise",
+  "headlineStrongSun": "Hier brennt die Sonne",
+  "headlineHotShade": "Heiß, sogar im Schatten",
+  "headlineCoolBetterSun": "Kühl: besser eine Terrasse in der Sonne",
+  "headlineWindy": "Gerade ist es zu windig",
+  "headlineCold": "Zu frisch für die Terrasse",
+  "headlineNight": "Nachts",
+  "flagStrongSun": "pralle Sonne",
+  "flagShade": "im Schatten",
+  "flagWindy": "windig",
+  "flagBreeze": "Brise",
+  "flagSheltered": "geschützt",
+  "flagCool": "frisch",
+  "flagHot": "heiß",
+  "feelsLike": "gefühlt {deg} °C",
+  "@feelsLike": {
+    "placeholders": {
+      "deg": {
+        "type": "int"
+      }
+    }
+  },
+  "statusPleno": "In der Sonne",
+  "statusSolConNubes": "Sonne mit Wolken",
+  "statusNublado": "Bewölkt",
+  "statusSombra": "Im Schatten",
+  "statusNoche": "Nachts",
+  "sunUntilSunset": "Sonne {h} Std. {m} Min.",
+  "@sunUntilSunset": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "windCalm": "Windstill",
+  "windLight": "Leichte Brise",
+  "windBreezy": "Etwas Wind",
+  "windWindy": "Wind",
+  "windVeryWindy": "Viel Wind",
+  "windSpeedFrom": "{kmh} km/h aus {cardinal}",
+  "@windSpeedFrom": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      },
+      "cardinal": {
+        "type": "String"
+      }
+    }
+  },
+  "windSpeed": "{kmh} km/h",
+  "@windSpeed": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
+  "gusts": "Böen bis {kmh} km/h",
+  "windShelteredByBuildings": "Von Gebäuden geschützt · {kmh} km/h im Freien",
+  "@windShelteredByBuildings": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
+  "@gusts": {
+    "placeholders": {
+      "kmh": {
+        "type": "int"
+      }
+    }
+  },
+  "temperature": "{deg} °C",
+  "@temperature": {
+    "placeholders": {
+      "deg": {
+        "type": "int"
+      }
+    }
+  },
+  "sourceForecast": "AEMET-Vorhersage",
+  "sourceObservation": "AEMET-Messung",
+  "distanceM": "{m} m",
+  "@distanceM": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "distanceKm": "{km} km",
+  "@distanceKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "about": "Über die App",
+  "dataSources": "Datenquellen",
+  "openSourceLicenses": "Open-Source-Lizenzen",
+  "aboutIntro": "Finde Terrassen und sieh, ob es gerade angenehm ist: Sonne oder Schatten, Wind und Temperatur.",
+  "creditMap": "Karte und Gebäude: © OpenStreetMap-Mitwirkende (ODbL).",
+  "creditTiles": "Kartenkacheln: OpenStreetMap.",
+  "creditWeather": "Wetterdaten: eigene Aufbereitung auf Basis von AEMET-Daten.",
+  "creditSun": "Sonnenstand: Algorithmus von Jean Meeus.",
+  "adTitle": "Werbung (Test)",
+  "adBody": "Hier käme eine echte Anzeige. Das dient nur zum Testen, wie oft sie erscheint.",
+  "removeAdsButton": "Werbung entfernen · 1,99 €",
+  "close": "Schließen",
+  "adsSectionTitle": "Werbung",
+  "adsAlreadyRemoved": "Du hast die Werbung bereits entfernt. Danke!",
+  "headlineSunnyCold": "Hier scheint die Sonne richtig angenehm",
+  "headlineChillyShade": "Hier ist es frisch und schattig",
+  "removeAdsPromptTitle": "Ohne Werbung?",
+  "removeAdsPromptBody": "Entferne sie dauerhaft mit einer einmaligen Zahlung.",
+  "notNow": "Jetzt nicht",
+  "adsRemovedMockDone": "Werbung entfernt (simuliert)."
+}
