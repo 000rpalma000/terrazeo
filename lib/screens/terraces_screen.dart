@@ -91,7 +91,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
     if (mounted) {
       setState(() => _capaLocales = sp.getBool(_kCapaLocales) ?? true);
     }
-    if (!await introYaVisto() && mounted) {
+    // La introducción sale en cada apertura.
+    if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) mostrarIntro(context);
       });
