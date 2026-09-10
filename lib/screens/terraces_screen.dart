@@ -47,6 +47,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
   LatLng _centro = LocationService.fallback;
 
+  /// Ubicación actual del usuario (null hasta que se obtiene).
+  LatLng? _miUbicacion;
+
   // Datos acumulados de todas las áreas descargadas.
   final Map<String, Bar> _baresPorId = {};
   final List<BuildingFootprint> _edificios = [];
@@ -126,6 +129,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
     try {
       final u = await _location.ubicacionActual();
       _centro = u.punto;
+      _miUbicacion = u.punto;
       _map.move(_centro, 16);
 
       final t = await _tiempo.condicionesYPrevision(_centro);
@@ -606,6 +610,16 @@ class _TerracesScreenState extends State<TerracesScreen> {
             child: Stack(
               children: [
                 _mapa(),
+                if (_miUbicacion != null)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: FloatingActionButton.small(
+                      heroTag: 'miUbicacion',
+                      onPressed: _centrarEnMiUbicacion,
+                      child: const Icon(Icons.my_location),
+                    ),
+                  ),
                 if (_cargando)
                   const Positioned.fill(
                     child: ColoredBox(
@@ -620,6 +634,18 @@ class _TerracesScreenState extends State<TerracesScreen> {
         ],
       ),
     );
+  }
+
+  void _centrarEnMiUbicacion() {
+    final u = _miUbicacion;
+    if (u == null) return;
+    double z;
+    try {
+      z = _map.camera.zoom;
+    } catch (_) {
+      z = 16;
+    }
+    _map.move(u, z < 15 ? 16 : z);
   }
 
   Widget _mapa() {
@@ -662,6 +688,28 @@ class _TerracesScreenState extends State<TerracesScreen> {
           ]),
         MarkerLayer(
           markers: [
+            if (_miUbicacion != null)
+              Marker(
+                point: _miUbicacion!,
+                width: 24,
+                height: 24,
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF1A73E8),
+                    border: Border.fromBorderSide(
+                      BorderSide(color: Colors.white, width: 3.5),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x33000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             if (_capaLocales)
               for (final r in _terrazas)
                 Marker(
