@@ -146,5 +146,6 @@
   "introTitle": "Ist es draußen schön?",
   "introBody1": "Tippe auf einen Punkt der Karte und sieh, wie angenehm es dort gerade ist: Sonne oder Schatten, Wind und Temperatur. Deine Lieblingsbar, dein Platz oder irgendwo.",
   "introButton": "Verstanden",
-  "showIntro": "Einführung anzeigen"
+  "showIntro": "Einführung anzeigen",
+  "shareApp": "App teilen"
 }

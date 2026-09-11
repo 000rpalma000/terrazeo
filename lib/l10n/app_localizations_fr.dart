@@ -270,4 +270,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get showIntro => 'Revoir l\'intro';
+
+  @override
+  String get shareApp => 'Partager cette appli';
 }

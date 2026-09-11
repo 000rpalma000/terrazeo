@@ -266,4 +266,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showIntro => 'Show the intro';
+
+  @override
+  String get shareApp => 'Share this app';
 }

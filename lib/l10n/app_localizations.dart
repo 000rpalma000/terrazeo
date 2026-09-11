@@ -573,6 +573,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ver la introducción'**
   String get showIntro;
+
+  /// No description provided for @shareApp.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir esta app'**
+  String get shareApp;
 }
 
 class _AppLocalizationsDelegate
