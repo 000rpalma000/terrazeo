@@ -87,5 +87,6 @@
   "introButton": "Compris",
   "showIntro": "Revoir l'intro",
   "localesLayer": "Couche des établissements",
-  "tapMapHint": "Touchez la carte pour voir le confort à cet endroit."
+  "tapMapHint": "Touchez la carte pour voir le confort à cet endroit.",
+  "shareApp": "Partager cette appli"
 }

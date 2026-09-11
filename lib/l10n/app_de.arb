@@ -149,5 +149,6 @@
   "introButton": "Verstanden",
   "showIntro": "Einführung anzeigen",
   "localesLayer": "Lokal-Ebene",
-  "tapMapHint": "Tippe auf die Karte, um zu sehen, wie es an dieser Stelle ist."
+  "tapMapHint": "Tippe auf die Karte, um zu sehen, wie es an dieser Stelle ist.",
+  "shareApp": "App teilen"
 }

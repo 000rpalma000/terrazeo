@@ -149,5 +149,6 @@
   "introButton": "Entendido",
   "showIntro": "Ver la introducción",
   "localesLayer": "Capa de locales",
-  "tapMapHint": "Toca el mapa para ver qué tal se está en ese punto."
+  "tapMapHint": "Toca el mapa para ver qué tal se está en ese punto.",
+  "shareApp": "Compartir esta app"
 }

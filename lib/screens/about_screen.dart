@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/search_gate.dart';
@@ -18,6 +19,9 @@ class _AboutScreenState extends State<AboutScreen> {
   final _gate = SearchGate();
   bool? _sinAnuncios;
 
+  // TODO: cambiar por el enlace de la tienda cuando la app esté publicada.
+  static const _urlCompartir = 'https://000rpalma000.github.io/terrazeo/privacy.html';
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +33,13 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> _quitarAnuncios() async {
     await _gate.eliminarAnunciosMock();
     if (mounted) setState(() => _sinAnuncios = true);
+  }
+
+  Future<void> _compartir() async {
+    final l10n = AppLocalizations.of(context);
+    await SharePlus.instance.share(
+      ShareParams(text: '${l10n.appTitle} — ${l10n.aboutIntro}\n$_urlCompartir'),
+    );
   }
 
   @override
@@ -47,13 +58,21 @@ class _AboutScreenState extends State<AboutScreen> {
           const SizedBox(height: 16),
           Text(l10n.aboutIntro, style: t.bodyMedium),
           const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.help_outline),
-              label: Text(l10n.showIntro),
-              onPressed: () => mostrarIntro(context, marcarVisto: false),
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                icon: const Icon(Icons.help_outline),
+                label: Text(l10n.showIntro),
+                onPressed: () => mostrarIntro(context, marcarVisto: false),
+              ),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.share_outlined),
+                label: Text(l10n.shareApp),
+                onPressed: _compartir,
+              ),
+            ],
           ),
           const SizedBox(height: 28),
           Text(l10n.dataSources, style: t.titleMedium),

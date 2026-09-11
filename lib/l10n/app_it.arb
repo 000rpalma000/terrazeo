@@ -87,5 +87,6 @@
   "introButton": "Ho capito",
   "showIntro": "Rivedi l'introduzione",
   "localesLayer": "Livello dei locali",
-  "tapMapHint": "Tocca la mappa per vedere come si sta in quel punto."
+  "tapMapHint": "Tocca la mappa per vedere come si sta in quel punto.",
+  "shareApp": "Condividi questa app"
 }

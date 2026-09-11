@@ -279,4 +279,7 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get tapMapHint =>
       'Tippe auf die Karte, um zu sehen, wie es an dieser Stelle ist.';
+
+  @override
+  String get shareApp => 'App teilen';
 }
