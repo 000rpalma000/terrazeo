@@ -16,7 +16,7 @@ class MapConfig {
   /// satellite · hybrid. Se puede sobreescribir con
   /// --dart-define=MAP_STYLE=basic-v2
   static const _estilo =
-      String.fromEnvironment('MAP_STYLE', defaultValue: 'basic-v2');
+      String.fromEnvironment('MAP_STYLE', defaultValue: 'dataviz');
 
   /// Identificador de la app para la cabecera User-Agent de las teselas.
   static const userAgent = 'com.terrazeo.app';
