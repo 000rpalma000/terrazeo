@@ -146,5 +146,6 @@
   "introTitle": "¿Se está bien ahí fuera?",
   "introBody1": "Toca un punto del mapa y mira qué tal se está ahí ahora mismo: sol o sombra, viento y temperatura. Tu bar preferido, tu plaza o un sitio cualquiera.",
   "introButton": "Entendido",
-  "showIntro": "Ver la introducción"
+  "showIntro": "Ver la introducción",
+  "shareApp": "Compartir esta app"
 }

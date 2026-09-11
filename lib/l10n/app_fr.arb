@@ -84,5 +84,6 @@
   "introTitle": "Fait-il bon dehors ?",
   "introBody1": "Touchez un point sur la carte et voyez s'il y fait bon en ce moment : soleil ou ombre, vent et température. Votre bar préféré, votre place, ou n'importe où.",
   "introButton": "Compris",
-  "showIntro": "Revoir l'intro"
+  "showIntro": "Revoir l'intro",
+  "shareApp": "Partager cette appli"
 }

@@ -268,4 +268,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get showIntro => 'Einführung anzeigen';
+
+  @override
+  String get shareApp => 'App teilen';
 }

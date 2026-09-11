@@ -267,4 +267,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get showIntro => 'Rivedi l\'introduzione';
+
+  @override
+  String get shareApp => 'Condividi questa app';
 }
