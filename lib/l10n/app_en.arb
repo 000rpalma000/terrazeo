@@ -87,5 +87,6 @@
   "introButton": "Got it",
   "showIntro": "Show the intro",
   "localesLayer": "Venues layer",
-  "tapMapHint": "Tap the map to check how it feels at that spot."
+  "tapMapHint": "Tap the map to check how it feels at that spot.",
+  "shareApp": "Share this app"
 }

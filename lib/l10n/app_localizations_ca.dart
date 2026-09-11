@@ -276,4 +276,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get tapMapHint => 'Toca el mapa per veure què tal s\'hi està.';
+
+  @override
+  String get shareApp => 'Comparteix aquesta app';
 }

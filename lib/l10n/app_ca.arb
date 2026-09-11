@@ -87,5 +87,6 @@
   "introButton": "Entesos",
   "showIntro": "Mostra la introducció",
   "localesLayer": "Capa de locals",
-  "tapMapHint": "Toca el mapa per veure què tal s'hi està."
+  "tapMapHint": "Toca el mapa per veure què tal s'hi està.",
+  "shareApp": "Comparteix aquesta app"
 }

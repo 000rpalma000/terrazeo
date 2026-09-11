@@ -276,4 +276,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tapMapHint => 'Tap the map to check how it feels at that spot.';
+
+  @override
+  String get shareApp => 'Share this app';
 }

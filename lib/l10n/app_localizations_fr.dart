@@ -281,4 +281,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get tapMapHint =>
       'Touchez la carte pour voir le confort à cet endroit.';
+
+  @override
+  String get shareApp => 'Partager cette appli';
 }

@@ -277,4 +277,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tapMapHint =>
       'Toca el mapa para ver qué tal se está en ese punto.';
+
+  @override
+  String get shareApp => 'Compartir esta app';
 }

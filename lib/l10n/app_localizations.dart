@@ -591,6 +591,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Toca el mapa para ver qué tal se está en ese punto.'**
   String get tapMapHint;
+
+  /// No description provided for @shareApp.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir esta app'**
+  String get shareApp;
 }
 
 class _AppLocalizationsDelegate
