@@ -54,10 +54,9 @@ una cuenta de cada publicas todas las apps que quieras.
    recopilados"**. Si dudas, declara *Ubicación aproximada · Funcionalidad de
    la app · No vinculada a la identidad · Sin seguimiento*.
 4. **Capturas:** obligatorias las de iPhone de 6,9" (1320×2868), de 3 a 10.
-   Se sacan del simulador "iPhone 17 Pro Max" con ⌘S. La app también se puede
-   instalar en iPad (`TARGETED_DEVICE_FAMILY = 1,2`), así que también pide
-   capturas de iPad de 13". Si no quieres hacerlas, se puede dejar solo para
-   iPhone.
+   Se sacan del simulador "iPhone 17 Pro Max" con ⌘S. La app es solo para
+   iPhone (`TARGETED_DEVICE_FAMILY = 1`), así que no hacen falta capturas de
+   iPad. (En iPad se puede instalar igualmente en modo iPhone.)
 5. Texto de la ficha: subtítulo (30 caracteres), descripción, palabras clave,
    URL de soporte.
 

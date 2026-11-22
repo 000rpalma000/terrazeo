@@ -62,13 +62,6 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
-		<key>UISupportedInterfaceOrientations~ipad</key>
-		<array>
-			<string>UIInterfaceOrientationPortrait</string>
-			<string>UIInterfaceOrientationPortraitUpsideDown</string>
-			<string>UIInterfaceOrientationLandscapeLeft</string>
-			<string>UIInterfaceOrientationLandscapeRight</string>
-		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Se usa tu ubicación para mostrar las plazas cercanas y calcular el sol y el viento en ese punto.</string>
 		<key>UIStatusBarHidden</key>
