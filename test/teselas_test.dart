@@ -80,4 +80,24 @@ void main() {
     final r = OsmAreaService.repartir(body, [(t.i, t.j)]);
     expect(r[t.clave]!.length, 2);
   });
+
+  test('Region agrupa una ciudad y filasDeOverpass usa el formato compacto',
+      () {
+    expect(Region.de(LatLng(40.4168, -3.7038)),
+        Region.de(LatLng(40.42, -3.70))); // Madrid centro: misma región
+    final filas = OsmAreaService.filasDeOverpass(jsonEncode({
+      'elements': [
+        {
+          'type': 'way', 'id': 7,
+          'center': {'lat': 40.42, 'lon': -3.70},
+          'tags': {'amenity': 'cafe', 'outdoor_seating': 'yes'},
+        },
+        {'type': 'node', 'id': 8, 'tags': {'amenity': 'bar'}}, // sin coords
+      ],
+    }));
+    expect(filas.length, 1);
+    final b = Bar.fromFila(filas.first);
+    expect(b.osmId, 'way/7');
+    expect(b.terrazaDeclarada, isTrue);
+  });
 }

@@ -55,6 +55,12 @@ class _TerracesScreenState extends State<TerracesScreen> {
   BaresEmpaquetados _empaquetados = const BaresEmpaquetados([], [], '');
   final Map<String, Bar> _baresPorId = {};
   final Map<Tesela, ZonaOsm> _teselas = {};
+
+  /// Locales "de base" que nunca se descartan de memoria: los empaquetados
+  /// (Barcelona) + los de cada ciudad descargada entera.
+  final Map<String, Bar> _baresBase = {};
+  final Set<Region> _regionesListas = {};
+  final Set<Region> _regionesEnCurso = {};
   List<BuildingFootprint> _edificios = const [];
   List<List<LatLng>> _lineas = const [];
   bool _descargando = false;
@@ -152,6 +158,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
     _empaquetados = await empaquetados;
     _destacados = await destacados;
     for (final b in _empaquetados.bares) {
+      _baresBase[b.osmId] = b;
       _baresPorId[b.osmId] = b;
     }
     if (!mounted) return;
@@ -208,6 +215,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
     // Lo que ya hay en memoria se pinta ya; luego llega lo que falte.
     _recalcularVisible();
+    _asegurarCiudad(centro);
 
     // Margen de ~110 m: las sombras de edificios justo fuera de la vista
     // también cuentan.
@@ -259,7 +267,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
       // que siguen en memoria.
       _baresPorId
         ..clear()
-        ..addEntries(_empaquetados.bares.map((b) => MapEntry(b.osmId, b)));
+        ..addAll(_baresBase);
     }
     _edificios = [for (final z in _teselas.values) ...z.edificios];
     _lineas = [for (final z in _teselas.values) ...z.lineasPublicas];
@@ -268,6 +276,30 @@ class _TerracesScreenState extends State<TerracesScreen> {
         _baresPorId[b.osmId] = b;
       }
     }
+  }
+
+  /// Descarga en segundo plano todos los locales de la ciudad (región de
+  /// ~11 km) en la que está [p], una sola vez: queda guardada 30 días y a
+  /// partir de ahí sus locales salen al instante, como los de Barcelona.
+  void _asegurarCiudad(LatLng p) {
+    final r = Region.de(p);
+    if (_regionesListas.contains(r) ||
+        _regionesEnCurso.contains(r) ||
+        _empaquetados.cubreRegion(r)) {
+      return;
+    }
+    _regionesEnCurso.add(r);
+    _osm.cargarRegion(r).then((bares) {
+      _regionesListas.add(r);
+      for (final b in bares) {
+        _baresBase[b.osmId] = b;
+        _baresPorId[b.osmId] = b;
+      }
+      if (mounted) _recalcularVisible();
+    }).catchError((Object e) {
+      // Sin red o Overpass caído: se reintenta en el próximo movimiento.
+      debugPrint('[osm] no se pudo bajar la ciudad ${r.clave}: $e');
+    }).whenComplete(() => _regionesEnCurso.remove(r));
   }
 
   bool _contextoListo(LatLng p) => _teselas.containsKey(Tesela.de(p));

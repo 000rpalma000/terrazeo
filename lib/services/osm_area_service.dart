@@ -74,6 +74,35 @@ class Tesela {
   int get hashCode => Object.hash(i, j);
 }
 
+/// Zona de "ciudad" (~11 × 11 km) cuyos locales se descargan de una vez y se
+/// guardan en el móvil, para que en esa ciudad salgan al instante como en
+/// Barcelona (que ya viene empaquetada).
+class Region {
+  final int i;
+  final int j;
+  const Region(this.i, this.j);
+
+  static const tamLat = 0.1;
+  static const tamLon = 0.13;
+
+  factory Region.de(LatLng p) => Region(
+        (p.latitude / tamLat).floor(),
+        (p.longitude / tamLon).floor(),
+      );
+
+  String get clave => '${i}_$j';
+  double get sur => i * tamLat;
+  double get oeste => j * tamLon;
+  double get norte => (i + 1) * tamLat;
+  double get este => (j + 1) * tamLon;
+
+  @override
+  bool operator ==(Object other) =>
+      other is Region && other.i == i && other.j == j;
+  @override
+  int get hashCode => Object.hash(i, j);
+}
+
 /// Locales empaquetados en la app (assets/data/bares.json, generado con
 /// tool/generar_bares.py). Se pintan al instante, sin red.
 class BaresEmpaquetados {
@@ -91,6 +120,14 @@ class BaresEmpaquetados {
       p.longitude >= bbox[1] &&
       p.latitude <= bbox[2] &&
       p.longitude <= bbox[3];
+
+  /// La región entera cae dentro de lo empaquetado: no hace falta bajarla.
+  bool cubreRegion(Region r) =>
+      bbox.length == 4 &&
+      r.sur >= bbox[0] &&
+      r.oeste >= bbox[1] &&
+      r.norte <= bbox[2] &&
+      r.este <= bbox[3];
 
   static Future<BaresEmpaquetados> cargar() async {
     try {
@@ -209,6 +246,71 @@ out center geom tags;
       res[t] = await Isolate.run(() => _parsearElementos(elementos));
     }
     return res;
+  }
+
+  /// Locales de toda una [Region] (una sola consulta, solo locales). Se
+  /// guardan en disco con el mismo formato compacto que assets/data/bares.json
+  /// y duran [_ttlCache]. Lanza si no hay caché y Overpass falla.
+  Future<List<Bar>> cargarRegion(Region r) async {
+    final dir = await _cacheDir();
+    final f = dir == null
+        ? null
+        : File('${dir.path}/t${_versionCache}_ciudad_${r.clave}.json');
+    if (f != null && await f.exists()) {
+      if (DateTime.now().difference(await f.lastModified()) < _ttlCache) {
+        try {
+          return await Isolate.run(() => [
+                for (final fila in jsonDecode(f.readAsStringSync()) as List)
+                  Bar.fromFila((fila as List).cast<dynamic>()),
+              ]);
+        } catch (_) {}
+      }
+    }
+
+    final query = '[out:json][timeout:120];'
+        'nwr["amenity"~"^($amenityBares)\$"]'
+        '(${r.sur},${r.oeste},${r.norte},${r.este});'
+        'out center tags;';
+    final cron = Stopwatch()..start();
+    final body = await _overpass(query, limite: const Duration(seconds: 150));
+    final filas = await Isolate.run(() => filasDeOverpass(body));
+    debugPrint('[osm] ciudad ${r.clave}: ${filas.length} locales en '
+        '${cron.elapsedMilliseconds} ms');
+    if (f != null) {
+      try {
+        await f.writeAsString(jsonEncode(filas));
+      } catch (_) {}
+    }
+    return [for (final fila in filas) Bar.fromFila(fila)];
+  }
+
+  /// Respuesta de Overpass (locales) → filas compactas
+  /// `[osmId, lat, lon, nombre, amenity, terraza]`.
+  @visibleForTesting
+  static List<List<dynamic>> filasDeOverpass(String body) {
+    final data = jsonDecode(body) as Map<String, dynamic>;
+    final filas = <List<dynamic>>[];
+    for (final raw in (data['elements'] as List? ?? const [])) {
+      final el = raw as Map<String, dynamic>;
+      final tags = (el['tags'] as Map?)?.cast<String, dynamic>() ?? const {};
+      final c = el['center'] as Map?;
+      final lat = (el['lat'] ?? c?['lat']) as num?;
+      final lon = (el['lon'] ?? c?['lon']) as num?;
+      if (lat == null || lon == null) continue;
+      final amenity = (tags['amenity'] ?? 'bar').toString();
+      final outdoor = (tags['outdoor_seating'] ?? '').toString().toLowerCase();
+      filas.add([
+        '${el['type']}/${el['id']}',
+        lat.toDouble(),
+        lon.toDouble(),
+        (tags['name'] ?? '').toString(),
+        amenity,
+        outdoor == 'yes' || outdoor == 'terrace' || amenity == 'biergarten'
+            ? 1
+            : 0,
+      ]);
+    }
+    return filas;
   }
 
   /// Si [p] cae dentro de un edificio, devuelve el punto público más cercano
@@ -333,7 +435,8 @@ out center geom tags;
 
   /// Pide [query] al primer servidor; si tarda más de [_escalonado], también
   /// al siguiente, y así. Gana la primera respuesta válida.
-  Future<String> _overpass(String query) {
+  Future<String> _overpass(String query,
+      {Duration limite = const Duration(seconds: 60)}) {
     final completer = Completer<String>();
     final errores = <String>[];
     var lanzados = 0, terminados = 0;
@@ -366,7 +469,7 @@ out center geom tags;
             },
             body: {'data': query},
           )
-          .timeout(const Duration(seconds: 60))
+          .timeout(limite)
           .then((resp) {
         if (completer.isCompleted) return;
         if (resp.statusCode == 200) {
