@@ -46,7 +46,6 @@ dependencies:
   shared_preferences: ^2.5.5
   share_plus: ^13.0.0
   path_provider: ^2.1.6
-  google_mobile_ads: ^9.1.0
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +76,8 @@ flutter:
 
   assets:
     - .env
+    - assets/data/bares.json
+    - assets/data/destacados.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

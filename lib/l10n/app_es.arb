@@ -1,6 +1,6 @@
 {
   "@@locale": "es",
-  "appTitle": "Terrazeo v2",
+  "appTitle": "Terrazeo",
   "terracesNearby": "Terrazas cerca",
   "noBars": "No se han encontrado bares cerca.",
   "thisSpot": "Este punto",
@@ -150,5 +150,13 @@
   "showIntro": "Ver la introducción",
   "localesLayer": "Capa de locales",
   "tapMapHint": "Toca el mapa para ver qué tal se está en ese punto.",
-  "shareApp": "Compartir esta app"
+  "shareApp": "Compartir esta app",
+  "locationOff": "La localización del móvil está apagada. Te muestro el centro de Barcelona.",
+  "locationDenied": "Sin permiso de ubicación. Te muestro el centro de Barcelona.",
+  "locationNoSignal": "No se pudo obtener tu ubicación. Te muestro el centro de Barcelona.",
+  "openSettings": "Ajustes",
+  "retry": "Reintentar",
+  "computingShade": "Calculando sombra…",
+  "computingShadeDetail": "Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos.",
+  "sponsored": "Patrocinado"
 }

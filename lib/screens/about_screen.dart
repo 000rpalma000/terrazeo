@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../l10n/app_localizations.dart';
-import '../services/search_gate.dart';
 import '../widgets/intro_sheet.dart';
 
-/// Pantalla "Acerca de": descripción, fuentes de datos, licencias y anuncios.
+/// Pantalla "Acerca de": descripción, fuentes de datos, y licencias.
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key, this.version = '2.0.0'});
 
@@ -16,24 +15,8 @@ class AboutScreen extends StatefulWidget {
 }
 
 class _AboutScreenState extends State<AboutScreen> {
-  final _gate = SearchGate();
-  bool? _sinAnuncios;
-
   // TODO: cambiar por el enlace de la tienda cuando la app esté publicada.
   static const _urlCompartir = 'https://000rpalma000.github.io/terrazeo/privacy.html';
-
-  @override
-  void initState() {
-    super.initState();
-    _gate.anunciosEliminados().then((v) {
-      if (mounted) setState(() => _sinAnuncios = v);
-    });
-  }
-
-  Future<void> _quitarAnuncios() async {
-    await _gate.eliminarAnunciosMock();
-    if (mounted) setState(() => _sinAnuncios = true);
-  }
 
   Future<void> _compartir() async {
     final l10n = AppLocalizations.of(context);
@@ -91,16 +74,6 @@ class _AboutScreenState extends State<AboutScreen> {
               applicationVersion: 'v${widget.version}',
             ),
           ),
-          const SizedBox(height: 28),
-          Text(l10n.adsSectionTitle, style: t.titleMedium),
-          const SizedBox(height: 8),
-          if (_sinAnuncios == true)
-            Text(l10n.adsAlreadyRemoved, style: t.bodyMedium)
-          else if (_sinAnuncios == false)
-            FilledButton.tonal(
-              onPressed: _quitarAnuncios,
-              child: Text(l10n.removeAdsButton),
-            ),
         ],
       ),
     );

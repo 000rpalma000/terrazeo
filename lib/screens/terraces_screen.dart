@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -17,10 +18,9 @@ import '../models/weather_conditions.dart';
 import '../services/weather_service.dart';
 import 'about_screen.dart';
 import '../services/locale_controller.dart';
+import '../services/destacados_service.dart';
 import '../services/location_service.dart';
 import '../services/osm_area_service.dart';
-import '../services/ads_service.dart';
-import '../services/search_gate.dart';
 import '../services/shadow_service.dart';
 import '../services/sun_service.dart';
 import '../services/wind_shelter_service.dart';
@@ -50,14 +50,21 @@ class _TerracesScreenState extends State<TerracesScreen> {
   /// Ubicación actual del usuario (null hasta que se obtiene).
   LatLng? _miUbicacion;
 
-  // Datos acumulados de todas las áreas descargadas.
+  // Locales: los empaquetados en la app (al instante) + los que llegan de
+  // Overpass con cada tesela. Contexto (edificios, calles) por teselas.
+  BaresEmpaquetados _empaquetados = const BaresEmpaquetados([], [], '');
   final Map<String, Bar> _baresPorId = {};
-  final List<BuildingFootprint> _edificios = [];
-  final List<List<LatLng>> _lineas = [];
-  final Set<String> _edifKeys = {};
-  final Set<String> _lineaKeys = {};
-  final List<({LatLng c, double r})> _areasDescargadas = [];
+  final Map<Tesela, ZonaOsm> _teselas = {};
+  List<BuildingFootprint> _edificios = const [];
+  List<List<LatLng>> _lineas = const [];
   bool _descargando = false;
+
+  /// Locales con suscripción (vacío mientras no se active; ver
+  /// docs/MONETIZACION.md).
+  Set<String> _destacados = const {};
+
+  /// El mapa se movió durante una descarga: al acabar, se carga la vista nueva.
+  bool _pendiente = false;
 
   WeatherConditions? _ahora;
   List<WeatherConditions> _prevision = const [];
@@ -78,13 +85,17 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
   Timer? _debounce;
 
-  static const _radioMaxM = 900.0;
   static const _diagMaxVisibleM = 2200.0;
+
+  /// Teselas por petición a Overpass (las más cercanas al centro primero).
+  static const _teselasPorPeticion = 6;
+
+  /// Teselas en memoria como máximo (~11 km²); se descartan las más lejanas.
+  static const _maxTeselas = 36;
 
   @override
   void initState() {
     super.initState();
-    AdsService.instancia.inicializar();
     _cargarPrefs();
     _arrancar();
   }
@@ -126,34 +137,56 @@ class _TerracesScreenState extends State<TerracesScreen> {
       _cargando = true;
       _error = false;
     });
-    try {
-      final u = await _location.ubicacionActual();
-      _centro = u.punto;
-      _miUbicacion = u.punto;
-      _map.move(_centro, 16);
+    // Los locales empaquetados no necesitan red: se leen mientras se pide la
+    // ubicación.
+    final empaquetados = BaresEmpaquetados.cargar();
+    final destacados = const DestacadosService().cargar();
 
+    final u = await _location.ubicacionActual();
+    _centro = u.punto;
+    // Solo se marca "estás aquí" si la posición es real, no el respaldo.
+    _miUbicacion = u.esReal ? u.punto : null;
+    _map.move(_centro, 16);
+    if (u.motivo != null) _avisarSinUbicacion(u.motivo!);
+
+    _empaquetados = await empaquetados;
+    _destacados = await destacados;
+    for (final b in _empaquetados.bares) {
+      _baresPorId[b.osmId] = b;
+    }
+    if (!mounted) return;
+    setState(() => _cargando = false);
+    _recalcularVisible(); // locales al instante (provisionales, sin sombra)
+
+    // El tiempo y los edificios llegan cada uno por su lado y recalculan.
+    unawaited(_cargarTiempo());
+    await _refrescarPorVista();
+  }
+
+  Future<void> _cargarTiempo() async {
+    try {
       final t = await _tiempo.condicionesYPrevision(_centro);
       _ahora = t.ahora;
       _prevision = t.prevision;
-
-      await _asegurarCobertura(_centro, 420);
-      _recalcularVisible();
+      if (mounted) _recalcularVisible();
     } catch (_) {
-      if (mounted) setState(() => _error = true);
-    } finally {
-      if (mounted) setState(() => _cargando = false);
+      // Sin tiempo el veredicto se basa solo en sol/sombra.
     }
   }
 
-  // --- Descarga por áreas + fusión -----------------------------------
+  // --- Descarga por teselas -----------------------------------------
 
   void _onMapaMovido() {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 600), _refrescarPorVista);
+    _debounce = Timer(const Duration(milliseconds: 400), _refrescarPorVista);
   }
 
   Future<void> _refrescarPorVista() async {
-    if (!mounted || _descargando) return;
+    if (!mounted) return;
+    if (_descargando) {
+      _pendiente = true;
+      return;
+    }
     final LatLng centro;
     final LatLngBounds bounds;
     try {
@@ -173,103 +206,74 @@ class _TerracesScreenState extends State<TerracesScreen> {
     }
     if (_demasiadoLejos) setState(() => _demasiadoLejos = false);
 
-    final radio = ((diag / 2) + 200).clamp(380.0, _radioMaxM).toDouble();
-    if (!_cubierto(bounds, 50)) {
-      await _asegurarCobertura(centro, radio);
-    }
+    // Lo que ya hay en memoria se pinta ya; luego llega lo que falte.
     _recalcularVisible();
-  }
 
-  bool _cubierto(LatLngBounds b, double margenM) {
-    final esquinas = [
-      b.northWest,
-      b.northEast,
-      b.southWest,
-      b.southEast,
-      b.center,
-    ];
-    return esquinas.every((p) => _areasDescargadas
-        .any((a) => Geo.distancia(a.c, p) <= a.r - margenM));
-  }
+    // Margen de ~110 m: las sombras de edificios justo fuera de la vista
+    // también cuentan.
+    const m = 0.001;
+    final faltan = Tesela.cubriendo(bounds.south - m, bounds.west - m,
+            bounds.north + m, bounds.east + m)
+        .where((t) => !_teselas.containsKey(t))
+        .toList()
+      ..sort((a, b) => Geo.distancia(centro, a.centro)
+          .compareTo(Geo.distancia(centro, b.centro)));
+    if (faltan.isEmpty) return;
 
-  Future<void> _asegurarCobertura(LatLng centro, double radio) async {
-    if (_descargando) return;
     _descargando = true;
-    // Snap para que áreas casi iguales compartan caché.
-    final rSnap = ((radio / 100).round() * 100).clamp(380, 900);
     setState(() => _cargandoZona = true);
     try {
-      final z = await _osm.cargarZona(
-        centro,
-        radioBaresM: rSnap,
-        radioContextoM: rSnap + 120,
-      );
-      _fusionar(z);
-      _areasDescargadas.add((c: centro, r: rSnap.toDouble()));
-      _podar(centro);
-      _error = false;
-    } catch (_) {
+      for (var k = 0; k < faltan.length; k += _teselasPorPeticion) {
+        final lote = faltan.sublist(
+            k, math.min(k + _teselasPorPeticion, faltan.length));
+        _teselas.addAll(await _osm.cargarTeselas(lote));
+        _rehacerContexto(centro);
+        _error = false;
+        if (mounted) _recalcularVisible();
+        if (_pendiente) break; // el usuario se ha movido: primero lo nuevo
+      }
+    } catch (e) {
+      debugPrint('[osm] no se pudieron cargar las teselas: $e');
       _error = true;
     } finally {
       _descargando = false;
       if (mounted) setState(() => _cargandoZona = false);
     }
-  }
-
-  void _fusionar(ZonaOsm z) {
-    for (final b in z.bares) {
-      _baresPorId[b.osmId] = b;
-    }
-    for (final e in z.edificios) {
-      final p = e.ring.first;
-      final k = '${(p.latitude * 1e5).round()}_${(p.longitude * 1e5).round()}';
-      if (_edifKeys.add(k)) _edificios.add(e);
-    }
-    for (final l in z.lineasPublicas) {
-      final a = l.first, b = l.last;
-      final k = '${(a.latitude * 1e5).round()}_${(a.longitude * 1e5).round()}'
-          '_${(b.latitude * 1e5).round()}_${(b.longitude * 1e5).round()}'
-          '_${l.length}';
-      if (_lineaKeys.add(k)) _lineas.add(l);
+    if (_pendiente && mounted) {
+      _pendiente = false;
+      unawaited(_refrescarPorVista());
     }
   }
 
-  /// Evita que la memoria crezca sin fin tras pasear por media ciudad.
-  /// Ordena por distancia del primer vértice al punto (aprox., barato).
-  void _podar(LatLng cerca) {
-    if (_edificios.length > 5000) {
-      _edificios.sort((a, b) => Geo.distancia(cerca, a.ring.first)
-          .compareTo(Geo.distancia(cerca, b.ring.first)));
-      _edificios.removeRange(3500, _edificios.length);
-      _edifKeys.clear();
-      for (final e in _edificios) {
-        final p = e.ring.first;
-        _edifKeys
-            .add('${(p.latitude * 1e5).round()}_${(p.longitude * 1e5).round()}');
+  /// Rehace las listas de contexto a partir de las teselas en memoria y
+  /// descarta las más lejanas si hay demasiadas (memoria acotada).
+  void _rehacerContexto(LatLng cerca) {
+    if (_teselas.length > _maxTeselas) {
+      final orden = _teselas.keys.toList()
+        ..sort((a, b) => Geo.distancia(cerca, a.centro)
+            .compareTo(Geo.distancia(cerca, b.centro)));
+      for (final t in orden.skip(_maxTeselas * 2 ~/ 3)) {
+        _teselas.remove(t);
       }
-    }
-    if (_lineas.length > 6000) {
-      _lineas.sort((a, b) => Geo.distancia(cerca, a.first)
-          .compareTo(Geo.distancia(cerca, b.first)));
-      _lineas.removeRange(4000, _lineas.length);
-      _lineaKeys.clear();
-      for (final l in _lineas) {
-        final a = l.first, b = l.last;
-        _lineaKeys.add(
-            '${(a.latitude * 1e5).round()}_${(a.longitude * 1e5).round()}'
-            '_${(b.latitude * 1e5).round()}_${(b.longitude * 1e5).round()}'
-            '_${l.length}');
-      }
-    }
-    if (_baresPorId.length > 2500) {
-      final orden = _baresPorId.values.toList()
-        ..sort((a, b) => Geo.distancia(cerca, a.punto)
-            .compareTo(Geo.distancia(cerca, b.punto)));
+      // Locales: los empaquetados siempre; de Overpass, solo los de teselas
+      // que siguen en memoria.
       _baresPorId
         ..clear()
-        ..addEntries(orden.take(1800).map((b) => MapEntry(b.osmId, b)));
+        ..addEntries(_empaquetados.bares.map((b) => MapEntry(b.osmId, b)));
+    }
+    _edificios = [for (final z in _teselas.values) ...z.edificios];
+    _lineas = [for (final z in _teselas.values) ...z.lineasPublicas];
+    for (final z in _teselas.values) {
+      for (final b in z.bares) {
+        _baresPorId[b.osmId] = b;
+      }
     }
   }
+
+  bool _contextoListo(LatLng p) => _teselas.containsKey(Tesela.de(p));
+
+  bool _esDestacado(PointReport r) =>
+      r.bar != null && _destacados.contains(r.bar!.osmId);
 
   // --- Recálculo local (sin red) ------------------------------------
 
@@ -319,6 +323,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
       for (final b in visibles) {
         reports.add(_evaluar(b.punto,
             bar: b,
+            provisional: !_contextoListo(b.punto),
             hora: hora,
             shadow: shadow,
             edificios: edifCerca,
@@ -327,6 +332,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
             ocaso: ocaso));
       }
       reports.sort((a, b) {
+        // Los patrocinados, primero; los que aún no tienen la sombra
+        // calculada, al final.
+        final da = _esDestacado(a), db = _esDestacado(b);
+        if (da != db) return da ? -1 : 1;
+        if (a.provisional != b.provisional) return a.provisional ? 1 : -1;
         var c = a.comfort.level.index.compareTo(b.comfort.level.index);
         if (c != 0) return c;
         c = (a.bar?.prioridadTipo ?? 2).compareTo(b.bar?.prioridadTipo ?? 2);
@@ -348,6 +358,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
         }
       } else if (sel != null) {
         _seleccion = _evaluar(sel.punto,
+            provisional: !_contextoListo(sel.punto),
             hora: hora,
             shadow: shadow,
             edificios: edifCerca,
@@ -361,6 +372,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
   PointReport _evaluar(
     LatLng punto0, {
     Bar? bar,
+    bool provisional = false,
     required DateTime hora,
     required ShadowMap shadow,
     required List<BuildingFootprint> edificios,
@@ -429,6 +441,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
       windDirectionDeg: w?.windDirectionDeg,
       windDirectionCardinal: w?.windDirectionCardinal,
       temperatureC: w?.temperatureC,
+      provisional: provisional,
     );
   }
 
@@ -455,12 +468,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
   void _seleccionarBar(PointReport r) {
     setState(() => _seleccion = r);
     _map.move(r.punto, _map.camera.zoom.clamp(16, 18));
-    unawaited(_contarToque());
   }
 
   void _tapMapa(LatLng p) {
-    unawaited(_contarToque());
-    if (_edificios.isEmpty && _lineas.isEmpty) return;
     final hora = _horaSel ?? DateTime.now();
     final edifCerca =
         _edificios.where((e) => Geo.distancia(p, e.ring.first) < 400).toList();
@@ -468,75 +478,13 @@ class _TerracesScreenState extends State<TerracesScreen> {
         _lineas.where((l) => Geo.distancia(p, l.first) < 400).toList();
     final shadow = _shadow.construir(edifCerca, p, hora);
     setState(() => _seleccion = _evaluar(p,
+        provisional: !_contextoListo(p),
         hora: hora,
         shadow: shadow,
         edificios: edifCerca,
         lineas: lineasCerca,
         pos: _sun.posicion(p, hora),
         ocaso: _sun.ocaso(p, hora)));
-    unawaited(_contarToque());
-  }
-
-  DateTime? _ultimoToque;
-
-  /// Cada toque en el mapa (o en un sitio) cuenta; cada N, anuncio + oferta de
-  /// quitarlos. Se ignoran repeticiones en <400 ms para que un solo toque que
-  /// dispara dos handlers (marcador + mapa) cuente una sola vez.
-  Future<void> _contarToque() async {
-    final ahora = DateTime.now();
-    if (_ultimoToque != null &&
-        ahora.difference(_ultimoToque!).inMilliseconds < 400) {
-      return;
-    }
-    _ultimoToque = ahora;
-    if (!await SearchGate().registrarToque()) return;
-    final visto = await AdsService.instancia.mostrarSiListo();
-    if (visto && mounted) await _ofrecerQuitarAnuncios();
-  }
-
-  Future<void> _ofrecerQuitarAnuncios() async {
-    final l10n = AppLocalizations.of(context);
-    final quitar = await showModalBottomSheet<bool>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.removeAdsPromptTitle,
-                  style: Theme.of(ctx).textTheme.titleMedium),
-              const SizedBox(height: 6),
-              Text(l10n.removeAdsPromptBody,
-                  style: Theme.of(ctx).textTheme.bodyMedium),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: Text(l10n.notNow),
-                  ),
-                  const Spacer(),
-                  FilledButton.tonal(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    child: Text(l10n.removeAdsButton),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (quitar == true) {
-      await SearchGate().eliminarAnunciosMock();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.adsRemovedMockDone)),
-        );
-      }
-    }
   }
 
   Future<void> _elegirIdioma() async {
@@ -563,6 +511,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
   }
 
   // --- UI --------------------------------------------------------------
+
+  /// Gris mientras la sombra no está calculada (faltan los edificios).
+  static Color _colorReporte(PointReport r) => r.provisional
+      ? const Color(0xFF9E9E9E)
+      : _colorConfort(r.comfort.level);
 
   static Color _colorConfort(ComfortLevel l) => switch (l) {
         ComfortLevel.muyAgradable => const Color(0xFF2E7D32),
@@ -610,16 +563,18 @@ class _TerracesScreenState extends State<TerracesScreen> {
             child: Stack(
               children: [
                 _mapa(),
-                if (_miUbicacion != null)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: FloatingActionButton.small(
-                      heroTag: 'miUbicacion',
-                      onPressed: _centrarEnMiUbicacion,
-                      child: const Icon(Icons.my_location),
-                    ),
+                // Siempre visible: si aún no hay ubicación real, reintenta.
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: FloatingActionButton.small(
+                    heroTag: 'miUbicacion',
+                    onPressed: _centrarEnMiUbicacion,
+                    child: Icon(_miUbicacion != null
+                        ? Icons.my_location
+                        : Icons.location_searching),
                   ),
+                ),
                 if (_cargando)
                   const Positioned.fill(
                     child: ColoredBox(
@@ -636,9 +591,45 @@ class _TerracesScreenState extends State<TerracesScreen> {
     );
   }
 
+  void _avisarSinUbicacion(MotivoSinUbicacion motivo) {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final texto = switch (motivo) {
+      MotivoSinUbicacion.servicioApagado => l10n.locationOff,
+      MotivoSinUbicacion.sinPermiso => l10n.locationDenied,
+      MotivoSinUbicacion.sinSenal => l10n.locationNoSignal,
+    };
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(texto),
+        duration: const Duration(seconds: 6),
+        action: motivo == MotivoSinUbicacion.sinSenal
+            ? SnackBarAction(label: l10n.retry, onPressed: _reintentarUbicacion)
+            : SnackBarAction(
+                label: l10n.openSettings,
+                onPressed: () => _location.abrirAjustes(motivo),
+              ),
+      ),
+    );
+  }
+
+  Future<void> _reintentarUbicacion() async {
+    final u = await _location.ubicacionActual();
+    if (!mounted) return;
+    if (!u.esReal) {
+      _avisarSinUbicacion(u.motivo!);
+      return;
+    }
+    setState(() => _miUbicacion = u.punto);
+    _centrarEnMiUbicacion();
+  }
+
   void _centrarEnMiUbicacion() {
     final u = _miUbicacion;
-    if (u == null) return;
+    if (u == null) {
+      _reintentarUbicacion();
+      return;
+    }
     double z;
     try {
       z = _map.camera.zoom;
@@ -719,9 +710,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
                   child: GestureDetector(
                     onTap: () => _seleccionarBar(r),
                     child: Icon(
-                      Icons.local_cafe,
-                      size: r.bar?.osmId == sel?.bar?.osmId ? 26 : 20,
-                      color: _colorConfort(r.comfort.level),
+                      _esDestacado(r) ? Icons.stars : Icons.local_cafe,
+                      size: r.bar?.osmId == sel?.bar?.osmId || _esDestacado(r)
+                          ? 26
+                          : 20,
+                      color: _colorReporte(r),
                     ),
                   ),
                 ),
@@ -839,15 +832,19 @@ class _TerracesScreenState extends State<TerracesScreen> {
                   onTap: () => _seleccionarBar(r),
                   leading: CircleAvatar(
                     radius: 6,
-                    backgroundColor: _colorConfort(r.comfort.level),
+                    backgroundColor: _colorReporte(r),
                   ),
-                  title: Text(r.bar!.nombre,
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  title: Text(
+                      _esDestacado(r)
+                          ? '${r.bar!.nombre} · ${l10n.sponsored}'
+                          : r.bar!.nombre,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${_labelStatus(l10n, r.sunStatus)}'
+                        '${r.provisional ? l10n.computingShade : _labelStatus(l10n, r.sunStatus)}'
                         '${vientoTxt != null ? ' · $vientoTxt' : ''}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -859,9 +856,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
                     ],
                   ),
                   trailing: Text(
-                    _labelConfort(l10n, r.comfort.level),
+                    r.provisional ? '…' : _labelConfort(l10n, r.comfort.level),
                     style: TextStyle(
-                      color: _colorConfort(r.comfort.level),
+                      color: _colorReporte(r),
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -899,6 +896,24 @@ class _TerracesScreenState extends State<TerracesScreen> {
           ),
           SizedBox(height: 30, child: _chipsHora(l10n)),
           const SizedBox(height: 10),
+          if (r.provisional)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(l10n.computingShadeDetail,
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ),
+                ],
+              ),
+            ),
           _tarjetaConfort(l10n, r),
           const SizedBox(height: 8),
           _tarjetaSolYViento(l10n, r),

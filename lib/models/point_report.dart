@@ -48,6 +48,10 @@ class PointReport {
   final String? windDirectionCardinal;
   final double? temperatureC;
 
+  /// Aún no han llegado los edificios de esta zona: la sombra no está
+  /// calculada y el veredicto es provisional (se pinta en gris).
+  final bool provisional;
+
   const PointReport({
     required this.comfort,
     required this.punto,
@@ -67,6 +71,7 @@ class PointReport {
     this.windDirectionDeg,
     this.windDirectionCardinal,
     this.temperatureC,
+    this.provisional = false,
   });
 
   /// El viento local es bastante menor que el regional por culpa de los

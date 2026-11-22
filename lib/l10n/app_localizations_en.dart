@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Terrazeo v2';
+  String get appTitle => 'Terrazeo';
 
   @override
   String get terracesNearby => 'Terraces nearby';
@@ -279,4 +279,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareApp => 'Share this app';
+
+  @override
+  String get locationOff =>
+      'Location services are off. Showing central Barcelona.';
+
+  @override
+  String get locationDenied =>
+      'No location permission. Showing central Barcelona.';
+
+  @override
+  String get locationNoSignal =>
+      'Couldn\'t get your location. Showing central Barcelona.';
+
+  @override
+  String get openSettings => 'Settings';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get computingShade => 'Working out shade…';
+
+  @override
+  String get computingShadeDetail =>
+      'Still downloading the buildings in this area. Shade will update in a few seconds.';
+
+  @override
+  String get sponsored => 'Sponsored';
 }

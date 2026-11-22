@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In es, this message translates to:
-  /// **'Terrazeo v2'**
+  /// **'Terrazeo'**
   String get appTitle;
 
   /// No description provided for @terracesNearby.
@@ -597,6 +597,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Compartir esta app'**
   String get shareApp;
+
+  /// No description provided for @locationOff.
+  ///
+  /// In es, this message translates to:
+  /// **'La localización del móvil está apagada. Te muestro el centro de Barcelona.'**
+  String get locationOff;
+
+  /// No description provided for @locationDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin permiso de ubicación. Te muestro el centro de Barcelona.'**
+  String get locationDenied;
+
+  /// No description provided for @locationNoSignal.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo obtener tu ubicación. Te muestro el centro de Barcelona.'**
+  String get locationNoSignal;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajustes'**
+  String get openSettings;
+
+  /// No description provided for @retry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get retry;
+
+  /// No description provided for @computingShade.
+  ///
+  /// In es, this message translates to:
+  /// **'Calculando sombra…'**
+  String get computingShade;
+
+  /// No description provided for @computingShadeDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos.'**
+  String get computingShadeDetail;
+
+  /// No description provided for @sponsored.
+  ///
+  /// In es, this message translates to:
+  /// **'Patrocinado'**
+  String get sponsored;
 }
 
 class _AppLocalizationsDelegate

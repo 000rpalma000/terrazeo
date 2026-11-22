@@ -39,6 +39,20 @@ class Bar {
     );
   }
 
+  /// Fila del archivo empaquetado `assets/data/bares.json`
+  /// (`[osmId, lat, lon, nombre, amenity, terraza]`, ver tool/generar_bares.py).
+  factory Bar.fromFila(List<dynamic> f) {
+    final amenity = (f[4] as String?) ?? 'bar';
+    final nombre = (f[3] as String?) ?? '';
+    return Bar(
+      osmId: f[0] as String,
+      nombre: nombre.isEmpty ? _nombrePorTipo(amenity) : nombre,
+      punto: LatLng((f[1] as num).toDouble(), (f[2] as num).toDouble()),
+      tipo: amenity.isEmpty ? 'bar' : amenity,
+      terrazaDeclarada: f[5] == 1,
+    );
+  }
+
   /// Prioridad para desempatar el orden: primero bares/pubs, luego cafés,
   /// después restaurantes y comida rápida.
   int get prioridadTipo => switch (tipo) {

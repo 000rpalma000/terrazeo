@@ -282,4 +282,32 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shareApp => 'App teilen';
+
+  @override
+  String get locationOff =>
+      'Die Ortungsdienste sind aus. Ich zeige das Zentrum von Barcelona.';
+
+  @override
+  String get locationDenied =>
+      'Keine Standortberechtigung. Ich zeige das Zentrum von Barcelona.';
+
+  @override
+  String get locationNoSignal =>
+      'Dein Standort konnte nicht ermittelt werden. Ich zeige das Zentrum von Barcelona.';
+
+  @override
+  String get openSettings => 'Einstellungen';
+
+  @override
+  String get retry => 'Erneut versuchen';
+
+  @override
+  String get computingShade => 'Schatten wird berechnet…';
+
+  @override
+  String get computingShadeDetail =>
+      'Die Gebäude in dieser Gegend werden noch geladen. Der Schatten wird in wenigen Sekunden aktualisiert.';
+
+  @override
+  String get sponsored => 'Gesponsert';
 }

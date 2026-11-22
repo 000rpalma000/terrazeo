@@ -50,3 +50,9 @@ dart_defines.json
 
 # config local de herramientas (no relevante para el repo)
 .claude/
+
+# firma de Android (no subir nunca)
+/android/key.properties
+*.jks
+*.keystore
+/android/build/

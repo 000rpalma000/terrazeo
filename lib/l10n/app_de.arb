@@ -150,5 +150,13 @@
   "showIntro": "Einführung anzeigen",
   "localesLayer": "Lokal-Ebene",
   "tapMapHint": "Tippe auf die Karte, um zu sehen, wie es an dieser Stelle ist.",
-  "shareApp": "App teilen"
+  "shareApp": "App teilen",
+  "locationOff": "Die Ortungsdienste sind aus. Ich zeige das Zentrum von Barcelona.",
+  "locationDenied": "Keine Standortberechtigung. Ich zeige das Zentrum von Barcelona.",
+  "locationNoSignal": "Dein Standort konnte nicht ermittelt werden. Ich zeige das Zentrum von Barcelona.",
+  "openSettings": "Einstellungen",
+  "retry": "Erneut versuchen",
+  "computingShade": "Schatten wird berechnet…",
+  "computingShadeDetail": "Die Gebäude in dieser Gegend werden noch geladen. Der Schatten wird in wenigen Sekunden aktualisiert.",
+  "sponsored": "Gesponsert"
 }

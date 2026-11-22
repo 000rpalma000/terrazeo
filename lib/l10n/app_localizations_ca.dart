@@ -9,7 +9,7 @@ class AppLocalizationsCa extends AppLocalizations {
   AppLocalizationsCa([String locale = 'ca']) : super(locale);
 
   @override
-  String get appTitle => 'Terrazeo v2';
+  String get appTitle => 'Terrazeo';
 
   @override
   String get terracesNearby => 'Terrasses a prop';
@@ -279,4 +279,32 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get shareApp => 'Comparteix aquesta app';
+
+  @override
+  String get locationOff =>
+      'La localització del mòbil està apagada. Et mostro el centre de Barcelona.';
+
+  @override
+  String get locationDenied =>
+      'Sense permís d\'ubicació. Et mostro el centre de Barcelona.';
+
+  @override
+  String get locationNoSignal =>
+      'No s\'ha pogut obtenir la teva ubicació. Et mostro el centre de Barcelona.';
+
+  @override
+  String get openSettings => 'Ajustos';
+
+  @override
+  String get retry => 'Torna-ho a provar';
+
+  @override
+  String get computingShade => 'Calculant l\'ombra…';
+
+  @override
+  String get computingShadeDetail =>
+      'Encara estic baixant els edificis d\'aquesta zona. L\'ombra s\'actualitzarà d\'aquí a uns segons.';
+
+  @override
+  String get sponsored => 'Patrocinat';
 }

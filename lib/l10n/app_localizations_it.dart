@@ -9,7 +9,7 @@ class AppLocalizationsIt extends AppLocalizations {
   AppLocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
-  String get appTitle => 'Terrazeo v2';
+  String get appTitle => 'Terrazeo';
 
   @override
   String get terracesNearby => 'Terrazze vicine';
@@ -281,4 +281,32 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get shareApp => 'Condividi questa app';
+
+  @override
+  String get locationOff =>
+      'La localizzazione è disattivata. Mostro il centro di Barcellona.';
+
+  @override
+  String get locationDenied =>
+      'Nessun permesso di posizione. Mostro il centro di Barcellona.';
+
+  @override
+  String get locationNoSignal =>
+      'Impossibile ottenere la tua posizione. Mostro il centro di Barcellona.';
+
+  @override
+  String get openSettings => 'Impostazioni';
+
+  @override
+  String get retry => 'Riprova';
+
+  @override
+  String get computingShade => 'Calcolo l\'ombra…';
+
+  @override
+  String get computingShadeDetail =>
+      'Sto ancora scaricando gli edifici della zona. L\'ombra si aggiornerà tra pochi secondi.';
+
+  @override
+  String get sponsored => 'Sponsorizzato';
 }
