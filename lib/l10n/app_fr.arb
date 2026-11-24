@@ -71,16 +71,10 @@
   "creditSun": "Position du soleil : algorithme de Jean Meeus.",
   "adTitle": "Publicité (test)",
   "adBody": "Une vraie publicité s'afficherait ici. Ceci sert juste à tester la fréquence.",
-  "removeAdsButton": "Supprimer les publicités · 1,99 €",
   "close": "Fermer",
-  "adsSectionTitle": "Publicités",
-  "adsAlreadyRemoved": "Vous avez déjà supprimé les publicités. Merci !",
   "headlineSunnyCold": "Un soleil très agréable ici",
   "headlineChillyShade": "Frais et à l’ombre ici",
-  "removeAdsPromptTitle": "Sans publicités ?",
-  "removeAdsPromptBody": "Supprimez-les définitivement avec un paiement unique.",
   "notNow": "Pas maintenant",
-  "adsRemovedMockDone": "Publicités supprimées (simulé).",
   "introTitle": "Fait-il bon dehors ?",
   "introBody1": "Touchez un point sur la carte et voyez s'il y fait bon en ce moment : soleil ou ombre, vent et température. Votre bar préféré, votre place, ou n'importe où.",
   "introBody2": "Activez la couche des établissements (données d'OpenStreetMap) pour voir aussi le confort de la terrasse de chaque bar.",
@@ -95,6 +89,5 @@
   "openSettings": "Réglages",
   "retry": "Réessayer",
   "computingShade": "Calcul de l'ombre…",
-  "computingShadeDetail": "Téléchargement des bâtiments du quartier en cours. L'ombre se mettra à jour dans quelques secondes.",
-  "sponsored": "Sponsorisé"
+  "computingShadeDetail": "Téléchargement des bâtiments du quartier en cours. L'ombre se mettra à jour dans quelques secondes."
 }

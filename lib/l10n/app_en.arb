@@ -71,16 +71,10 @@
   "creditSun": "Sun position: algorithm by Jean Meeus.",
   "adTitle": "Ad (test)",
   "adBody": "A real ad would go here. This is just to test how often it shows up.",
-  "removeAdsButton": "Remove ads · €1.99",
   "close": "Close",
-  "adsSectionTitle": "Ads",
-  "adsAlreadyRemoved": "You already removed ads. Thank you!",
   "headlineSunnyCold": "Lovely sun here",
   "headlineChillyShade": "Chilly and shaded here",
-  "removeAdsPromptTitle": "No ads?",
-  "removeAdsPromptBody": "Remove them for good with a one-time payment.",
   "notNow": "Not now",
-  "adsRemovedMockDone": "Ads removed (mock).",
   "introTitle": "Is it nice out there?",
   "introBody1": "Tap a point on the map and see how pleasant it is there right now: sun or shade, wind and temperature. Your favourite bar, your square, or anywhere.",
   "introBody2": "Turn on the venues layer (data from OpenStreetMap) to also see how pleasant each bar's terrace is.",
@@ -95,6 +89,5 @@
   "openSettings": "Settings",
   "retry": "Retry",
   "computingShade": "Working out shade…",
-  "computingShadeDetail": "Still downloading the buildings in this area. Shade will update in a few seconds.",
-  "sponsored": "Sponsored"
+  "computingShadeDetail": "Still downloading the buildings in this area. Shade will update in a few seconds."
 }

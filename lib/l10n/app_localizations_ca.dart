@@ -225,16 +225,7 @@ class AppLocalizationsCa extends AppLocalizations {
       'Aquí aniria un anunci real. Això és només per provar cada quant apareix.';
 
   @override
-  String get removeAdsButton => 'Treu anuncis · 1,99 €';
-
-  @override
   String get close => 'Tanca';
-
-  @override
-  String get adsSectionTitle => 'Anuncis';
-
-  @override
-  String get adsAlreadyRemoved => 'Ja has tret els anuncis. Gràcies!';
 
   @override
   String get headlineSunnyCold => 'Aquí fa un sol molt agradable';
@@ -243,16 +234,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get headlineChillyShade => 'Fa fresca i sense sol aquí';
 
   @override
-  String get removeAdsPromptTitle => 'Sense anuncis?';
-
-  @override
-  String get removeAdsPromptBody => 'Treu-los per sempre amb un únic pagament.';
-
-  @override
   String get notNow => 'Ara no';
-
-  @override
-  String get adsRemovedMockDone => 'Anuncis trets (simulat).';
 
   @override
   String get introTitle => 'S\'hi està bé, a fora?';
@@ -304,7 +286,4 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get computingShadeDetail =>
       'Encara estic baixant els edificis d\'aquesta zona. L\'ombra s\'actualitzarà d\'aquí a uns segons.';
-
-  @override
-  String get sponsored => 'Patrocinat';
 }

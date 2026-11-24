@@ -71,16 +71,10 @@
   "creditSun": "Posizione del sole: algoritmo di Jean Meeus.",
   "adTitle": "Pubblicità (test)",
   "adBody": "Qui apparirebbe una pubblicità reale. Serve solo per provare la frequenza.",
-  "removeAdsButton": "Rimuovi pubblicità · 1,99 €",
   "close": "Chiudi",
-  "adsSectionTitle": "Pubblicità",
-  "adsAlreadyRemoved": "Hai già rimosso la pubblicità. Grazie!",
   "headlineSunnyCold": "Un sole molto piacevole qui",
   "headlineChillyShade": "Fresco e all’ombra qui",
-  "removeAdsPromptTitle": "Senza pubblicità?",
-  "removeAdsPromptBody": "Rimuovila per sempre con un pagamento unico.",
   "notNow": "Non ora",
-  "adsRemovedMockDone": "Pubblicità rimossa (simulato).",
   "introTitle": "Si sta bene là fuori?",
   "introBody1": "Tocca un punto sulla mappa e scopri quanto si sta bene lì in questo momento: sole o ombra, vento e temperatura. Il tuo bar preferito, la tua piazza o un posto qualsiasi.",
   "introBody2": "Attiva il livello dei locali (dati di OpenStreetMap) per vedere anche quanto si sta bene nel dehors di ogni bar.",
@@ -95,6 +89,5 @@
   "openSettings": "Impostazioni",
   "retry": "Riprova",
   "computingShade": "Calcolo l'ombra…",
-  "computingShadeDetail": "Sto ancora scaricando gli edifici della zona. L'ombra si aggiornerà tra pochi secondi.",
-  "sponsored": "Sponsorizzato"
+  "computingShadeDetail": "Sto ancora scaricando gli edifici della zona. L'ombra si aggiornerà tra pochi secondi."
 }

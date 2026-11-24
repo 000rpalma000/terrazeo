@@ -14,7 +14,16 @@
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
-		<key>CFBundleName</key>
+		<key>CFBundleLocalizations</key>
+	<array>
+		<string>es</string>
+		<string>en</string>
+		<string>ca</string>
+		<string>fr</string>
+		<string>it</string>
+		<string>de</string>
+	</array>
+	<key>CFBundleName</key>
 		<string>Terrazeo</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
@@ -63,7 +72,7 @@
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Se usa tu ubicación para mostrar las plazas cercanas y calcular el sol y el viento en ese punto.</string>
+		<string>Se usa tu ubicación para mostrarte los bares y terrazas cercanos y calcular si están al sol o a la sombra.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

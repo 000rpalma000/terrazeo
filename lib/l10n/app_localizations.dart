@@ -490,29 +490,11 @@ abstract class AppLocalizations {
   /// **'Aquí iría un anuncio real. Esto es solo para probar cada cuánto aparece.'**
   String get adBody;
 
-  /// No description provided for @removeAdsButton.
-  ///
-  /// In es, this message translates to:
-  /// **'Quitar anuncios · 1,99 €'**
-  String get removeAdsButton;
-
   /// No description provided for @close.
   ///
   /// In es, this message translates to:
   /// **'Cerrar'**
   String get close;
-
-  /// No description provided for @adsSectionTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Anuncios'**
-  String get adsSectionTitle;
-
-  /// No description provided for @adsAlreadyRemoved.
-  ///
-  /// In es, this message translates to:
-  /// **'Ya has quitado los anuncios. ¡Gracias!'**
-  String get adsAlreadyRemoved;
 
   /// No description provided for @headlineSunnyCold.
   ///
@@ -526,29 +508,11 @@ abstract class AppLocalizations {
   /// **'Hace fresco y sin sol aquí'**
   String get headlineChillyShade;
 
-  /// No description provided for @removeAdsPromptTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'¿Sin anuncios?'**
-  String get removeAdsPromptTitle;
-
-  /// No description provided for @removeAdsPromptBody.
-  ///
-  /// In es, this message translates to:
-  /// **'Quítalos para siempre con un único pago.'**
-  String get removeAdsPromptBody;
-
   /// No description provided for @notNow.
   ///
   /// In es, this message translates to:
   /// **'Ahora no'**
   String get notNow;
-
-  /// No description provided for @adsRemovedMockDone.
-  ///
-  /// In es, this message translates to:
-  /// **'Anuncios quitados (simulado).'**
-  String get adsRemovedMockDone;
 
   /// No description provided for @introTitle.
   ///
@@ -639,12 +603,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos.'**
   String get computingShadeDetail;
-
-  /// No description provided for @sponsored.
-  ///
-  /// In es, this message translates to:
-  /// **'Patrocinado'**
-  String get sponsored;
 }
 
 class _AppLocalizationsDelegate

@@ -16,7 +16,7 @@ class AboutScreen extends StatefulWidget {
 
 class _AboutScreenState extends State<AboutScreen> {
   // TODO: cambiar por el enlace de la tienda cuando la app esté publicada.
-  static const _urlCompartir = 'https://000rpalma000.github.io/terrazeo/privacy.html';
+  static const _urlCompartir = 'https://lat41lab.com/privacy.html';
 
   Future<void> _compartir() async {
     final l10n = AppLocalizations.of(context);

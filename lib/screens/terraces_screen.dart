@@ -18,7 +18,6 @@ import '../models/weather_conditions.dart';
 import '../services/weather_service.dart';
 import 'about_screen.dart';
 import '../services/locale_controller.dart';
-import '../services/destacados_service.dart';
 import '../services/location_service.dart';
 import '../services/osm_area_service.dart';
 import '../services/shadow_service.dart';
@@ -67,7 +66,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
   /// Locales con suscripción (vacío mientras no se active; ver
   /// docs/MONETIZACION.md).
-  Set<String> _destacados = const {};
 
   /// El mapa se movió durante una descarga: al acabar, se carga la vista nueva.
   bool _pendiente = false;
@@ -146,7 +144,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
     // Los locales empaquetados no necesitan red: se leen mientras se pide la
     // ubicación.
     final empaquetados = BaresEmpaquetados.cargar();
-    final destacados = const DestacadosService().cargar();
 
     final u = await _location.ubicacionActual();
     _centro = u.punto;
@@ -156,7 +153,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
     if (u.motivo != null) _avisarSinUbicacion(u.motivo!);
 
     _empaquetados = await empaquetados;
-    _destacados = await destacados;
     for (final b in _empaquetados.bares) {
       _baresBase[b.osmId] = b;
       _baresPorId[b.osmId] = b;
@@ -304,9 +300,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
   bool _contextoListo(LatLng p) => _teselas.containsKey(Tesela.de(p));
 
-  bool _esDestacado(PointReport r) =>
-      r.bar != null && _destacados.contains(r.bar!.osmId);
-
   // --- Recálculo local (sin red) ------------------------------------
 
   static const _maxTerrazas = 300;
@@ -364,10 +357,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
             ocaso: ocaso));
       }
       reports.sort((a, b) {
-        // Los patrocinados, primero; los que aún no tienen la sombra
-        // calculada, al final.
-        final da = _esDestacado(a), db = _esDestacado(b);
-        if (da != db) return da ? -1 : 1;
+        // Los que aún no tienen la sombra calculada, al final.
         if (a.provisional != b.provisional) return a.provisional ? 1 : -1;
         var c = a.comfort.level.index.compareTo(b.comfort.level.index);
         if (c != 0) return c;
@@ -742,10 +732,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
                   child: GestureDetector(
                     onTap: () => _seleccionarBar(r),
                     child: Icon(
-                      _esDestacado(r) ? Icons.stars : Icons.local_cafe,
-                      size: r.bar?.osmId == sel?.bar?.osmId || _esDestacado(r)
-                          ? 26
-                          : 20,
+                      Icons.local_cafe,
+                      size: r.bar?.osmId == sel?.bar?.osmId ? 26 : 20,
                       color: _colorReporte(r),
                     ),
                   ),
@@ -866,10 +854,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
                     radius: 6,
                     backgroundColor: _colorReporte(r),
                   ),
-                  title: Text(
-                      _esDestacado(r)
-                          ? '${r.bar!.nombre} · ${l10n.sponsored}'
-                          : r.bar!.nombre,
+                  title: Text(r.bar!.nombre,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
                   subtitle: Column(

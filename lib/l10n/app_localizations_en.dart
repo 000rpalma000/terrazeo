@@ -224,16 +224,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'A real ad would go here. This is just to test how often it shows up.';
 
   @override
-  String get removeAdsButton => 'Remove ads · €1.99';
-
-  @override
   String get close => 'Close';
-
-  @override
-  String get adsSectionTitle => 'Ads';
-
-  @override
-  String get adsAlreadyRemoved => 'You already removed ads. Thank you!';
 
   @override
   String get headlineSunnyCold => 'Lovely sun here';
@@ -242,17 +233,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get headlineChillyShade => 'Chilly and shaded here';
 
   @override
-  String get removeAdsPromptTitle => 'No ads?';
-
-  @override
-  String get removeAdsPromptBody =>
-      'Remove them for good with a one-time payment.';
-
-  @override
   String get notNow => 'Not now';
-
-  @override
-  String get adsRemovedMockDone => 'Ads removed (mock).';
 
   @override
   String get introTitle => 'Is it nice out there?';
@@ -304,7 +285,4 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get computingShadeDetail =>
       'Still downloading the buildings in this area. Shade will update in a few seconds.';
-
-  @override
-  String get sponsored => 'Sponsored';
 }

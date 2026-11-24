@@ -133,16 +133,10 @@
   "creditSun": "Posición del sol: algoritmo de Jean Meeus.",
   "adTitle": "Publicidad (prueba)",
   "adBody": "Aquí iría un anuncio real. Esto es solo para probar cada cuánto aparece.",
-  "removeAdsButton": "Quitar anuncios · 1,99 €",
   "close": "Cerrar",
-  "adsSectionTitle": "Anuncios",
-  "adsAlreadyRemoved": "Ya has quitado los anuncios. ¡Gracias!",
   "headlineSunnyCold": "Aquí da un sol muy agradable",
   "headlineChillyShade": "Hace fresco y sin sol aquí",
-  "removeAdsPromptTitle": "¿Sin anuncios?",
-  "removeAdsPromptBody": "Quítalos para siempre con un único pago.",
   "notNow": "Ahora no",
-  "adsRemovedMockDone": "Anuncios quitados (simulado).",
   "introTitle": "¿Se está bien ahí fuera?",
   "introBody1": "Toca un punto del mapa y mira qué tal se está ahí ahora mismo: sol o sombra, viento y temperatura. Tu bar preferido, tu plaza o un sitio cualquiera.",
   "introBody2": "Activa la capa de locales (datos de OpenStreetMap) para ver también qué tal se está en la terraza de cada bar.",
@@ -157,6 +151,5 @@
   "openSettings": "Ajustes",
   "retry": "Reintentar",
   "computingShade": "Calculando sombra…",
-  "computingShadeDetail": "Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos.",
-  "sponsored": "Patrocinado"
+  "computingShadeDetail": "Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos."
 }

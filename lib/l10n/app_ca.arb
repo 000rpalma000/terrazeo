@@ -71,16 +71,10 @@
   "creditSun": "Posició del sol: algorisme de Jean Meeus.",
   "adTitle": "Publicitat (prova)",
   "adBody": "Aquí aniria un anunci real. Això és només per provar cada quant apareix.",
-  "removeAdsButton": "Treu anuncis · 1,99 €",
   "close": "Tanca",
-  "adsSectionTitle": "Anuncis",
-  "adsAlreadyRemoved": "Ja has tret els anuncis. Gràcies!",
   "headlineSunnyCold": "Aquí fa un sol molt agradable",
   "headlineChillyShade": "Fa fresca i sense sol aquí",
-  "removeAdsPromptTitle": "Sense anuncis?",
-  "removeAdsPromptBody": "Treu-los per sempre amb un únic pagament.",
   "notNow": "Ara no",
-  "adsRemovedMockDone": "Anuncis trets (simulat).",
   "introTitle": "S'hi està bé, a fora?",
   "introBody1": "Toca un punt del mapa i mira què tal s'hi està ara mateix: sol o ombra, vent i temperatura. El teu bar preferit, la teva plaça o un lloc qualsevol.",
   "introBody2": "Activa la capa de locals (dades d'OpenStreetMap) per veure també què tal s'està a la terrassa de cada bar.",
@@ -95,6 +89,5 @@
   "openSettings": "Ajustos",
   "retry": "Torna-ho a provar",
   "computingShade": "Calculant l'ombra…",
-  "computingShadeDetail": "Encara estic baixant els edificis d'aquesta zona. L'ombra s'actualitzarà d'aquí a uns segons.",
-  "sponsored": "Patrocinat"
+  "computingShadeDetail": "Encara estic baixant els edificis d'aquesta zona. L'ombra s'actualitzarà d'aquí a uns segons."
 }

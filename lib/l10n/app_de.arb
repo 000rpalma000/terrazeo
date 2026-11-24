@@ -133,16 +133,10 @@
   "creditSun": "Sonnenstand: Algorithmus von Jean Meeus.",
   "adTitle": "Werbung (Test)",
   "adBody": "Hier käme eine echte Anzeige. Das dient nur zum Testen, wie oft sie erscheint.",
-  "removeAdsButton": "Werbung entfernen · 1,99 €",
   "close": "Schließen",
-  "adsSectionTitle": "Werbung",
-  "adsAlreadyRemoved": "Du hast die Werbung bereits entfernt. Danke!",
   "headlineSunnyCold": "Hier scheint die Sonne richtig angenehm",
   "headlineChillyShade": "Hier ist es frisch und schattig",
-  "removeAdsPromptTitle": "Ohne Werbung?",
-  "removeAdsPromptBody": "Entferne sie dauerhaft mit einer einmaligen Zahlung.",
   "notNow": "Jetzt nicht",
-  "adsRemovedMockDone": "Werbung entfernt (simuliert).",
   "introTitle": "Ist es draußen schön?",
   "introBody1": "Tippe auf einen Punkt der Karte und sieh, wie angenehm es dort gerade ist: Sonne oder Schatten, Wind und Temperatur. Deine Lieblingsbar, dein Platz oder irgendwo.",
   "introBody2": "Aktiviere die Lokal-Ebene (Daten von OpenStreetMap), um auch zu sehen, wie angenehm die Terrasse jeder Bar ist.",
@@ -157,6 +151,5 @@
   "openSettings": "Einstellungen",
   "retry": "Erneut versuchen",
   "computingShade": "Schatten wird berechnet…",
-  "computingShadeDetail": "Die Gebäude in dieser Gegend werden noch geladen. Der Schatten wird in wenigen Sekunden aktualisiert.",
-  "sponsored": "Gesponsert"
+  "computingShadeDetail": "Die Gebäude in dieser Gegend werden noch geladen. Der Schatten wird in wenigen Sekunden aktualisiert."
 }

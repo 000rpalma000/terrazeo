@@ -39,7 +39,11 @@ Antes de publicar con anuncios:
 
 ## 2. Locales destacados (suscripción para bares)
 
-Ya está programado y **apagado**: `lib/services/destacados_service.dart`.
+Está programado pero **fuera de `main`**: el código completo está en la rama
+**`con-destacados`** (`lib/services/destacados_service.dart`,
+`assets/data/destacados.json`, la cadena `sponsored` de los 6 idiomas y los
+cambios en `lib/screens/terraces_screen.dart`). Para recuperarlo, fusiona o
+copia esos cambios desde esa rama.
 
 Un local destacado:
 - sale el primero de la lista y en el mapa lleva una estrella más grande;

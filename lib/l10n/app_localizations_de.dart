@@ -225,17 +225,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Hier käme eine echte Anzeige. Das dient nur zum Testen, wie oft sie erscheint.';
 
   @override
-  String get removeAdsButton => 'Werbung entfernen · 1,99 €';
-
-  @override
   String get close => 'Schließen';
-
-  @override
-  String get adsSectionTitle => 'Werbung';
-
-  @override
-  String get adsAlreadyRemoved =>
-      'Du hast die Werbung bereits entfernt. Danke!';
 
   @override
   String get headlineSunnyCold => 'Hier scheint die Sonne richtig angenehm';
@@ -244,17 +234,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get headlineChillyShade => 'Hier ist es frisch und schattig';
 
   @override
-  String get removeAdsPromptTitle => 'Ohne Werbung?';
-
-  @override
-  String get removeAdsPromptBody =>
-      'Entferne sie dauerhaft mit einer einmaligen Zahlung.';
-
-  @override
   String get notNow => 'Jetzt nicht';
-
-  @override
-  String get adsRemovedMockDone => 'Werbung entfernt (simuliert).';
 
   @override
   String get introTitle => 'Ist es draußen schön?';
@@ -307,7 +287,4 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get computingShadeDetail =>
       'Die Gebäude in dieser Gegend werden noch geladen. Der Schatten wird in wenigen Sekunden aktualisiert.';
-
-  @override
-  String get sponsored => 'Gesponsert';
 }
