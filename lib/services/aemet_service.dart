@@ -215,6 +215,27 @@ class AemetService {
     return observacionActual(idema: e.codigo);
   }
 
+  /// "Ahora" + predicción en [p] en una pasada: la observación y la
+  /// predicción se piden **a la vez**, y la predicción **una sola vez** (el
+  /// "ahora" toma de ella la nubosidad). Cada parte puede fallar por su lado.
+  Future<({WeatherConditions? ahora, List<WeatherConditions> prevision})>
+      condicionesYPrevisionEnPunto(LatLng p) async {
+    final obsF = observacionActualEnPunto(p)
+        .then<WeatherConditions?>((v) => v, onError: (_) => null);
+    final prevF = previsionHorariaEnPunto(p).then<List<WeatherConditions>>(
+        (v) => v,
+        onError: (_) => const <WeatherConditions>[]);
+    final obs = await obsF;
+    final prevision = await prevF;
+    final horaActual = _masCercana(prevision, DateTime.now());
+    final ahora = obs == null
+        ? horaActual
+        : horaActual == null
+            ? obs
+            : obs.copyWith(sky: horaActual.sky);
+    return (ahora: ahora, prevision: prevision);
+  }
+
   /// Igual que [condicionesActuales] pero eligiendo estación y municipio por
   /// cercanía a [p].
   Future<WeatherConditions?> condicionesActualesEnPunto(LatLng p) async {
@@ -269,7 +290,23 @@ class AemetService {
     return (codigo: mejor['c'] as String, distanciaM: mejorD);
   }
 
-  Future<List<Map<String, dynamic>>> _municipiosMin() => _maestroConCache(
+  // Los maestros se cargan una vez por sesión (antes se releían del disco,
+  // 360 KB de JSON, en cada consulta). Si fallan, se reintenta la próxima vez.
+  Future<List<Map<String, dynamic>>>? _municipiosF, _estacionesF;
+  Future<List<Map<String, dynamic>>> _municipiosMin() =>
+      _municipiosF ??= _municipiosMin0()
+        ..catchError((Object _) {
+          _municipiosF = null;
+          return const <Map<String, dynamic>>[];
+        });
+  Future<List<Map<String, dynamic>>> _estacionesMin() =>
+      _estacionesF ??= _estacionesMin0()
+        ..catchError((Object _) {
+          _estacionesF = null;
+          return const <Map<String, dynamic>>[];
+        });
+
+  Future<List<Map<String, dynamic>>> _municipiosMin0() => _maestroConCache(
         'municipios.json',
         '/maestro/municipios',
         (e) {
@@ -286,7 +323,7 @@ class AemetService {
         },
       );
 
-  Future<List<Map<String, dynamic>>> _estacionesMin() => _maestroConCache(
+  Future<List<Map<String, dynamic>>> _estacionesMin0() => _maestroConCache(
         'estaciones.json',
         '/valores/climatologicos/inventarioestaciones/todasestaciones',
         (e) {

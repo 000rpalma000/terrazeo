@@ -175,10 +175,12 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
   Future<void> _cargarTiempo() async {
     try {
-      final t = await _tiempo.condicionesYPrevision(_centro);
-      _ahora = t.ahora;
-      _prevision = t.prevision;
-      if (mounted) _recalcularVisible();
+      // Puede llegar dos veces: Open-Meteo enseguida y AEMET después.
+      await for (final t in _tiempo.condicionesYPrevisionEnVivo(_centro)) {
+        _ahora = t.ahora;
+        _prevision = t.prevision;
+        if (mounted) _recalcularVisible();
+      }
     } catch (_) {
       // Sin tiempo el veredicto se basa solo en sol/sombra.
     }
