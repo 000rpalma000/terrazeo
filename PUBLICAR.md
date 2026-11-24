@@ -7,7 +7,7 @@ Sirve para las dos apps:
 | Repo | `terrazeo` | `a-la-sombra` |
 | ID (iOS y Android) | `com.lat41lab.terrazeo` | `com.alasombra.app` |
 | Versión | `pubspec.yaml` → `version:` | ídem |
-| Privacidad | https://lat41lab.com/privacy.html (hoy también https://000rpalma000.github.io/terrazeo/privacy.html) | https://000rpalma000.github.io/a-la-sombra/privacy.html |
+| Privacidad | https://lat41lab.com/privacy.html | https://lat41lab.com/privacy.html |
 
 **Coste:** Apple 99 $/año (cuenta individual); Google 25 $ una sola vez. Con
 una cuenta de cada publicas todas las apps que quieras.
