@@ -37,6 +37,11 @@ class TerracesScreen extends StatefulWidget {
 
 class _TerracesScreenState extends State<TerracesScreen> {
   final _map = MapController();
+
+  /// Se completa cuando el mapa se ha dibujado por primera vez. Antes de eso
+  /// el [MapController] lanza si se usa (pasaba cuando la ubicación respondía
+  /// al instante, p. ej. con el permiso denegado).
+  final _mapaListo = Completer<void>();
   final _location = const LocationService();
   final _osm = OsmAreaService();
   final _sun = const SunService();
@@ -149,6 +154,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
     _centro = u.punto;
     // Solo se marca "estás aquí" si la posición es real, no el respaldo.
     _miUbicacion = u.esReal ? u.punto : null;
+    await _mapaListo.future;
+    if (!mounted) return;
     _map.move(_centro, 16);
     if (u.motivo != null) _avisarSinUbicacion(u.motivo!);
 
@@ -699,6 +706,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
     return FlutterMap(
       mapController: _map,
       options: MapOptions(
+        onMapReady: () {
+          if (!_mapaListo.isCompleted) _mapaListo.complete();
+        },
         initialCenter: _centro,
         initialZoom: 16,
         minZoom: 11,
