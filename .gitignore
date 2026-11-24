@@ -56,3 +56,7 @@ dart_defines.json
 *.jks
 *.keystore
 /android/build/
+
+# Firebase (no se usa, pero que nunca se suba)
+GoogleService-Info.plist
+google-services.json

@@ -19,7 +19,7 @@ class MapConfig {
       String.fromEnvironment('MAP_STYLE', defaultValue: 'dataviz');
 
   /// Identificador de la app para la cabecera User-Agent de las teselas.
-  static const userAgent = 'com.terrazeo.app';
+  static const userAgent = 'com.lat41lab.terrazeo';
 
   static bool get hayClave =>
       _maptilerKey.isNotEmpty || _stadiaKey.isNotEmpty;

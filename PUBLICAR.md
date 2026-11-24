@@ -5,7 +5,7 @@ Sirve para las dos apps:
 | | Terrazeo | A la sombra |
 |---|---|---|
 | Repo | `terrazeo` | `a-la-sombra` |
-| ID (iOS y Android) | `com.terrazeo.app` | `com.alasombra.app` |
+| ID (iOS y Android) | `com.lat41lab.terrazeo` | `com.alasombra.app` |
 | Versión | `pubspec.yaml` → `version:` | ídem |
 | Privacidad | https://000rpalma000.github.io/terrazeo/privacy.html | https://000rpalma000.github.io/a-la-sombra/privacy.html |
 
@@ -43,7 +43,7 @@ una cuenta de cada publicas todas las apps que quieras.
 1. <https://appstoreconnect.apple.com> → Apps → **+** → Nueva app.
    - Plataforma iOS, nombre **Terrazeo** (tiene que estar libre en toda la
      tienda; si no lo está, p. ej. "Terrazeo – terrazas al sol").
-   - Bundle ID: `com.terrazeo.app` (se crea solo al compilar con firma
+   - Bundle ID: `com.lat41lab.terrazeo` (se crea solo al compilar con firma
      automática; si no aparece, créalo en developer.apple.com → Identifiers).
    - SKU: cualquier texto, p. ej. `terrazeo`.
 2. **Información de la app:** categoría (Viajes o Estilo de vida), URL de
