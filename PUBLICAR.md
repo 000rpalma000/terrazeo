@@ -2,10 +2,10 @@
 
 Sirve para las dos apps:
 
-| | Terrazeo | A la sombra |
+| | Terrazeo | Alombra |
 |---|---|---|
 | Repo | `terrazeo` | `a-la-sombra` |
-| ID (iOS y Android) | `com.lat41lab.terrazeo` | `com.alasombra.app` |
+| ID (iOS y Android) | `com.lat41lab.terrazeo` | `com.lat41lab.alombra` |
 | Versión | `pubspec.yaml` → `version:` | ídem |
 | Privacidad | https://lat41lab.com/privacy.html | https://lat41lab.com/privacy.html |
 
