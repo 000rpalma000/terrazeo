@@ -227,14 +227,27 @@ class _TerracesScreenState extends State<TerracesScreen> {
     _descargando = true;
     setState(() => _cargandoZona = true);
     try {
-      for (var k = 0; k < faltan.length; k += _teselasPorPeticion) {
-        final lote = faltan.sublist(
-            k, math.min(k + _teselasPorPeticion, faltan.length));
-        _teselas.addAll(await _osm.cargarTeselas(lote));
+      // Lo guardado en disco se pinta ya, sin esperar a la red.
+      final guardadas = await _osm.leerGuardadas(faltan);
+      if (guardadas.isNotEmpty) {
+        _teselas.addAll(guardadas);
+        _rehacerContexto(centro);
+        if (mounted) _recalcularVisible();
+      }
+      final porBajar = [
+        for (final t in faltan)
+          if (!guardadas.containsKey(t)) t,
+      ];
+      // Si el usuario se mueve, se corta: primero lo nuevo.
+      for (var k = 0;
+          k < porBajar.length && !_pendiente;
+          k += _teselasPorPeticion) {
+        final lote = porBajar.sublist(
+            k, math.min(k + _teselasPorPeticion, porBajar.length));
+        _teselas.addAll(await _osm.descargarTeselas(lote));
         _rehacerContexto(centro);
         _error = false;
         if (mounted) _recalcularVisible();
-        if (_pendiente) break; // el usuario se ha movido: primero lo nuevo
       }
     } catch (e) {
       debugPrint('[osm] no se pudieron cargar las teselas: $e');

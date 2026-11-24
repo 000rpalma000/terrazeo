@@ -177,29 +177,72 @@ class OsmAreaService {
       'footway|path|pedestrian|living_street|steps|residential|service|'
       'unclassified|tertiary|secondary|track|road|cycleway';
 
-  /// Carga [teselas] (caché en disco o Overpass). Devuelve las que han
-  /// llegado; si la red falla, las que faltan no aparecen en el resultado.
-  /// Lanza solo si no se pudo cargar ninguna.
+  /// Carga [teselas]: primero las guardadas en disco y después, de una vez,
+  /// las que falten desde Overpass. Si la red falla, las que faltan no
+  /// aparecen en el resultado. Lanza solo si no se pudo cargar ninguna.
   Future<Map<Tesela, ZonaOsm>> cargarTeselas(List<Tesela> teselas) async {
-    final res = <Tesela, ZonaOsm>{};
-    final faltan = <Tesela>[];
-    final dir = await _cacheDir();
-
-    for (final t in teselas) {
-      final f = dir == null ? null : _fichero(dir, t);
-      if (f != null && await f.exists()) {
-        final edad = DateTime.now().difference(await f.lastModified());
-        if (edad < _ttlCache) {
-          try {
-            res[t] = await Isolate.run(
-                () => _parsearElementos(jsonDecode(f.readAsStringSync())));
-            continue;
-          } catch (_) {}
-        }
-      }
-      faltan.add(t);
-    }
+    final res = await leerGuardadas(teselas);
+    final faltan = [
+      for (final t in teselas)
+        if (!res.containsKey(t)) t,
+    ];
     if (faltan.isEmpty) return res;
+    try {
+      res.addAll(await descargarTeselas(faltan));
+    } catch (_) {
+      if (res.isEmpty) rethrow;
+    }
+    return res;
+  }
+
+  /// Las [teselas] que hay guardadas en disco y no han caducado. No usa la
+  /// red: es rápido y sirve para pintar lo conocido mientras llega el resto.
+  /// Todas se procesan en un mismo isolate (arrancar uno por tesela cuesta
+  /// más de lo que se gana).
+  Future<Map<Tesela, ZonaOsm>> leerGuardadas(List<Tesela> teselas) async {
+    final dir = await _cacheDir();
+    if (dir == null) return {};
+    final vigentes = <Tesela>[];
+    for (final t in teselas) {
+      final f = _fichero(dir, t);
+      try {
+        if (!await f.exists()) continue;
+        final edad = DateTime.now().difference(await f.lastModified());
+        if (edad < _ttlCache) vigentes.add(t);
+      } catch (_) {}
+    }
+    if (vigentes.isEmpty) return {};
+    final zonas =
+        await _leerTeselas([for (final t in vigentes) _fichero(dir, t).path]);
+    return {
+      for (var k = 0; k < vigentes.length; k++)
+        if (zonas[k] != null) vigentes[k]: zonas[k]!,
+    };
+  }
+
+  /// Lee y procesa teselas guardadas en otro isolate (`null` si alguna está
+  /// dañada). Es estática a propósito: así el cierre que viaja al isolate solo
+  /// lleva las rutas (un método de instancia arrastraría el servicio y su
+  /// cliente HTTP, que no se pueden enviar).
+  static Future<List<ZonaOsm?>> _leerTeselas(List<String> rutas) =>
+      Isolate.run(() => [
+            for (final ruta in rutas)
+              () {
+                try {
+                  return _parsearElementos(
+                      jsonDecode(File(ruta).readAsStringSync()));
+                } catch (_) {
+                  return null;
+                }
+              }(),
+          ]);
+
+  /// Descarga [faltan] de Overpass en una sola petición (la caja que las
+  /// envuelve) y las guarda en disco. Lanza si Overpass falla.
+  Future<Map<Tesela, ZonaOsm>> descargarTeselas(List<Tesela> faltan) async {
+    final res = <Tesela, ZonaOsm>{};
+    if (faltan.isEmpty) return res;
+    final dir = await _cacheDir();
 
     // Una sola petición para la caja que envuelve todas las que faltan.
     final s = faltan.map((t) => t.sur).reduce(math.min);
@@ -228,8 +271,7 @@ out center geom tags;
           '(${body.length ~/ 1024} KB)');
     } catch (e) {
       debugPrint('[osm] Overpass falló tras ${cron.elapsedMilliseconds} ms: $e');
-      if (res.isEmpty) rethrow;
-      return res;
+      rethrow;
     }
 
     // Reparto por teselas + parseo fuera del hilo de la interfaz.
