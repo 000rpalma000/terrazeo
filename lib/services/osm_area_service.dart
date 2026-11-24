@@ -121,6 +121,14 @@ class BaresEmpaquetados {
       p.latitude <= bbox[2] &&
       p.longitude <= bbox[3];
 
+  /// La caja [s, w, n, e] cae entera dentro de lo empaquetado.
+  bool cubreZona(double s, double w, double n, double e) =>
+      bbox.length == 4 &&
+      s >= bbox[0] &&
+      w >= bbox[1] &&
+      n <= bbox[2] &&
+      e <= bbox[3];
+
   /// La región entera cae dentro de lo empaquetado: no hace falta bajarla.
   bool cubreRegion(Region r) =>
       bbox.length == 4 &&
@@ -314,7 +322,16 @@ out center geom tags;
         '(${r.sur},${r.oeste},${r.norte},${r.este});'
         'out center tags;';
     final cron = Stopwatch()..start();
-    final body = await _overpass(query, limite: const Duration(seconds: 150));
+    // Cliente propio para poder cortarla (ver [cancelarRegion]).
+    final cliente = _clienteRegion = http.Client();
+    final String body;
+    try {
+      body = await _overpass(query,
+          limite: const Duration(seconds: 150), cliente: cliente);
+    } finally {
+      cliente.close();
+      if (identical(_clienteRegion, cliente)) _clienteRegion = null;
+    }
     final filas = await Isolate.run(() => filasDeOverpass(body));
     debugPrint('[osm] ciudad ${r.clave}: ${filas.length} locales en '
         '${cron.elapsedMilliseconds} ms');
@@ -477,8 +494,22 @@ out center geom tags;
 
   /// Pide [query] al primer servidor; si tarda más de [_escalonado], también
   /// al siguiente, y así. Gana la primera respuesta válida.
+  http.Client? _clienteRegion;
+
+  /// Corta la descarga de los locales de una región, si hay una en marcha,
+  /// para dejar Overpass libre a los edificios. Esa descarga falla y se
+  /// reintenta más adelante.
+  void cancelarRegion() {
+    final c = _clienteRegion;
+    if (c == null) return;
+    debugPrint('[osm] corto la descarga de la ciudad: hacen falta edificios');
+    _clienteRegion = null;
+    c.close();
+  }
+
   Future<String> _overpass(String query,
-      {Duration limite = const Duration(seconds: 60)}) {
+      {Duration limite = const Duration(seconds: 60), http.Client? cliente}) {
+    final cli = cliente ?? _client;
     final completer = Completer<String>();
     final errores = <String>[];
     var lanzados = 0, terminados = 0;
@@ -502,7 +533,7 @@ out center geom tags;
         }
       }
 
-      _client
+      cli
           .post(
             Uri.parse(endpoint),
             headers: {

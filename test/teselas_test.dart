@@ -51,6 +51,21 @@ void main() {
     }
   });
 
+  test('Los locales empaquetados cubren el centro de Barcelona (sin bajar la ciudad)',
+      () {
+    final d = jsonDecode(File('assets/data/bares.json').readAsStringSync())
+        as Map<String, dynamic>;
+    final bbox = [for (final v in d['bbox'] as List) (v as num).toDouble()];
+    final emp = BaresEmpaquetados(const [], bbox, '');
+    // Gòtic con ~1 km de margen: cubierto.
+    expect(emp.cubreZona(41.366, 2.160, 41.400, 2.191), isTrue);
+    // Madrid: no.
+    expect(emp.cubreZona(40.40, -3.72, 40.43, -3.69), isFalse);
+    // La región de 11 km del centro se sale por el sur (41,30 < 41,317):
+    // por eso no basta con mirar la región entera.
+    expect(emp.cubreRegion(Region.de(const LatLng(41.383, 2.1755))), isFalse);
+  });
+
   test('repartir asigna ways sin center (out geom) por su caja', () {
     final t = Tesela.de(LatLng(41.3870, 2.1700));
     final body = jsonEncode({

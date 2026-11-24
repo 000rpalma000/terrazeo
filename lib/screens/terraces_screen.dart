@@ -211,7 +211,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
     // Lo que ya hay en memoria se pinta ya; luego llega lo que falte.
     _recalcularVisible();
-    _asegurarCiudad(centro);
 
     // Margen de ~110 m: las sombras de edificios justo fuera de la vista
     // también cuentan.
@@ -222,7 +221,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
         .toList()
       ..sort((a, b) => Geo.distancia(centro, a.centro)
           .compareTo(Geo.distancia(centro, b.centro)));
-    if (faltan.isEmpty) return;
+    if (faltan.isEmpty) {
+      _asegurarCiudad(centro, bounds);
+      return;
+    }
 
     _descargando = true;
     setState(() => _cargandoZona = true);
@@ -238,6 +240,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
         for (final t in faltan)
           if (!guardadas.containsKey(t)) t,
       ];
+      // Los edificios tienen prioridad: nunca a la vez que la ciudad.
+      if (porBajar.isNotEmpty) _osm.cancelarRegion();
       // Si el usuario se mueve, se corta: primero lo nuevo.
       for (var k = 0;
           k < porBajar.length && !_pendiente;
@@ -259,6 +263,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
     if (_pendiente && mounted) {
       _pendiente = false;
       unawaited(_refrescarPorVista());
+    } else if (mounted) {
+      // Con los edificios ya pedidos, Overpass queda libre para la ciudad.
+      _asegurarCiudad(centro, bounds);
     }
   }
 
@@ -290,7 +297,16 @@ class _TerracesScreenState extends State<TerracesScreen> {
   /// Descarga en segundo plano todos los locales de la ciudad (región de
   /// ~11 km) en la que está [p], una sola vez: queda guardada 30 días y a
   /// partir de ahí sus locales salen al instante, como los de Barcelona.
-  void _asegurarCiudad(LatLng p) {
+  ///
+  /// No hace nada si los locales empaquetados ya cubren la [vista] con
+  /// ~1 km de margen (Barcelona), ni mientras se descargan edificios.
+  void _asegurarCiudad(LatLng p, LatLngBounds vista) {
+    const margen = 0.01; // ~1 km
+    if (_descargando ||
+        _empaquetados.cubreZona(vista.south - margen, vista.west - margen,
+            vista.north + margen, vista.east + margen)) {
+      return;
+    }
     final r = Region.de(p);
     if (_regionesListas.contains(r) ||
         _regionesEnCurso.contains(r) ||
