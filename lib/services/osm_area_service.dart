@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/bar.dart';
 import '../models/building_height.dart';
 import '../models/geo.dart';
+import '../models/indice_espacial.dart';
 import '../models/shadow_map.dart';
 
 /// Todo lo que hace falta de OSM en una zona: bares, edificios y espacio
@@ -384,27 +385,29 @@ out center geom tags;
     List<List<LatLng>> lineas, {
     double maxM = 60,
   }) {
-    if (!edificios.any((b) => Geo.dentroDePoligono(p, b.ring))) return p;
+    return ajustarConIndices(
+        p, IndiceEdificios(edificios), IndiceSegmentos(lineas),
+        maxM: maxM);
+  }
 
-    final tol = maxM / 111320.0; // ~grados
+  /// Igual que [ajustarAEspacioPublico] pero con los edificios y las vías ya
+  /// indexados: solo mira lo que hay en las celdas de alrededor de [p], en vez
+  /// de recorrerlo todo por cada punto.
+  static LatLng? ajustarConIndices(
+    LatLng p,
+    IndiceEdificios edificios,
+    IndiceSegmentos vias, {
+    double maxM = 60,
+  }) {
+    if (!edificios.dentroDeAlguno(p)) return p;
     LatLng? mejor;
     var mejorD = maxM;
-    for (final linea in lineas) {
-      for (var i = 0; i < linea.length - 1; i++) {
-        final a = linea[i], b = linea[i + 1];
-        // descarte rápido por caja del segmento ampliada
-        if (p.latitude < math.min(a.latitude, b.latitude) - tol ||
-            p.latitude > math.max(a.latitude, b.latitude) + tol ||
-            p.longitude < math.min(a.longitude, b.longitude) - tol ||
-            p.longitude > math.max(a.longitude, b.longitude) + tol) {
-          continue;
-        }
-        final c = Geo.puntoMasCercanoEnSegmento(p, a, b);
-        final d = Geo.distancia(p, c);
-        if (d < mejorD && !edificios.any((e) => Geo.dentroDePoligono(c, e.ring))) {
-          mejorD = d;
-          mejor = c;
-        }
+    for (final (a, b) in vias.cerca(p, maxM)) {
+      final c = Geo.puntoMasCercanoEnSegmento(p, a, b);
+      final d = Geo.distancia(p, c);
+      if (d < mejorD && !edificios.dentroDeAlguno(c)) {
+        mejorD = d;
+        mejor = c;
       }
     }
     return mejor;

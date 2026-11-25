@@ -1,6 +1,7 @@
 import 'package:latlong2/latlong.dart';
 
 import '../models/geo.dart';
+import '../models/indice_espacial.dart';
 import '../models/shadow_map.dart';
 
 /// Estima cuánto **resguardan del viento** los edificios cercanos a un punto:
@@ -52,22 +53,22 @@ class WindShelterService {
     double? vientoDesdeDeg,
   ) {
     if (vientoDesdeDeg == null || edificios.isEmpty) return 0;
+    return abrigoConIndice(punto, IndiceEdificios(edificios), vientoDesdeDeg);
+  }
 
-    // Cajas envolventes de los edificios que podrían entrar en el alcance
-    // (se calculan una vez y sirven de descarte rápido en el marchado).
-    final cerca = <_EdificioBbox>[];
-    for (final e in edificios) {
-      if (e.heightM < alturaMinimaM || e.ring.length < 3) continue;
-      if (Geo.distancia(punto, e.ring.first) > alcanceM + 150) continue;
-      cerca.add(_EdificioBbox.of(e));
-    }
-    if (cerca.isEmpty) return 0;
-
+  /// Igual que [abrigo] con los edificios ya indexados: cada paso del rayo
+  /// mira solo los edificios de su celda.
+  double abrigoConIndice(
+    LatLng punto,
+    IndiceEdificios edificios,
+    double? vientoDesdeDeg,
+  ) {
+    if (vientoDesdeDeg == null || edificios.n == 0) return 0;
     var suma = 0.0;
     var pesos = 0.0;
     for (final rayo in _rayos) {
       final rumbo = (vientoDesdeDeg + rayo.desvioDeg) % 360;
-      suma += rayo.peso * _abrigoEnRayo(punto, rumbo, cerca);
+      suma += rayo.peso * _abrigoEnRayo(punto, rumbo, edificios);
       pesos += rayo.peso;
     }
     return (suma / pesos).clamp(0.0, 1.0);
@@ -76,16 +77,14 @@ class WindShelterService {
   double _abrigoEnRayo(
     LatLng origen,
     double rumbo,
-    List<_EdificioBbox> edificios,
+    IndiceEdificios edificios,
   ) {
     for (var d = pasoM; d <= alcanceM; d += pasoM) {
       final s = Geo.destino(origen, rumbo, d);
-      for (final e in edificios) {
-        if (!e.contieneBbox(s)) continue;
-        if (Geo.dentroDePoligono(s, e.edificio.ring)) {
-          final alcanceEstela = alcanceEstelaEnAlturas * e.edificio.heightM;
-          return (1 - d / alcanceEstela).clamp(0.0, 1.0);
-        }
+      final e = edificios.edificioEn(s, alturaMinM: alturaMinimaM);
+      if (e != null) {
+        final alcanceEstela = alcanceEstelaEnAlturas * e.heightM;
+        return (1 - d / alcanceEstela).clamp(0.0, 1.0);
       }
     }
     return 0;
@@ -94,30 +93,4 @@ class WindShelterService {
   /// Viento que se sentiría en el punto tras aplicar el resguardo.
   static double vientoLocal(double vientoKmh, double abrigo) =>
       vientoKmh * (1 - abrigo.clamp(0.0, 1.0) * reduccionMaxima);
-}
-
-class _EdificioBbox {
-  final BuildingFootprint edificio;
-  final double minLat, maxLat, minLon, maxLon;
-
-  _EdificioBbox._(
-      this.edificio, this.minLat, this.maxLat, this.minLon, this.maxLon);
-
-  factory _EdificioBbox.of(BuildingFootprint e) {
-    var minLat = e.ring.first.latitude, maxLat = minLat;
-    var minLon = e.ring.first.longitude, maxLon = minLon;
-    for (final p in e.ring) {
-      if (p.latitude < minLat) minLat = p.latitude;
-      if (p.latitude > maxLat) maxLat = p.latitude;
-      if (p.longitude < minLon) minLon = p.longitude;
-      if (p.longitude > maxLon) maxLon = p.longitude;
-    }
-    return _EdificioBbox._(e, minLat, maxLat, minLon, maxLon);
-  }
-
-  bool contieneBbox(LatLng p) =>
-      p.latitude >= minLat &&
-      p.latitude <= maxLat &&
-      p.longitude >= minLon &&
-      p.longitude <= maxLon;
 }

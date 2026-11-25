@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import '../l10n/app_localizations.dart';
 import '../models/bar.dart';
 import '../models/comfort.dart';
 import '../models/geo.dart';
+import '../models/indice_espacial.dart';
 import '../models/point_report.dart';
 import '../models/shadow_map.dart';
 import '../models/sun_status.dart';
@@ -45,7 +47,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
   final _location = const LocationService();
   final _osm = OsmAreaService();
   final _sun = const SunService();
-  final _shadow = const ShadowService();
   final _viento = const WindShelterService();
   final _tiempo = WeatherService();
 
@@ -65,8 +66,15 @@ class _TerracesScreenState extends State<TerracesScreen> {
   final Map<String, Bar> _baresBase = {};
   final Set<Region> _regionesListas = {};
   final Set<Region> _regionesEnCurso = {};
-  List<BuildingFootprint> _edificios = const [];
-  List<List<LatLng>> _lineas = const [];
+  IndiceEdificios _indiceEdif = IndiceEdificios.vacio;
+  IndiceSegmentos _indiceVias = IndiceSegmentos.vacio;
+
+  /// Sombras de cada tesela para el tramo de 5 min [_tramoSombras]. Se
+  /// calculan fuera del hilo de la interfaz y valen mientras no cambien el
+  /// tramo ni la tesela (sus edificios).
+  final Map<Tesela, ShadowMap> _sombras = {};
+  DateTime? _tramoSombras;
+  bool _calculandoSombras = false;
   bool _descargando = false;
 
   /// Locales con suscripción (vacío mientras no se active; ver
@@ -294,8 +302,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
         ..clear()
         ..addAll(_baresBase);
     }
-    _edificios = [for (final z in _teselas.values) ...z.edificios];
-    _lineas = [for (final z in _teselas.values) ...z.lineasPublicas];
+    _indiceEdif = IndiceEdificios(
+        [for (final z in _teselas.values) ...z.edificios]);
+    _indiceVias = IndiceSegmentos(
+        [for (final z in _teselas.values) ...z.lineasPublicas]);
+    _sombras.removeWhere((t, _) => !_teselas.containsKey(t));
     for (final z in _teselas.values) {
       for (final b in z.bares) {
         _baresPorId[b.osmId] = b;
@@ -336,7 +347,84 @@ class _TerracesScreenState extends State<TerracesScreen> {
     }).whenComplete(() => _regionesEnCurso.remove(r));
   }
 
-  bool _contextoListo(LatLng p) => _teselas.containsKey(Tesela.de(p));
+  /// La tesela de [p] tiene edificios y sus sombras ya calculadas.
+  bool _contextoListo(LatLng p) {
+    final t = Tesela.de(p);
+    return _teselas.containsKey(t) && _sombras.containsKey(t);
+  }
+
+  // --- Sombras por tesela -------------------------------------------
+
+  /// Tramo de 5 minutos de [h]: mientras no cambie, las sombras valen.
+  static DateTime _tramo(DateTime h) =>
+      DateTime(h.year, h.month, h.day, h.hour, h.minute - h.minute % 5);
+
+  /// Pone en marcha el cálculo de las sombras que falten para la vista y un
+  /// anillo de teselas alrededor (sus sombras pueden entrar en la vista).
+  void _asegurarSombras(LatLngBounds vista, DateTime hora) {
+    final tramo = _tramo(hora);
+    if (tramo != _tramoSombras) {
+      _sombras.clear();
+      _tramoSombras = tramo;
+    }
+    if (_calculandoSombras) return;
+    final faltan = Tesela.cubriendo(
+            vista.south - Tesela.tamLat,
+            vista.west - Tesela.tamLon,
+            vista.north + Tesela.tamLat,
+            vista.east + Tesela.tamLon)
+        .where((t) => _teselas.containsKey(t) && !_sombras.containsKey(t))
+        .toList();
+    if (faltan.isNotEmpty) unawaited(_calcularSombras(faltan, tramo));
+  }
+
+  Future<void> _calcularSombras(List<Tesela> ts, DateTime tramo) async {
+    _calculandoSombras = true;
+    try {
+      // A mitad del tramo: el error máximo es de 2,5 min de sol.
+      final mapas = await _sombrasEnIsolate(
+          [for (final t in ts) _teselas[t]!.edificios],
+          ts.first.centro,
+          tramo.add(const Duration(seconds: 150)));
+      _calculandoSombras = false;
+      if (tramo == _tramoSombras) {
+        for (var k = 0; k < ts.length; k++) {
+          if (_teselas.containsKey(ts[k])) _sombras[ts[k]] = mapas[k];
+        }
+      }
+      if (mounted) _recalcularVisible();
+    } catch (e) {
+      // Sin recalcular: evita repetir el error en bucle.
+      debugPrint('[sombras] no se pudieron calcular: $e');
+    } finally {
+      _calculandoSombras = false;
+    }
+  }
+
+  /// Estática a propósito: el cierre que viaja al isolate solo lleva los
+  /// edificios (un método de instancia arrastraría toda la pantalla).
+  static Future<List<ShadowMap>> _sombrasEnIsolate(
+          List<List<BuildingFootprint>> porTesela,
+          LatLng ref,
+          DateTime instante) =>
+      Isolate.run(() => [
+            for (final eds in porTesela)
+              const ShadowService().construir(eds, ref, instante),
+          ]);
+
+  /// ¿Cae [p] en la sombra de algún edificio? Mira su tesela y las 8 vecinas:
+  /// una sombra no pasa de 400 m y una tesela mide ~550 m.
+  bool _enSombra(LatLng p) {
+    final t = Tesela.de(p);
+    for (var di = -1; di <= 1; di++) {
+      for (var dj = -1; dj <= 1; dj++) {
+        if (_sombras[Tesela(t.i + di, t.j + dj)]?.enSombra(p) ?? false) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   // --- Recálculo local (sin red) ------------------------------------
 
@@ -359,14 +447,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
     }
     final hora = _horaSel ?? DateTime.now();
 
-    // Contexto local (barato: distancia del primer vértice).
-    final edifCerca = _edificios
-        .where((e) => Geo.distancia(centroV, e.ring.first) < 700)
-        .toList();
-    final lineasCerca = _lineas
-        .where((l) => Geo.distancia(centroV, l.first) < 700)
-        .toList();
-    final shadow = _shadow.construir(edifCerca, centroV, hora);
+    // Las sombras que falten se calculan aparte y, al llegar, se recalcula.
+    _asegurarSombras(bounds, hora);
 
     // El sol es casi el mismo en toda la vista: se calcula una sola vez.
     final pos = _sun.posicion(centroV, hora);
@@ -388,9 +470,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
             bar: b,
             provisional: !_contextoListo(b.punto),
             hora: hora,
-            shadow: shadow,
-            edificios: edifCerca,
-            lineas: lineasCerca,
             pos: pos,
             ocaso: ocaso));
       }
@@ -420,9 +499,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
         _seleccion = _evaluar(sel.punto,
             provisional: !_contextoListo(sel.punto),
             hora: hora,
-            shadow: shadow,
-            edificios: edifCerca,
-            lineas: lineasCerca,
             pos: _sun.posicion(sel.punto, hora),
             ocaso: _sun.ocaso(sel.punto, hora));
       }
@@ -434,20 +510,17 @@ class _TerracesScreenState extends State<TerracesScreen> {
     Bar? bar,
     bool provisional = false,
     required DateTime hora,
-    required ShadowMap shadow,
-    required List<BuildingFootprint> edificios,
-    required List<List<LatLng>> lineas,
     required SunPosition pos,
     required DateTime ocaso,
   }) {
     final ajustado0 =
-        OsmAreaService.ajustarAEspacioPublico(punto0, edificios, lineas);
+        OsmAreaService.ajustarConIndices(punto0, _indiceEdif, _indiceVias);
     final punto = ajustado0 ?? punto0;
     final ajustado = ajustado0 != null && !identical(ajustado0, punto0);
 
     // El sol se calcula una vez por recálculo (misma vista ≈ misma posición).
     final esDia = pos.elevationDeg > 0;
-    final tapado = esDia && shadow.enSombra(punto);
+    final tapado = esDia && _enSombra(punto);
 
     final w = _tiempoPara(hora);
     final cloud = w?.sky.cloudFraction;
@@ -462,7 +535,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
     final vientoReg = w?.windSpeedKmh;
     final abrigo = vientoReg == null
         ? 0.0
-        : _viento.abrigo(punto, edificios, w?.windDirectionDeg?.toDouble());
+        : _viento.abrigoConIndice(
+            punto, _indiceEdif, w?.windDirectionDeg?.toDouble());
     final vientoLoc = vientoReg == null
         ? null
         : WindShelterService.vientoLocal(vientoReg, abrigo);
@@ -532,17 +606,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
   void _tapMapa(LatLng p) {
     final hora = _horaSel ?? DateTime.now();
-    final edifCerca =
-        _edificios.where((e) => Geo.distancia(p, e.ring.first) < 400).toList();
-    final lineasCerca =
-        _lineas.where((l) => Geo.distancia(p, l.first) < 400).toList();
-    final shadow = _shadow.construir(edifCerca, p, hora);
     setState(() => _seleccion = _evaluar(p,
         provisional: !_contextoListo(p),
         hora: hora,
-        shadow: shadow,
-        edificios: edifCerca,
-        lineas: lineasCerca,
         pos: _sun.posicion(p, hora),
         ocaso: _sun.ocaso(p, hora)));
   }
