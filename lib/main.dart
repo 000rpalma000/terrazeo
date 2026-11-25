@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'l10n/app_localizations.dart';
 import 'screens/terraces_screen.dart';
@@ -7,11 +6,6 @@ import 'services/locale_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // Sin .env la app arranca igual; AEMET avisará de que falta la clave.
-  }
   final localeController = LocaleController();
   await localeController.cargar();
   runApp(PlacesBarcelonaApp(localeController: localeController));

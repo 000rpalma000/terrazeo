@@ -23,18 +23,22 @@ class OpenMeteoService {
   static const _campos =
       'temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover';
 
+  /// La consulta a Open-Meteo para [p]. Las coordenadas van **redondeadas a
+  /// 2 decimales** (~1 km): para el tiempo basta, y así no se envía la
+  /// ubicación exacta.
+  static Uri consulta(LatLng p) => Uri.parse(_base).replace(queryParameters: {
+        'latitude': p.latitude.toStringAsFixed(2),
+        'longitude': p.longitude.toStringAsFixed(2),
+        'current': _campos,
+        'hourly': _campos,
+        'wind_speed_unit': 'kmh',
+        'forecast_days': '3',
+        'timezone': 'UTC',
+      });
+
   Future<Map<String, dynamic>> _fetch(LatLng p) async {
-    final uri = Uri.parse(_base).replace(queryParameters: {
-      'latitude': p.latitude.toStringAsFixed(4),
-      'longitude': p.longitude.toStringAsFixed(4),
-      'current': _campos,
-      'hourly': _campos,
-      'wind_speed_unit': 'kmh',
-      'forecast_days': '3',
-      'timezone': 'UTC',
-    });
     final resp =
-        await _client.get(uri).timeout(const Duration(seconds: 20));
+        await _client.get(consulta(p)).timeout(const Duration(seconds: 20));
     if (resp.statusCode != 200) {
       throw Exception('Open-Meteo respondió ${resp.statusCode}');
     }

@@ -1,0 +1,13 @@
+{
+  "name": "lat41lab-tiempo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "wrangler": "4.168.0"
+  }
+}

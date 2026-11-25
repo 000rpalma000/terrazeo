@@ -1,0 +1,16 @@
+# Intermediario de AEMET (ver README.md). La clave NO va aquí: es un
+# secreto de Cloudflare (`npx wrangler secret put AEMET_API_KEY`).
+name = "lat41lab-tiempo"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = false
+preview_urls = false
+
+# Crea el registro DNS de api.lat41lab.com al desplegar. Solo /tiempo/*
+# responde; el resto del subdominio da 404.
+routes = [
+  { pattern = "api.lat41lab.com", custom_domain = true },
+]
+
+[observability]
+enabled = true

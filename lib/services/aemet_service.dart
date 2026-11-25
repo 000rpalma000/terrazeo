@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,20 +8,24 @@ import 'package:path_provider/path_provider.dart';
 import '../models/geo.dart';
 import '../models/weather_conditions.dart';
 
-/// Cliente de la API OpenData de AEMET.
+/// Datos de la API OpenData de AEMET, a través del intermediario de Lat41 Lab
+/// (`api.lat41lab.com/tiempo`, en `cloudflare/tiempo/`).
 ///
-/// La API funciona en dos pasos: la primera petición devuelve un JSON con una
-/// URL en el campo `datos`; hay que descargar esa URL para obtener el contenido
-/// real (codificado en ISO-8859-1).
+/// La app **no lleva la clave de AEMET**: la pone el intermediario, que además
+/// hace los dos pasos de la API (metadatos → URL de `datos`), pasa el
+/// resultado a UTF-8 y lo guarda en caché para todos los usuarios. Las rutas
+/// son las mismas que las de AEMET. Si el intermediario falla, el
+/// [WeatherService] usa Open-Meteo.
 class AemetService {
-  AemetService({http.Client? client, String? apiKey})
+  AemetService({http.Client? client, String? base})
       : _client = client ?? http.Client(),
-        _apiKey = apiKey ?? dotenv.env['AEMET_API_KEY'] ?? '';
+        _base = base ?? _baseDefinida;
 
   final http.Client _client;
-  final String _apiKey;
+  final String _base;
 
-  static const _base = 'https://opendata.aemet.es/opendata/api';
+  static const _baseDefinida = String.fromEnvironment('TIEMPO_URL',
+      defaultValue: 'https://api.lat41lab.com/tiempo');
 
   /// Código INE del municipio (Barcelona = 08019).
   static const municipioBarcelona = '08019';
@@ -31,8 +34,6 @@ class AemetService {
   /// 0076  = Barcelona Aeropuerto (El Prat) — referencia habitual de ciudad.
   /// 0201D = Barcelona, Observatori Fabra (en la montaña, más ventoso).
   static const estacionBarcelona = '0076';
-
-  bool get tieneApiKey => _apiKey.isNotEmpty;
 
   // ---------------------------------------------------------------------------
   // Predicción horaria (para "planificar más tarde")
@@ -411,38 +412,19 @@ class AemetService {
   // Infraestructura
   // ---------------------------------------------------------------------------
 
+  /// GET de [path] en el intermediario, que ya devuelve el JSON final de
+  /// AEMET en UTF-8. Lanza si no responde (y entonces se usa Open-Meteo).
   Future<dynamic> _fetch(String path) async {
-    if (_apiKey.isEmpty) {
-      throw Exception('Falta AEMET_API_KEY en .env');
-    }
-
-    final metaResp = await _client.get(
+    // Los maestros, si no están en la caché del intermediario, pueden tardar
+    // en salir de AEMET; mientras tanto la app ya enseña Open-Meteo.
+    final r = await _client.get(
       Uri.parse('$_base$path'),
-      headers: {'api_key': _apiKey, 'Accept': 'application/json'},
-    ).timeout(const Duration(seconds: 20));
-
-    if (metaResp.statusCode == 429) {
-      throw Exception('AEMET: demasiadas peticiones, inténtalo en un momento');
+      headers: {'Accept': 'application/json'},
+    ).timeout(const Duration(seconds: 50));
+    if (r.statusCode != 200) {
+      throw Exception('AEMET (intermediario) respondió ${r.statusCode}');
     }
-    if (metaResp.statusCode != 200) {
-      throw Exception('AEMET respondió ${metaResp.statusCode}');
-    }
-
-    final meta = jsonDecode(metaResp.body) as Map<String, dynamic>;
-    final datosUrl = meta['datos']?.toString();
-    if (datosUrl == null) {
-      throw Exception('AEMET: ${meta['descripcion'] ?? 'sin datos'}');
-    }
-
-    final datosResp = await _client
-        .get(Uri.parse(datosUrl))
-        .timeout(const Duration(seconds: 20));
-    if (datosResp.statusCode != 200) {
-      throw Exception('AEMET (datos) respondió ${datosResp.statusCode}');
-    }
-
-    // Los ficheros de datos de AEMET vienen en ISO-8859-1.
-    return jsonDecode(latin1.decode(datosResp.bodyBytes));
+    return jsonDecode(utf8.decode(r.bodyBytes));
   }
 
   static Map<String, Map<String, dynamic>> _porPeriodo(dynamic lista) {

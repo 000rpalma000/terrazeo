@@ -16,7 +16,7 @@ WeatherConditions _w(double t) => WeatherConditions(
 
 /// AEMET falso: tarda [retraso] y devuelve [res]. Cuenta las llamadas.
 class _Aemet extends AemetService {
-  _Aemet(this.retraso, this.res) : super(apiKey: 'x');
+  _Aemet(this.retraso, this.res) : super();
   final Duration retraso;
   final _T res;
   int llamadas = 0;
@@ -86,5 +86,12 @@ void main() {
     final emitidos = await s.condicionesYPrevisionEnVivo(paris).toList();
     expect(emitidos.single.ahora!.temperatureC, 10);
     expect(aemet.llamadas, 0);
+  });
+
+  test('Open-Meteo recibe la zona (2 decimales), no la ubicación exacta', () {
+    final q = OpenMeteoService.consulta(const LatLng(41.383712, 2.175549))
+        .queryParameters;
+    expect(q['latitude'], '41.38');
+    expect(q['longitude'], '2.18');
   });
 }

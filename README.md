@@ -27,11 +27,20 @@ lib/
 
 ## Configuración
 
-Crea un fichero `.env` en la raíz (ya está en `.gitignore` y declarado como asset):
+La app **no lleva ninguna clave de AEMET**: el tiempo de AEMET llega por el
+intermediario `https://api.lat41lab.com/tiempo` (Worker de Cloudflare en
+[`cloudflare/tiempo/`](cloudflare/tiempo/README.md)), que guarda la clave como
+secreto de Cloudflare. Si no responde, la app usa Open-Meteo.
+
+Para la clave del mapa, `dart_defines.json` en la raíz (en `.gitignore`):
 
 ```
-AEMET_API_KEY=tu_clave_de_https://opendata.aemet.es/
+{"MAPTILER_KEY": "…"}
 ```
+
+y `flutter run --dart-define-from-file=dart_defines.json`. Con
+`--dart-define=TIEMPO_URL=http://127.0.0.1:8787/tiempo` se usa el Worker en
+local (`npm run dev` en `cloudflare/tiempo/`).
 
 ## Notas
 
