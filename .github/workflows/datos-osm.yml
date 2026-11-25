@@ -1,0 +1,55 @@
+# Regenera los datos propios de OpenStreetMap (Barcelona) y los sube a R2.
+# Ver tool/datos/README.md.
+name: Datos OSM
+
+on:
+  schedule:
+    - cron: "0 4 2 * *" # día 2 de cada mes, 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar pyosmium
+        run: pip install -r tool/datos/requirements.txt
+
+      - name: Descargar el extracto de Cataluña (Geofabrik)
+        run: |
+          base=https://download.geofabrik.de/europe/spain/cataluna
+          curl -sSfL -A "lat41lab-datos (GitHub Actions)" -o cataluna.osm.pbf "$base/cataluna-latest.osm.pbf"
+          esperado=$(curl -sSfL "$base/cataluna-latest.osm.pbf.md5" | awk '{print $1}')
+          echo "$esperado  cataluna.osm.pbf" | md5sum -c -
+
+      - name: Generar cuadrículas
+        run: python tool/datos/generar_teselas.py cataluna.osm.pbf salida
+
+      - name: Subir a R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          # R2 no acepta las sumas de comprobación nuevas por defecto del AWS CLI.
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          BUCKET: ${{ vars.R2_BUCKET }}
+        run: |
+          # Primero las cuadrículas y al final el manifiesto: así nunca apunta
+          # a una cuadrícula que aún no está subida.
+          aws s3 sync salida/osm/v1 "s3://$BUCKET/osm/v1" --endpoint-url "$ENDPOINT" \
+            --exclude manifest.json --content-type application/json \
+            --cache-control "public, max-age=86400" --no-progress
+          aws s3 cp salida/osm/v1/manifest.json "s3://$BUCKET/osm/v1/manifest.json" \
+            --endpoint-url "$ENDPOINT" --content-type application/json \
+            --cache-control "public, max-age=3600"

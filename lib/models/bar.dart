@@ -40,7 +40,7 @@ class Bar {
   }
 
   /// Fila del archivo empaquetado `assets/data/bares.json`
-  /// (`[osmId, lat, lon, nombre, amenity, terraza]`, ver tool/generar_bares.py).
+  /// (`[osmId, lat, lon, nombre, amenity, terraza]`, ver tool/datos/generar_teselas.py).
   factory Bar.fromFila(List<dynamic> f) {
     final amenity = (f[4] as String?) ?? 'bar';
     final nombre = (f[3] as String?) ?? '';

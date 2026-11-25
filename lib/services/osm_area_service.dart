@@ -15,6 +15,7 @@ import '../models/building_height.dart';
 import '../models/geo.dart';
 import '../models/indice_espacial.dart';
 import '../models/shadow_map.dart';
+import 'datos_lat41.dart';
 import 'overpass.dart';
 
 /// Todo lo que hace falta de OSM en una zona: bares, edificios y espacio
@@ -106,7 +107,7 @@ class Region {
 }
 
 /// Locales empaquetados en la app (assets/data/bares.json, generado con
-/// tool/generar_bares.py). Se pintan al instante, sin red.
+/// tool/datos/generar_teselas.py). Se pintan al instante, sin red.
 class BaresEmpaquetados {
   final List<Bar> bares;
 
@@ -164,6 +165,7 @@ class OsmAreaService {
 
   final http.Client _client;
   late final _op = Overpass(_client, userAgent: _userAgent);
+  late final _datos = DatosLat41(_client, directorio: _cacheDir);
 
   static const _userAgent = 'terrazeo/2.0 (Flutter)';
 
@@ -239,9 +241,78 @@ class OsmAreaService {
               }(),
           ]);
 
+  /// Descarga [faltan] y las guarda en disco: las de las zonas cubiertas
+  /// por los datos propios (Barcelona), de `data.lat41lab.com`; el resto, o
+  /// si eso falla, de Overpass. Lanza si no llega ninguna.
+  Future<Map<Tesela, ZonaOsm>> descargarTeselas(List<Tesela> faltan) async {
+    if (faltan.isEmpty) return {};
+    final m = await _datos.manifiesto();
+    final propias = [
+      if (m != null)
+        for (final t in faltan)
+          if (m.cubre(t.i, t.j)) t,
+    ];
+    if (propias.isEmpty) return _descargarOverpass(faltan);
+    final res = await _descargarPropias(propias, m!);
+    final resto = [
+      for (final t in faltan)
+        if (!res.containsKey(t)) t,
+    ];
+    if (resto.isEmpty) return res;
+    try {
+      res.addAll(await _descargarOverpass(resto));
+    } catch (_) {
+      if (res.isEmpty) rethrow;
+    }
+    return res;
+  }
+
+  /// Vías que cuentan como espacio público (las mismas que se piden a
+  /// Overpass).
+  static final _viasPublicasSet = _viasPublicas.split('|').toSet();
+
+  /// Cuadrículas de los datos propios, en paralelo. Las que fallan no
+  /// aparecen en el resultado (irán por Overpass).
+  Future<Map<Tesela, ZonaOsm>> _descargarPropias(
+      List<Tesela> ts, Manifiesto m) async {
+    final dir = await _cacheDir();
+    final res = <Tesela, ZonaOsm>{};
+    final cron = Stopwatch()..start();
+    await Future.wait([
+      for (final t in ts)
+        () async {
+          try {
+            final cuerpo = m.vacia(t.i, t.j) ? null : await _datos.cuadricula(t.clave);
+            final (json, zona) = await _convertirEnIsolate(cuerpo);
+            res[t] = zona;
+            if (dir != null) {
+              try {
+                await _fichero(dir, t).writeAsString(json);
+              } catch (_) {}
+            }
+          } catch (e) {
+            debugPrint('[lat41] ${t.clave}: $e');
+          }
+        }(),
+    ]);
+    debugPrint('[lat41] ${res.length}/${ts.length} cuadrículas en '
+        '${cron.elapsedMilliseconds} ms');
+    return res;
+  }
+
+  /// Convierte una cuadrícula propia (o una vacía, con `null`) a elementos
+  /// de Overpass, la procesa y devuelve también el JSON para la caché.
+  static Future<(String, ZonaOsm)> _convertirEnIsolate(String? cuerpo) =>
+      Isolate.run(() {
+        final els = cuerpo == null
+            ? const <Map<String, dynamic>>[]
+            : DatosLat41.aElementos(cuerpo, vias: _viasPublicasSet);
+        return (jsonEncode(els), _parsearElementos(els));
+      });
+
   /// Descarga [faltan] de Overpass en una sola petición (la caja que las
   /// envuelve) y las guarda en disco. Lanza si Overpass falla.
-  Future<Map<Tesela, ZonaOsm>> descargarTeselas(List<Tesela> faltan) async {
+  Future<Map<Tesela, ZonaOsm>> _descargarOverpass(List<Tesela> faltan) async {
     final res = <Tesela, ZonaOsm>{};
     if (faltan.isEmpty) return res;
     final dir = await _cacheDir();

@@ -122,8 +122,9 @@ de subida, se puede reponer.
 - [ ] `dart_defines.json` con la clave de MapTiler de **producción** (con el
       plan gratuito de MapTiler hay un límite mensual de teselas: vigílalo
       en su panel).
-- [ ] `python3 tool/generar_bares.py` para tener los locales al día (solo
-      Terrazeo).
+- [ ] Locales empaquetados al día (solo Terrazeo): con el extracto de
+      Geofabrik, `python3 tool/datos/generar_teselas.py cataluna-latest.osm.pbf
+      /tmp/salida --bares assets/data/bares.json` (ver `tool/datos/README.md`).
 - [ ] Subir el número de build en `pubspec.yaml`.
 - [ ] `flutter test` y prueba rápida en un móvil real.
 - [ ] Capturas actualizadas si ha cambiado la interfaz.
