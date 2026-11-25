@@ -210,10 +210,14 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get creditMap =>
-      'Mappa ed edifici: © contributori di OpenStreetMap (ODbL).';
+      'Edifici, strade e locali: © contributori di OpenStreetMap (ODbL), preparati da Lat41 Lab da estratti Geofabrik.';
 
   @override
-  String get creditTiles => 'Riquadri della mappa: OpenStreetMap.';
+  String get creditTiles =>
+      'Mappa di base: © MapTiler · © contributori di OpenStreetMap.';
+
+  @override
+  String get osmAttribution => '© contributori di OpenStreetMap';
 
   @override
   String get creditWeather => 'Dati meteo: elaborati a partire dai dati AEMET.';

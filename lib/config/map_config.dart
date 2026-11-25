@@ -37,10 +37,11 @@ class MapConfig {
     return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
   }
 
-  /// Texto de atribución que debe mostrarse sobre el mapa.
-  static String get atribucion {
-    if (_maptilerKey.isNotEmpty) return '© MapTiler © OpenStreetMap';
-    if (_stadiaKey.isNotEmpty) return '© Stadia Maps © OpenStreetMap';
-    return '© OpenStreetMap';
+  /// Proveedor de las teselas del mapa base, para la atribución (vacío si
+  /// son las de OpenStreetMap, que ya se citan aparte).
+  static String get atribucionTeselas {
+    if (_maptilerKey.isNotEmpty) return '© MapTiler';
+    if (_stadiaKey.isNotEmpty) return '© Stadia Maps';
+    return '';
   }
 }

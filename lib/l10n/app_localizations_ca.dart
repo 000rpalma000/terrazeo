@@ -209,10 +209,14 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get creditMap =>
-      'Mapa i edificis: © col·laboradors d’OpenStreetMap (ODbL).';
+      'Edificis, carrers i locals: © col·laboradors d’OpenStreetMap (ODbL), preparats per Lat41 Lab amb extractes de Geofabrik.';
 
   @override
-  String get creditTiles => 'Tessel·les del mapa: OpenStreetMap.';
+  String get creditTiles =>
+      'Mapa base: © MapTiler · © col·laboradors d’OpenStreetMap.';
+
+  @override
+  String get osmAttribution => '© col·laboradors d’OpenStreetMap';
 
   @override
   String get creditWeather =>

@@ -479,7 +479,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
             ocaso: ocaso));
       }
       reports.sort((a, b) {
-        // Los que aún no tienen la sombra calculada, al final.
+        // Los aún no tienen la sombra calculada, al final.
         if (a.provisional != b.provisional) return a.provisional ? 1 : -1;
         var c = a.comfort.level.index.compareTo(b.comfort.level.index);
         if (c != 0) return c;
@@ -886,8 +886,23 @@ class _TerracesScreenState extends State<TerracesScreen> {
               ),
           ],
         ),
-        RichAttributionWidget(
-          attributions: [TextSourceAttribution(MapConfig.atribucion)],
+        // Siempre visible, como pide OpenStreetMap (y el proveedor del mapa).
+        Align(
+          alignment: Alignment.bottomRight,
+          child: IgnorePointer(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              color: const Color(0xB3FFFFFF),
+              child: Text(
+                [
+                  if (MapConfig.atribucionTeselas.isNotEmpty)
+                    MapConfig.atribucionTeselas,
+                  AppLocalizations.of(context).osmAttribution,
+                ].join(' · '),
+                style: const TextStyle(fontSize: 10, color: Color(0xDD000000)),
+              ),
+            ),
+          ),
         ),
       ],
     );

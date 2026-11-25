@@ -463,14 +463,20 @@ abstract class AppLocalizations {
   /// No description provided for @creditMap.
   ///
   /// In es, this message translates to:
-  /// **'Mapa y edificios: © colaboradores de OpenStreetMap (ODbL).'**
+  /// **'Edificios, calles y locales: © colaboradores de OpenStreetMap (ODbL), preparados por Lat41 Lab con extractos de Geofabrik.'**
   String get creditMap;
 
   /// No description provided for @creditTiles.
   ///
   /// In es, this message translates to:
-  /// **'Teselas del mapa: OpenStreetMap.'**
+  /// **'Mapa base: © MapTiler · © colaboradores de OpenStreetMap.'**
   String get creditTiles;
+
+  /// No description provided for @osmAttribution.
+  ///
+  /// In es, this message translates to:
+  /// **'© colaboradores de OpenStreetMap'**
+  String get osmAttribution;
 
   /// No description provided for @creditWeather.
   ///
