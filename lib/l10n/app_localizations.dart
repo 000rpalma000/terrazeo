@@ -178,6 +178,12 @@ abstract class AppLocalizations {
   /// **'No se han podido descargar los datos. Revisa la conexión e inténtalo de nuevo.'**
   String get networkError;
 
+  /// No description provided for @buildingsUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'No se han podido cargar los edificios de esta zona. Vuelve a intentarlo en un rato.'**
+  String get buildingsUnavailable;
+
   /// No description provided for @noAemet.
   ///
   /// In es, this message translates to:

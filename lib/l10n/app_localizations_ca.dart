@@ -47,6 +47,10 @@ class AppLocalizationsCa extends AppLocalizations {
       'No s\'han pogut baixar les dades. Comprova la connexió i torna-ho a provar.';
 
   @override
+  String get buildingsUnavailable =>
+      'No s\'han pogut carregar els edificis d\'aquesta zona. Torna-ho a provar d\'aquí a una estona.';
+
+  @override
   String get noAemet => 'Sense dades de l\'AEMET ara mateix.';
 
   @override

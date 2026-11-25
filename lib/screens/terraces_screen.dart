@@ -105,7 +105,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
   static const _diagMaxVisibleM = 2200.0;
 
   /// Teselas por petición a Overpass (las más cercanas al centro primero).
-  static const _teselasPorPeticion = 6;
+  static const _teselasPorPeticion = 4;
+
+  /// La primera petición, más pequeña: lo más cercano llega antes.
+  static const _teselasPrimerLote = 2;
 
   /// Teselas en memoria como máximo (~11 km²); se descartan las más lejanas.
   static const _maxTeselas = 36;
@@ -239,6 +242,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
       ..sort((a, b) => Geo.distancia(centro, a.centro)
           .compareTo(Geo.distancia(centro, b.centro)));
     if (faltan.isEmpty) {
+      if (_error) setState(() => _error = false); // no falta nada
       _asegurarCiudad(centro, bounds);
       return;
     }
@@ -259,12 +263,13 @@ class _TerracesScreenState extends State<TerracesScreen> {
       ];
       // Los edificios tienen prioridad: nunca a la vez que la ciudad.
       if (porBajar.isNotEmpty) _osm.cancelarRegion();
+      if (porBajar.isEmpty) _error = false;
       // Si el usuario se mueve, se corta: primero lo nuevo.
-      for (var k = 0;
-          k < porBajar.length && !_pendiente;
-          k += _teselasPorPeticion) {
-        final lote = porBajar.sublist(
-            k, math.min(k + _teselasPorPeticion, porBajar.length));
+      var k = 0;
+      while (k < porBajar.length && !_pendiente) {
+        final n = k == 0 ? _teselasPrimerLote : _teselasPorPeticion;
+        final lote = porBajar.sublist(k, math.min(k + n, porBajar.length));
+        k += lote.length;
         _teselas.addAll(await _osm.descargarTeselas(lote));
         _rehacerContexto(centro);
         _error = false;
@@ -717,6 +722,32 @@ class _TerracesScreenState extends State<TerracesScreen> {
     );
   }
 
+  Widget _avisoSinEdificios(AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: cs.errorContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.cloud_off, size: 18, color: cs.onErrorContainer),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(l10n.buildingsUnavailable,
+                style: TextStyle(color: cs.onErrorContainer, fontSize: 13)),
+          ),
+          TextButton(
+            onPressed: _cargandoZona ? null : () => unawaited(_refrescarPorVista()),
+            child: Text(l10n.retry),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _avisarSinUbicacion(MotivoSinUbicacion motivo) {
     if (!mounted) return;
     final l10n = AppLocalizations.of(context);
@@ -927,6 +958,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
           child: SizedBox(height: 34, child: _chipsHora(l10n)),
         ),
         const SizedBox(height: 4),
+        // Overpass no ha respondido: se ve lo que hay (caché y locales en
+        // gris) y un aviso fijo, que no se pierde detrás de otra ventana.
+        if (_error && !_demasiadoLejos && _terrazas.isNotEmpty)
+          _avisoSinEdificios(l10n),
         if (_demasiadoLejos)
           Padding(
             padding: const EdgeInsets.all(16),

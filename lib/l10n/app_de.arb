@@ -12,6 +12,7 @@
   "movedToOpenSpace": "Berechnet am nächstgelegenen offenen Platz zum Lokal.",
   "terraceNotConfirmed": "Terrasse auf der Karte nicht bestätigt.",
   "networkError": "Daten konnten nicht geladen werden. Prüfe die Verbindung und versuche es erneut.",
+  "buildingsUnavailable": "Die Gebäude dieser Gegend konnten nicht geladen werden. Versuche es in einer Weile noch einmal.",
   "noAemet": "Zurzeit keine AEMET-Daten.",
   "now": "Jetzt",
   "comfortVeryNice": "Sehr angenehm",

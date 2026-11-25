@@ -15,6 +15,7 @@ import '../models/building_height.dart';
 import '../models/geo.dart';
 import '../models/indice_espacial.dart';
 import '../models/shadow_map.dart';
+import 'overpass.dart';
 
 /// Todo lo que hace falta de OSM en una zona: bares, edificios y espacio
 /// público (calles, plazas, parques).
@@ -162,20 +163,12 @@ class OsmAreaService {
   OsmAreaService({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
+  late final _op = Overpass(_client, userAgent: _userAgent);
 
-  static const _endpoints = [
-    'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter',
-    'https://overpass.private.coffee/api/interpreter',
-  ];
   static const _userAgent = 'terrazeo/2.0 (Flutter)';
 
   /// Edificios y calles cambian poco: un mes de caché.
   static const Duration _ttlCache = Duration(days: 30);
-
-  /// Si el servidor no ha contestado en este tiempo, se prueba también el
-  /// siguiente (sin cancelar el primero). Evita mandar siempre 3 peticiones.
-  static const Duration _escalonado = Duration(seconds: 6);
 
   /// Versión del formato de caché: subirla invalida las cachés viejas.
   static const _versionCache = 'v2';
@@ -260,7 +253,7 @@ class OsmAreaService {
     final e = faltan.map((t) => t.este).reduce(math.max);
     final bb = '$s,$w,$n,$e';
     final query = '''
-[out:json][timeout:60];
+[out:json][timeout:25];
 (
   nwr["amenity"~"^($amenityBares)\$"]($bb);
   way["building"]($bb);
@@ -269,7 +262,7 @@ class OsmAreaService {
   way["place"="square"]($bb);
   way["highway"="pedestrian"]["area"="yes"]($bb);
 );
-out center geom tags;
+out center geom tags qt;
 ''';
 
     final String body;
@@ -318,7 +311,7 @@ out center geom tags;
       }
     }
 
-    final query = '[out:json][timeout:120];'
+    final query = '[out:json][timeout:60];'
         'nwr["amenity"~"^($amenityBares)\$"]'
         '(${r.sur},${r.oeste},${r.norte},${r.este});'
         'out center tags;';
@@ -327,8 +320,12 @@ out center geom tags;
     final cliente = _clienteRegion = http.Client();
     final String body;
     try {
+      // En segundo plano y se corta si hacen falta edificios: puede esperar
+      // más que las cuadrículas.
       body = await _overpass(query,
-          limite: const Duration(seconds: 150), cliente: cliente);
+          limite: const Duration(seconds: 60),
+          total: const Duration(seconds: 120),
+          cliente: cliente);
     } finally {
       cliente.close();
       if (identical(_clienteRegion, cliente)) _clienteRegion = null;
@@ -493,10 +490,8 @@ out center geom tags;
     return ZonaOsm(bares: bares, edificios: edificios, lineasPublicas: lineas);
   }
 
-  // --- Overpass (escalonado) + caché en disco -----------------------------
+  // --- Overpass + caché en disco -----------------------------------------
 
-  /// Pide [query] al primer servidor; si tarda más de [_escalonado], también
-  /// al siguiente, y así. Gana la primera respuesta válida.
   http.Client? _clienteRegion;
 
   /// Corta la descarga de los locales de una región, si hay una en marcha,
@@ -510,59 +505,10 @@ out center geom tags;
     c.close();
   }
 
+  /// Consulta Overpass con reintentos (ver [Overpass]).
   Future<String> _overpass(String query,
-      {Duration limite = const Duration(seconds: 60), http.Client? cliente}) {
-    final cli = cliente ?? _client;
-    final completer = Completer<String>();
-    final errores = <String>[];
-    var lanzados = 0, terminados = 0;
-    Timer? siguiente;
-
-    void lanzar() {
-      if (completer.isCompleted || lanzados >= _endpoints.length) return;
-      final endpoint = _endpoints[lanzados++];
-      siguiente?.cancel();
-      siguiente = Timer(_escalonado, lanzar);
-
-      void fallo(String msg) {
-        errores.add(msg);
-        terminados++;
-        if (completer.isCompleted) return;
-        if (lanzados < _endpoints.length) {
-          lanzar(); // no esperes al temporizador si este ya ha fallado
-        } else if (terminados == lanzados) {
-          completer.completeError(
-              Exception('Overpass no disponible: ${errores.join(' | ')}'));
-        }
-      }
-
-      cli
-          .post(
-            Uri.parse(endpoint),
-            headers: {
-              'User-Agent': _userAgent,
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: {'data': query},
-          )
-          .timeout(limite)
-          .then((resp) {
-        if (completer.isCompleted) return;
-        if (resp.statusCode == 200) {
-          terminados++;
-          siguiente?.cancel();
-          completer.complete(utf8.decode(resp.bodyBytes));
-        } else {
-          fallo('HTTP ${resp.statusCode} $endpoint');
-        }
-      }).catchError((Object e) {
-        fallo('$e ($endpoint)');
-      });
-    }
-
-    lanzar();
-    return completer.future.whenComplete(() => siguiente?.cancel());
-  }
+          {Duration? limite, Duration? total, http.Client? cliente}) =>
+      _op.consultar(query, cliente: cliente, limite: limite, total: total);
 
   Directory? _dirCache;
 

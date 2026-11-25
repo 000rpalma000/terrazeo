@@ -47,6 +47,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t download data. Check your connection and try again.';
 
   @override
+  String get buildingsUnavailable =>
+      'Couldn\'t load the buildings for this area. Please try again in a while.';
+
+  @override
   String get noAemet => 'No AEMET data right now.';
 
   @override

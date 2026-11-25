@@ -48,6 +48,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Impossibile scaricare i dati. Controlla la connessione e riprova.';
 
   @override
+  String get buildingsUnavailable =>
+      'Non è stato possibile caricare gli edifici di questa zona. Riprova tra un po\'.';
+
+  @override
   String get noAemet => 'Nessun dato AEMET al momento.';
 
   @override

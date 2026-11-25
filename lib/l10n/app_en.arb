@@ -12,6 +12,7 @@
   "movedToOpenSpace": "Calculated at the open space closest to the venue.",
   "terraceNotConfirmed": "Terrace not confirmed on the map.",
   "networkError": "Couldn't download data. Check your connection and try again.",
+  "buildingsUnavailable": "Couldn't load the buildings for this area. Please try again in a while.",
   "noAemet": "No AEMET data right now.",
   "now": "Now",
   "comfortVeryNice": "Very nice",
