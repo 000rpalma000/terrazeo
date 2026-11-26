@@ -334,4 +334,62 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get couldNotOpen => 'Konnte nicht geöffnet werden.';
+
+  @override
+  String get recommended => 'Empfohlen';
+
+  @override
+  String get onlyRecommended => 'Nur empfohlene';
+
+  @override
+  String get noRecommendedHere =>
+      'In dieser Gegend gibt es noch keine empfohlenen Lokale. Schalte den Filter aus, um alle Terrassen zu sehen.';
+
+  @override
+  String get recommendedDisclosure =>
+      'Empfohlenes Lokal: Es zahlt dafür, hervorgehoben zu werden. Das ändert nichts an der Berechnung von Sonne, Schatten und Wind.';
+
+  @override
+  String get ownerTitle => 'Ist das dein Lokal?';
+
+  @override
+  String get ownerRecommend => 'Als Empfohlen erscheinen';
+
+  @override
+  String get ownerRecommendDetail =>
+      '5 € im Monat inkl. MwSt. Bezahlt wird auf der Website von Stripe, jederzeit kündbar.';
+
+  @override
+  String get ownerClaim => 'Kostenlos beanspruchen';
+
+  @override
+  String get ownerClaimDetail =>
+      'Schreib uns, um zu bestätigen, dass es dir gehört, und die Angaben zu korrigieren.';
+
+  @override
+  String ownerClaimSubject(String name) {
+    return 'Ich beanspruche mein Lokal auf Terrazeo: $name';
+  }
+
+  @override
+  String ownerClaimBody(String name, String url) {
+    return 'Lokal: $name\n$url\n\nKontaktname und Telefon:\n';
+  }
+
+  @override
+  String get haveVenue => 'Du hast ein Lokal? Erscheine auf Terrazeo';
+
+  @override
+  String get availableCities => 'Verfügbare Städte';
+
+  @override
+  String get availableCitiesIntro =>
+      'In diesen Städten haben wir eigene Straßen- und Gebäudedaten, die Schatten erscheinen sofort. Anderswo funktioniert die App auch, kann aber langsamer sein.';
+
+  @override
+  String get outsideCoverage =>
+      'Hier haben wir noch keine eigenen Daten: Gebäude laden eventuell langsam oder gar nicht. Am besten funktioniert die App in den verfügbaren Städten.';
+
+  @override
+  String get seeCities => 'Städte ansehen';
 }

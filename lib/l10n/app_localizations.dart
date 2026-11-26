@@ -681,6 +681,102 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se ha podido abrir.'**
   String get couldNotOpen;
+
+  /// No description provided for @recommended.
+  ///
+  /// In es, this message translates to:
+  /// **'Recomendado'**
+  String get recommended;
+
+  /// No description provided for @onlyRecommended.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo recomendados'**
+  String get onlyRecommended;
+
+  /// No description provided for @noRecommendedHere.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay ningún local recomendado en esta zona. Quita el filtro para ver todas las terrazas.'**
+  String get noRecommendedHere;
+
+  /// No description provided for @recommendedDisclosure.
+  ///
+  /// In es, this message translates to:
+  /// **'Local recomendado: paga por aparecer destacado. Esto no cambia el cálculo de sol, sombra ni viento.'**
+  String get recommendedDisclosure;
+
+  /// No description provided for @ownerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Es tu local?'**
+  String get ownerTitle;
+
+  /// No description provided for @ownerRecommend.
+  ///
+  /// In es, this message translates to:
+  /// **'Aparece como Recomendado'**
+  String get ownerRecommend;
+
+  /// No description provided for @ownerRecommendDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'5 € al mes, IVA incluido. Se paga en la web de Stripe y te puedes dar de baja cuando quieras.'**
+  String get ownerRecommendDetail;
+
+  /// No description provided for @ownerClaim.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclámalo gratis'**
+  String get ownerClaim;
+
+  /// No description provided for @ownerClaimDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Escríbenos para confirmar que es tuyo y corregir sus datos.'**
+  String get ownerClaimDetail;
+
+  /// No description provided for @ownerClaimSubject.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclamo mi local en Terrazeo: {name}'**
+  String ownerClaimSubject(String name);
+
+  /// No description provided for @ownerClaimBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Local: {name}\n{url}\n\nNombre y teléfono de contacto:\n'**
+  String ownerClaimBody(String name, String url);
+
+  /// No description provided for @haveVenue.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Tienes un local? Aparece en Terrazeo'**
+  String get haveVenue;
+
+  /// No description provided for @availableCities.
+  ///
+  /// In es, this message translates to:
+  /// **'Ciudades disponibles'**
+  String get availableCities;
+
+  /// No description provided for @availableCitiesIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'En estas ciudades tenemos datos propios de calles y edificios, y las sombras salen al momento. En el resto, la app funciona igual pero puede tardar más.'**
+  String get availableCitiesIntro;
+
+  /// No description provided for @outsideCoverage.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí todavía no tenemos datos propios: los edificios pueden tardar en cargarse o no aparecer. Funciona mejor en las ciudades disponibles.'**
+  String get outsideCoverage;
+
+  /// No description provided for @seeCities.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver ciudades'**
+  String get seeCities;
 }
 
 class _AppLocalizationsDelegate

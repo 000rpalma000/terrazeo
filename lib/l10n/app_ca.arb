@@ -102,5 +102,21 @@
   "reportEmail": "Escriure a Lat41 Lab",
   "reportEmailSubject": "Error a Terrazeo: {name}",
   "reportEmailBody": "Local: {name}\n{url}\n\nQuè hi ha malament?\n",
-  "couldNotOpen": "No s'ha pogut obrir."
+  "couldNotOpen": "No s'ha pogut obrir.",
+  "recommended": "Recomanat",
+  "onlyRecommended": "Només recomanats",
+  "noRecommendedHere": "Encara no hi ha cap local recomanat en aquesta zona. Treu el filtre per veure totes les terrasses.",
+  "recommendedDisclosure": "Local recomanat: paga per aparèixer destacat. Això no canvia el càlcul de sol, ombra ni vent.",
+  "ownerTitle": "És el teu local?",
+  "ownerRecommend": "Apareix com a Recomanat",
+  "ownerRecommendDetail": "5 € al mes, IVA inclòs. Es paga a la web de Stripe i et pots donar de baixa quan vulguis.",
+  "ownerClaim": "Reclama'l gratis",
+  "ownerClaimDetail": "Escriu-nos per confirmar que és teu i corregir-ne les dades.",
+  "ownerClaimSubject": "Reclamo el meu local a Terrazeo: {name}",
+  "ownerClaimBody": "Local: {name}\n{url}\n\nNom i telèfon de contacte:\n",
+  "haveVenue": "Tens un local? Apareix a Terrazeo",
+  "availableCities": "Ciutats disponibles",
+  "availableCitiesIntro": "En aquestes ciutats tenim dades pròpies de carrers i edificis, i les ombres surten al moment. A la resta, l'app funciona igual però pot trigar més.",
+  "outsideCoverage": "Aquí encara no tenim dades pròpies: els edificis poden trigar a carregar-se o no sortir. Funciona millor a les ciutats disponibles.",
+  "seeCities": "Veure ciutats"
 }

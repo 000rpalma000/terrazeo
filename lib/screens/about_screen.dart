@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../config/locales_config.dart';
+import '../models/ciutat.dart';
+import '../services/recomanats_service.dart';
+import '../widgets/ciutats_lista.dart';
 
 import '../l10n/app_localizations.dart';
 import '../widgets/intro_sheet.dart';
@@ -17,6 +23,23 @@ class AboutScreen extends StatefulWidget {
 class _AboutScreenState extends State<AboutScreen> {
   // TODO: cambiar por el enlace de la tienda cuando la app esté publicada.
   static const _urlCompartir = 'https://lat41lab.com/privacy.html';
+
+  final _ciutatsSrv = CiutatsService();
+  List<Ciutat> _ciutats = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _ciutatsSrv.cargar().then((c) {
+      if (mounted) setState(() => _ciutats = c);
+    });
+  }
+
+  @override
+  void dispose() {
+    _ciutatsSrv.dispose();
+    super.dispose();
+  }
 
   Future<void> _compartir() async {
     final l10n = AppLocalizations.of(context);
@@ -57,6 +80,24 @@ class _AboutScreenState extends State<AboutScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          // Para los dueños de locales: abre la web (nada de pagos en la app).
+          FilledButton.tonalIcon(
+            icon: const Icon(Icons.storefront_outlined),
+            label: Text(l10n.haveVenue),
+            onPressed: () => launchUrl(
+                LocalesConfig.paginaLocales(
+                    Localizations.localeOf(context).languageCode),
+                mode: LaunchMode.externalApplication),
+          ),
+          if (_ciutats.isNotEmpty) ...[
+            const SizedBox(height: 28),
+            Text(l10n.availableCities, style: t.titleMedium),
+            const SizedBox(height: 6),
+            Text(l10n.availableCitiesIntro, style: t.bodySmall),
+            const SizedBox(height: 8),
+            CiutatsLista(_ciutats),
+          ],
           const SizedBox(height: 28),
           Text(l10n.dataSources, style: t.titleMedium),
           const SizedBox(height: 8),

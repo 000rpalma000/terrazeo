@@ -181,5 +181,38 @@
       }
     }
   },
-  "couldNotOpen": "No se ha podido abrir."
+  "couldNotOpen": "No se ha podido abrir.",
+  "recommended": "Recomendado",
+  "onlyRecommended": "Solo recomendados",
+  "noRecommendedHere": "Todavía no hay ningún local recomendado en esta zona. Quita el filtro para ver todas las terrazas.",
+  "recommendedDisclosure": "Local recomendado: paga por aparecer destacado. Esto no cambia el cálculo de sol, sombra ni viento.",
+  "ownerTitle": "¿Es tu local?",
+  "ownerRecommend": "Aparece como Recomendado",
+  "ownerRecommendDetail": "5 € al mes, IVA incluido. Se paga en la web de Stripe y te puedes dar de baja cuando quieras.",
+  "ownerClaim": "Reclámalo gratis",
+  "ownerClaimDetail": "Escríbenos para confirmar que es tuyo y corregir sus datos.",
+  "ownerClaimSubject": "Reclamo mi local en Terrazeo: {name}",
+  "@ownerClaimSubject": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ownerClaimBody": "Local: {name}\n{url}\n\nNombre y teléfono de contacto:\n",
+  "@ownerClaimBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "haveVenue": "¿Tienes un local? Aparece en Terrazeo",
+  "availableCities": "Ciudades disponibles",
+  "availableCitiesIntro": "En estas ciudades tenemos datos propios de calles y edificios, y las sombras salen al momento. En el resto, la app funciona igual pero puede tardar más.",
+  "outsideCoverage": "Aquí todavía no tenemos datos propios: los edificios pueden tardar en cargarse o no aparecer. Funciona mejor en las ciudades disponibles.",
+  "seeCities": "Ver ciudades"
 }

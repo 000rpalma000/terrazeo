@@ -164,5 +164,21 @@
   "reportEmail": "Lat41 Lab schreiben",
   "reportEmailSubject": "Fehler in Terrazeo: {name}",
   "reportEmailBody": "Lokal: {name}\n{url}\n\nWas stimmt nicht?\n",
-  "couldNotOpen": "Konnte nicht geöffnet werden."
+  "couldNotOpen": "Konnte nicht geöffnet werden.",
+  "recommended": "Empfohlen",
+  "onlyRecommended": "Nur empfohlene",
+  "noRecommendedHere": "In dieser Gegend gibt es noch keine empfohlenen Lokale. Schalte den Filter aus, um alle Terrassen zu sehen.",
+  "recommendedDisclosure": "Empfohlenes Lokal: Es zahlt dafür, hervorgehoben zu werden. Das ändert nichts an der Berechnung von Sonne, Schatten und Wind.",
+  "ownerTitle": "Ist das dein Lokal?",
+  "ownerRecommend": "Als Empfohlen erscheinen",
+  "ownerRecommendDetail": "5 € im Monat inkl. MwSt. Bezahlt wird auf der Website von Stripe, jederzeit kündbar.",
+  "ownerClaim": "Kostenlos beanspruchen",
+  "ownerClaimDetail": "Schreib uns, um zu bestätigen, dass es dir gehört, und die Angaben zu korrigieren.",
+  "ownerClaimSubject": "Ich beanspruche mein Lokal auf Terrazeo: {name}",
+  "ownerClaimBody": "Lokal: {name}\n{url}\n\nKontaktname und Telefon:\n",
+  "haveVenue": "Du hast ein Lokal? Erscheine auf Terrazeo",
+  "availableCities": "Verfügbare Städte",
+  "availableCitiesIntro": "In diesen Städten haben wir eigene Straßen- und Gebäudedaten, die Schatten erscheinen sofort. Anderswo funktioniert die App auch, kann aber langsamer sein.",
+  "outsideCoverage": "Hier haben wir noch keine eigenen Daten: Gebäude laden eventuell langsam oder gar nicht. Am besten funktioniert die App in den verfügbaren Städten.",
+  "seeCities": "Städte ansehen"
 }

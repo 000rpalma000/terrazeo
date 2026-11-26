@@ -102,5 +102,21 @@
   "reportEmail": "Écrire à Lat41 Lab",
   "reportEmailSubject": "Erreur dans Terrazeo : {name}",
   "reportEmailBody": "Établissement : {name}\n{url}\n\nQu'est-ce qui ne va pas ?\n",
-  "couldNotOpen": "Impossible de l'ouvrir."
+  "couldNotOpen": "Impossible de l'ouvrir.",
+  "recommended": "Recommandé",
+  "onlyRecommended": "Recommandés uniquement",
+  "noRecommendedHere": "Il n'y a pas encore d'établissement recommandé dans cette zone. Désactivez le filtre pour voir toutes les terrasses.",
+  "recommendedDisclosure": "Établissement recommandé : il paie pour être mis en avant. Cela ne change pas le calcul du soleil, de l'ombre ou du vent.",
+  "ownerTitle": "C'est votre établissement ?",
+  "ownerRecommend": "Apparaître comme Recommandé",
+  "ownerRecommendDetail": "5 € par mois, TVA incluse. Paiement sur le site de Stripe, résiliable à tout moment.",
+  "ownerClaim": "Le revendiquer gratuitement",
+  "ownerClaimDetail": "Écrivez-nous pour confirmer qu'il est à vous et corriger ses informations.",
+  "ownerClaimSubject": "Je revendique mon établissement sur Terrazeo : {name}",
+  "ownerClaimBody": "Établissement : {name}\n{url}\n\nNom et téléphone de contact :\n",
+  "haveVenue": "Vous avez un établissement ? Apparaissez sur Terrazeo",
+  "availableCities": "Villes disponibles",
+  "availableCitiesIntro": "Dans ces villes, nous avons nos propres données de rues et de bâtiments : les ombres s'affichent tout de suite. Ailleurs, l'app fonctionne aussi mais peut être plus lente.",
+  "outsideCoverage": "Nous n'avons pas encore nos propres données ici : les bâtiments peuvent tarder à s'afficher ou manquer. L'app fonctionne mieux dans les villes disponibles.",
+  "seeCities": "Voir les villes"
 }

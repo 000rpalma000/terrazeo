@@ -102,5 +102,21 @@
   "reportEmail": "Email Lat41 Lab",
   "reportEmailSubject": "Problem in Terrazeo: {name}",
   "reportEmailBody": "Venue: {name}\n{url}\n\nWhat's wrong?\n",
-  "couldNotOpen": "Couldn't open it."
+  "couldNotOpen": "Couldn't open it.",
+  "recommended": "Recommended",
+  "onlyRecommended": "Recommended only",
+  "noRecommendedHere": "There are no recommended venues in this area yet. Turn off the filter to see all terraces.",
+  "recommendedDisclosure": "Recommended venue: it pays to be highlighted. This doesn't change the sun, shade or wind calculation.",
+  "ownerTitle": "Is this your venue?",
+  "ownerRecommend": "Get listed as Recommended",
+  "ownerRecommendDetail": "€5 a month, VAT included. Paid on Stripe's website; cancel any time.",
+  "ownerClaim": "Claim it for free",
+  "ownerClaimDetail": "Write to us to confirm it's yours and fix its details.",
+  "ownerClaimSubject": "Claiming my venue on Terrazeo: {name}",
+  "ownerClaimBody": "Venue: {name}\n{url}\n\nContact name and phone:\n",
+  "haveVenue": "Own a venue? Get on Terrazeo",
+  "availableCities": "Available cities",
+  "availableCitiesIntro": "In these cities we have our own street and building data, so shade appears instantly. Elsewhere the app still works but may be slower.",
+  "outsideCoverage": "We don't have our own data here yet: buildings may load slowly or not at all. It works best in the available cities.",
+  "seeCities": "See cities"
 }

@@ -336,4 +336,63 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get couldNotOpen => 'Impossible de l\'ouvrir.';
+
+  @override
+  String get recommended => 'Recommandé';
+
+  @override
+  String get onlyRecommended => 'Recommandés uniquement';
+
+  @override
+  String get noRecommendedHere =>
+      'Il n\'y a pas encore d\'établissement recommandé dans cette zone. Désactivez le filtre pour voir toutes les terrasses.';
+
+  @override
+  String get recommendedDisclosure =>
+      'Établissement recommandé : il paie pour être mis en avant. Cela ne change pas le calcul du soleil, de l\'ombre ou du vent.';
+
+  @override
+  String get ownerTitle => 'C\'est votre établissement ?';
+
+  @override
+  String get ownerRecommend => 'Apparaître comme Recommandé';
+
+  @override
+  String get ownerRecommendDetail =>
+      '5 € par mois, TVA incluse. Paiement sur le site de Stripe, résiliable à tout moment.';
+
+  @override
+  String get ownerClaim => 'Le revendiquer gratuitement';
+
+  @override
+  String get ownerClaimDetail =>
+      'Écrivez-nous pour confirmer qu\'il est à vous et corriger ses informations.';
+
+  @override
+  String ownerClaimSubject(String name) {
+    return 'Je revendique mon établissement sur Terrazeo : $name';
+  }
+
+  @override
+  String ownerClaimBody(String name, String url) {
+    return 'Établissement : $name\n$url\n\nNom et téléphone de contact :\n';
+  }
+
+  @override
+  String get haveVenue =>
+      'Vous avez un établissement ? Apparaissez sur Terrazeo';
+
+  @override
+  String get availableCities => 'Villes disponibles';
+
+  @override
+  String get availableCitiesIntro =>
+      'Dans ces villes, nous avons nos propres données de rues et de bâtiments : les ombres s\'affichent tout de suite. Ailleurs, l\'app fonctionne aussi mais peut être plus lente.';
+
+  @override
+  String get outsideCoverage =>
+      'Nous n\'avons pas encore nos propres données ici : les bâtiments peuvent tarder à s\'afficher ou manquer. L\'app fonctionne mieux dans les villes disponibles.';
+
+  @override
+  String get seeCities => 'Voir les villes';
 }

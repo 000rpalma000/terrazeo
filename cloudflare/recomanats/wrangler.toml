@@ -1,0 +1,30 @@
+# Webhooks de Stripe para "Recomanat per Terrazeo" (ver README.md). Los
+# secretos NO van aquí: `npx wrangler secret put STRIPE_WEBHOOK_SECRET`.
+name = "lat41lab-recomanats"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = false
+preview_urls = false
+
+# Crea el registro DNS de pagos.lat41lab.com al desplegar.
+routes = [
+  { pattern = "pagos.lat41lab.com", custom_domain = true },
+]
+
+# recomanats.json, en el mismo bucket que los datos (público por
+# data.lat41lab.com/recomanats.json).
+[[r2_buckets]]
+binding = "DATOS"
+bucket_name = "lat41lab-datos"
+
+# Privado: suscripción de Stripe → local, eventos ya procesados y avisos.
+[[kv_namespaces]]
+binding = "PRIVADO"
+id = "PENDIENTE_DE_CREAR"
+
+[vars]
+AVISOS_A = "hola@lat41lab.com"
+AVISOS_DE = "Terrazeo <avisos@lat41lab.com>"
+
+[observability]
+enabled = true

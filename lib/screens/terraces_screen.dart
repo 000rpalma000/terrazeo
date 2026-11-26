@@ -8,13 +8,16 @@ import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../config/locales_config.dart';
 import '../config/map_config.dart';
 import '../l10n/app_localizations.dart';
 import '../models/bar.dart';
+import '../models/ciutat.dart';
 import '../models/comfort.dart';
 import '../models/geo.dart';
 import '../models/indice_espacial.dart';
 import '../models/point_report.dart';
+import '../models/recomanat.dart';
 import '../models/shadow_map.dart';
 import '../models/sun_status.dart';
 import '../models/weather_conditions.dart';
@@ -23,9 +26,11 @@ import 'about_screen.dart';
 import '../services/locale_controller.dart';
 import '../services/location_service.dart';
 import '../services/osm_area_service.dart';
+import '../services/recomanats_service.dart';
 import '../services/shadow_service.dart';
 import '../services/sun_service.dart';
 import '../services/wind_shelter_service.dart';
+import '../widgets/ciutats_lista.dart';
 import '../widgets/intro_sheet.dart';
 import '../widgets/report_widgets.dart';
 
@@ -47,6 +52,17 @@ class _TerracesScreenState extends State<TerracesScreen> {
   final _mapaListo = Completer<void>();
   final _location = const LocationService();
   final _osm = OsmAreaService();
+  final _recomanatsSrv = RecomanatsService();
+  final _ciutatsSrv = CiutatsService();
+
+  /// Ciudades con datos propios (para el aviso fuera de cobertura y para
+  /// saber dónde se vende "Recomanat").
+  List<Ciutat> _ciutats = const [];
+  bool _avisoCoberturaMostrado = false;
+
+  /// Locales recomendados vigentes, por osmId. Solo cambian cómo se enseña
+  /// el local, nunca el cálculo de sol, sombra o viento.
+  Map<String, Recomanat> _recomanats = const {};
   final _sun = const SunService();
   final _viento = const WindShelterService();
   final _tiempo = WeatherService();
@@ -101,6 +117,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
   bool _soloConfirmadas = false;
   static const _kSoloConfirmadas = 'solo_confirmadas';
 
+  /// Solo locales recomendados (apagado por defecto).
+  bool _soloRecomanats = false;
+  static const _kSoloRecomanats = 'solo_recomanats';
+
   bool _cargando = true; // carga inicial (overlay)
   bool _cargandoZona = false; // descarga incremental al mover el mapa
   bool _error = false;
@@ -132,6 +152,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
       setState(() {
         _capaLocales = sp.getBool(_kCapaLocales) ?? true;
         _soloConfirmadas = sp.getBool(_kSoloConfirmadas) ?? false;
+        _soloRecomanats = sp.getBool(_kSoloRecomanats) ?? false;
       });
     }
     // La introducción sale en cada apertura.
@@ -159,6 +180,76 @@ class _TerracesScreenState extends State<TerracesScreen> {
     _recalcularVisible();
   }
 
+  Future<void> _toggleSoloRecomanats() async {
+    setState(() => _soloRecomanats = !_soloRecomanats);
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kSoloRecomanats, _soloRecomanats);
+    _recalcularVisible();
+  }
+
+  Recomanat? _rec(Bar? b) {
+    final r = b == null ? null : _recomanats[b.osmId];
+    return r != null && r.activoEn(DateTime.now()) ? r : null;
+  }
+
+  Future<void> _cargarRecomanats() async {
+    final r = await _recomanatsSrv.cargar();
+    if (!mounted) return;
+    _recomanats = r;
+    _recalcularVisible();
+  }
+
+  Future<void> _cargarCiutats() async {
+    final c = await _ciutatsSrv.cargar();
+    if (!mounted) return;
+    setState(() => _ciutats = c);
+    _quizaAvisarCobertura(_centro);
+  }
+
+  /// Una vez por sesión: si el usuario está fuera de las ciudades con datos
+  /// propios, se lo decimos con la lista (allí funciona mejor).
+  void _quizaAvisarCobertura(LatLng p) {
+    if (_avisoCoberturaMostrado || _ciutats.isEmpty) return;
+    if (_ciutats.any((c) => c.conte(p))) return;
+    _avisoCoberturaMostrado = true;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 10),
+      content: Text(l10n.outsideCoverage),
+      action: SnackBarAction(label: l10n.seeCities, onPressed: _mostrarCiutats),
+    ));
+  }
+
+  void _mostrarCiutats() {
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.availableCities,
+                  style: Theme.of(ctx).textTheme.titleMedium),
+              const SizedBox(height: 6),
+              Text(l10n.availableCitiesIntro,
+                  style: Theme.of(ctx).textTheme.bodySmall),
+              const SizedBox(height: 10),
+              CiutatsLista(_ciutats),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Si en el sitio del local se vende "Aparecer como recomendado".
+  bool _seVendeEn(LatLng p) =>
+      _ciutats.any((c) => c.vendaRecomanats && c.conte(p));
+
   /// Si el local se enseña a la hora [hora]: nunca los que dicen no tener
   /// terraza; los sin confirmar según el interruptor; y no los que su
   /// horario dice cerrados a esa hora (sin horario, o si no se entiende, sí
@@ -166,6 +257,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
   bool _seMuestra(Bar b, DateTime hora) {
     if (b.terraza == Terraza.no) return false;
     if (_soloConfirmadas && b.terraza != Terraza.confirmada) return false;
+    if (_soloRecomanats && _rec(b) == null) return false;
     return b.abiertoEn(hora) != false;
   }
 
@@ -173,6 +265,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
   void dispose() {
     _debounce?.cancel();
     _osm.dispose();
+    _recomanatsSrv.dispose();
+    _ciutatsSrv.dispose();
     _tiempo.dispose();
     _map.dispose();
     super.dispose();
@@ -205,8 +299,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
     setState(() => _cargando = false);
     _recalcularVisible(); // locales al instante (provisionales, sin sombra)
 
-    // El tiempo y los edificios llegan cada uno por su lado y recalculan.
+    // El tiempo, los recomendados y los edificios llegan cada uno por su
+    // lado y recalculan.
     unawaited(_cargarTiempo());
+    unawaited(_cargarRecomanats());
+    unawaited(_cargarCiutats());
     await _refrescarPorVista();
   }
 
@@ -270,6 +367,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
     if (faltan.isEmpty) {
       if (_error) setState(() => _error = false); // no falta nada
       unawaited(_asegurarCiudad(centro, bounds));
+      _quizaAvisarCobertura(centro);
       return;
     }
 
@@ -314,6 +412,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
     } else if (mounted) {
       // Con los edificios ya pedidos, Overpass queda libre para la ciudad.
       unawaited(_asegurarCiudad(centro, bounds));
+      _quizaAvisarCobertura(centro);
     }
   }
 
@@ -511,7 +610,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
         if (a.provisional != b.provisional) return a.provisional ? 1 : -1;
         var c = a.comfort.level.index.compareTo(b.comfort.level.index);
         if (c != 0) return c;
-        // A igual confort, primero las terrazas confirmadas.
+        // A igual confort, primero los recomendados (solo el orden: el
+        // confort se calcula igual para todos) y luego las terrazas
+        // confirmadas.
+        final ra = _rec(a.bar) != null, rb = _rec(b.bar) != null;
+        if (ra != rb) return ra ? -1 : 1;
         final ca = a.bar?.terrazaDeclarada ?? false;
         final cb = b.bar?.terrazaDeclarada ?? false;
         if (ca != cb) return ca ? -1 : 1;
@@ -902,8 +1005,12 @@ class _TerracesScreenState extends State<TerracesScreen> {
                   height: 26,
                   child: GestureDetector(
                     onTap: () => _seleccionarBar(r),
-                    // Terraza sin confirmar: icono hueco y algo más pequeño.
-                    child: Icon(
+                    // Recomendado: más grande y con estrella. Terraza sin
+                    // confirmar: icono hueco y algo más pequeño.
+                    child: _rec(r.bar) != null
+                        ? _iconoRecomanat(_colorReporte(r),
+                            seleccionado: r.bar?.osmId == sel?.bar?.osmId)
+                        : Icon(
                       r.bar!.terrazaDeclarada
                           ? Icons.local_cafe
                           : Icons.local_cafe_outlined,
@@ -1002,7 +1109,12 @@ class _TerracesScreenState extends State<TerracesScreen> {
                       height: 14,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                  const Spacer(),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                children: [
                   FilterChip(
                     label: Text(l10n.onlyConfirmedTerraces),
                     selected: _soloConfirmadas,
@@ -1011,9 +1123,18 @@ class _TerracesScreenState extends State<TerracesScreen> {
                     labelStyle: Theme.of(context).textTheme.labelSmall,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
+                  FilterChip(
+                    avatar: const Icon(Icons.star, size: 14, color: _colorRecomanat),
+                    label: Text(l10n.onlyRecommended),
+                    selected: _soloRecomanats,
+                    onSelected: (_) => _toggleSoloRecomanats(),
+                    visualDensity: VisualDensity.compact,
+                    labelStyle: Theme.of(context).textTheme.labelSmall,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               _leyendaConfort(l10n),
             ],
           ),
@@ -1038,6 +1159,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
             child: Text(l10n.networkError,
                 style: TextStyle(color: Theme.of(context).colorScheme.error)),
           )
+        else if (!_cargando && _soloRecomanats && _terrazas.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(l10n.noRecommendedHere),
+          )
         else if (!_cargando && !_cargandoZona && _terrazas.isEmpty)
           Padding(
             padding: const EdgeInsets.all(16),
@@ -1061,9 +1187,18 @@ class _TerracesScreenState extends State<TerracesScreen> {
                     radius: 6,
                     backgroundColor: _colorReporte(r),
                   ),
-                  title: Text(r.bar!.nombre,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  title: Row(
+                    children: [
+                      Flexible(
+                        child: Text(r.bar!.nombre,
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                      if (_rec(r.bar) != null) ...[
+                        const SizedBox(width: 6),
+                        _etiquetaRecomanat(l10n),
+                      ],
+                    ],
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1121,6 +1256,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
               ),
             ],
           ),
+          if (_rec(r.bar) case final rec?) _cabeceraRecomanat(l10n, rec),
           SizedBox(height: 30, child: _chipsHora(l10n)),
           const SizedBox(height: 10),
           if (r.provisional)
@@ -1174,9 +1310,125 @@ class _TerracesScreenState extends State<TerracesScreen> {
                 label: Text(l10n.reportError),
               ),
             ),
+          if (r.bar != null) _pieDueno(l10n, r.bar!),
         ],
       ),
     );
+  }
+
+  // --- Recomendados -------------------------------------------------
+
+  static const _colorRecomanat = Color(0xFFD81B60);
+
+  Widget _iconoRecomanat(Color color, {required bool seleccionado}) => Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(Icons.local_cafe, size: seleccionado ? 28 : 24, color: color),
+          const Positioned(
+            right: -4,
+            top: -4,
+            child: Icon(Icons.star, size: 13, color: _colorRecomanat),
+          ),
+        ],
+      );
+
+  Widget _etiquetaRecomanat(AppLocalizations l10n) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        decoration: BoxDecoration(
+          color: _colorRecomanat,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.star, size: 11, color: Colors.white),
+            const SizedBox(width: 3),
+            Text(l10n.recommended,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600)),
+          ],
+        ),
+      );
+
+  /// Etiqueta, aviso de que es de pago, foto y texto propio del local.
+  Widget _cabeceraRecomanat(AppLocalizations l10n, Recomanat rec) {
+    final t = Theme.of(context).textTheme;
+    final texto = rec.texto(Localizations.localeOf(context).languageCode);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _etiquetaRecomanat(l10n),
+          const SizedBox(height: 4),
+          Text(l10n.recommendedDisclosure, style: t.bodySmall),
+          if (rec.foto != null) ...[
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(rec.foto!,
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const SizedBox.shrink()),
+            ),
+          ],
+          if (texto != null) ...[
+            const SizedBox(height: 8),
+            Text(texto, style: t.bodyMedium),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// "¿Es tu local?": aparecer como recomendado (pago en la web de Stripe)
+  /// o reclamarlo gratis por correo. La app solo abre el navegador o el
+  /// correo: no hay pagos dentro de la app.
+  Widget _pieDueno(AppLocalizations l10n, Bar bar) {
+    final t = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(),
+          Text(l10n.ownerTitle, style: t.titleSmall),
+          if (_rec(bar) == null && _seVendeEn(bar.punto))
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              leading: const Icon(Icons.star_outline, color: _colorRecomanat),
+              title: Text(l10n.ownerRecommend),
+              subtitle: Text(l10n.ownerRecommendDetail),
+              onTap: () => _abrir(LocalesConfig.pagoPara(bar.osmId)),
+            ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            leading: const Icon(Icons.storefront_outlined),
+            title: Text(l10n.ownerClaim),
+            subtitle: Text(l10n.ownerClaimDetail),
+            onTap: () => _abrir(Uri.parse('mailto:${LocalesConfig.correo}'
+                '?subject=${Uri.encodeComponent(l10n.ownerClaimSubject(bar.nombre))}'
+                '&body=${Uri.encodeComponent(l10n.ownerClaimBody(bar.nombre, 'https://www.openstreetmap.org/${bar.osmId}'))}')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _abrir(Uri destino) async {
+    var ok = false;
+    try {
+      ok = await launchUrl(destino, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context).couldNotOpen)));
+    }
   }
 
   /// "Avisar de un error": nota pública en OpenStreetMap o correo a Lat41

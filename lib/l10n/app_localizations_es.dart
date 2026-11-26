@@ -334,4 +334,62 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get couldNotOpen => 'No se ha podido abrir.';
+
+  @override
+  String get recommended => 'Recomendado';
+
+  @override
+  String get onlyRecommended => 'Solo recomendados';
+
+  @override
+  String get noRecommendedHere =>
+      'Todavía no hay ningún local recomendado en esta zona. Quita el filtro para ver todas las terrazas.';
+
+  @override
+  String get recommendedDisclosure =>
+      'Local recomendado: paga por aparecer destacado. Esto no cambia el cálculo de sol, sombra ni viento.';
+
+  @override
+  String get ownerTitle => '¿Es tu local?';
+
+  @override
+  String get ownerRecommend => 'Aparece como Recomendado';
+
+  @override
+  String get ownerRecommendDetail =>
+      '5 € al mes, IVA incluido. Se paga en la web de Stripe y te puedes dar de baja cuando quieras.';
+
+  @override
+  String get ownerClaim => 'Reclámalo gratis';
+
+  @override
+  String get ownerClaimDetail =>
+      'Escríbenos para confirmar que es tuyo y corregir sus datos.';
+
+  @override
+  String ownerClaimSubject(String name) {
+    return 'Reclamo mi local en Terrazeo: $name';
+  }
+
+  @override
+  String ownerClaimBody(String name, String url) {
+    return 'Local: $name\n$url\n\nNombre y teléfono de contacto:\n';
+  }
+
+  @override
+  String get haveVenue => '¿Tienes un local? Aparece en Terrazeo';
+
+  @override
+  String get availableCities => 'Ciudades disponibles';
+
+  @override
+  String get availableCitiesIntro =>
+      'En estas ciudades tenemos datos propios de calles y edificios, y las sombras salen al momento. En el resto, la app funciona igual pero puede tardar más.';
+
+  @override
+  String get outsideCoverage =>
+      'Aquí todavía no tenemos datos propios: los edificios pueden tardar en cargarse o no aparecer. Funciona mejor en las ciudades disponibles.';
+
+  @override
+  String get seeCities => 'Ver ciudades';
 }

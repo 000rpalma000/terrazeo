@@ -333,4 +333,62 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get couldNotOpen => 'No s\'ha pogut obrir.';
+
+  @override
+  String get recommended => 'Recomanat';
+
+  @override
+  String get onlyRecommended => 'Només recomanats';
+
+  @override
+  String get noRecommendedHere =>
+      'Encara no hi ha cap local recomanat en aquesta zona. Treu el filtre per veure totes les terrasses.';
+
+  @override
+  String get recommendedDisclosure =>
+      'Local recomanat: paga per aparèixer destacat. Això no canvia el càlcul de sol, ombra ni vent.';
+
+  @override
+  String get ownerTitle => 'És el teu local?';
+
+  @override
+  String get ownerRecommend => 'Apareix com a Recomanat';
+
+  @override
+  String get ownerRecommendDetail =>
+      '5 € al mes, IVA inclòs. Es paga a la web de Stripe i et pots donar de baixa quan vulguis.';
+
+  @override
+  String get ownerClaim => 'Reclama\'l gratis';
+
+  @override
+  String get ownerClaimDetail =>
+      'Escriu-nos per confirmar que és teu i corregir-ne les dades.';
+
+  @override
+  String ownerClaimSubject(String name) {
+    return 'Reclamo el meu local a Terrazeo: $name';
+  }
+
+  @override
+  String ownerClaimBody(String name, String url) {
+    return 'Local: $name\n$url\n\nNom i telèfon de contacte:\n';
+  }
+
+  @override
+  String get haveVenue => 'Tens un local? Apareix a Terrazeo';
+
+  @override
+  String get availableCities => 'Ciutats disponibles';
+
+  @override
+  String get availableCitiesIntro =>
+      'En aquestes ciutats tenim dades pròpies de carrers i edificis, i les ombres surten al moment. A la resta, l\'app funciona igual però pot trigar més.';
+
+  @override
+  String get outsideCoverage =>
+      'Aquí encara no tenim dades pròpies: els edificis poden trigar a carregar-se o no sortir. Funciona millor a les ciutats disponibles.';
+
+  @override
+  String get seeCities => 'Veure ciutats';
 }
