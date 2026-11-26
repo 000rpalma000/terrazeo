@@ -64,7 +64,14 @@ def main() -> None:
 
     if len(fuentes) > 1:
         fuente = trabajo / "fuentes.osm.pbf"
-        run("osmium", "merge", "--overwrite", "-o", str(fuente), *map(str, fuentes))
+        unidas = trabajo / "unidas.osm.pbf"
+        run("osmium", "merge", "--overwrite", "-o", str(unidas), *map(str, fuentes))
+        # Geofabrik actualiza cada país a una hora distinta: un objeto de la
+        # frontera puede venir en dos versiones (Austria + Eslovaquia) y
+        # osmium extract lo rechaza ("Node ID twice in input"). time-filter
+        # deja solo la versión vigente, la más nueva, de cada objeto.
+        run("osmium", "time-filter", "--overwrite", "-o", str(fuente), str(unidas))
+        unidas.unlink()
     else:
         fuente = fuentes[0]
 
