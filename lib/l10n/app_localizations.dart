@@ -777,6 +777,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ver ciudades'**
   String get seeCities;
+
+  /// No description provided for @statusSolParcial.
+  ///
+  /// In es, this message translates to:
+  /// **'Sol parcial'**
+  String get statusSolParcial;
 }
 
 class _AppLocalizationsDelegate

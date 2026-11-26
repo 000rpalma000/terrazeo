@@ -21,6 +21,7 @@ import '../models/point_report.dart';
 import '../models/recomanat.dart';
 import '../models/shadow_map.dart';
 import '../models/sun_status.dart';
+import '../models/terraza_puntos.dart';
 import '../models/weather_conditions.dart';
 import '../services/weather_service.dart';
 import 'about_screen.dart';
@@ -308,6 +309,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
     await _refrescarPorVista();
   }
 
+
+
   Future<void> _cargarTiempo() async {
     try {
       // Puede llegar dos veces: Open-Meteo enseguida y AEMET después.
@@ -419,7 +422,15 @@ class _TerracesScreenState extends State<TerracesScreen> {
 
   /// Rehace las listas de contexto a partir de las teselas en memoria y
   /// descarta las más lejanas si hay demasiadas (memoria acotada).
+  /// Puntos de la terraza de cada local: dependen solo de los edificios, así
+  /// que se calculan una vez y se guardan hasta que cambian los edificios.
+  final _terrazasCache = <String, PuntosTerraza?>{};
+
+  PuntosTerraza? _puntosTerraza(Bar b) => _terrazasCache.putIfAbsent(
+      b.osmId, () => PuntosTerraza.de(b.punto, _indiceEdif));
+
   void _rehacerContexto(LatLng cerca) {
+    _terrazasCache.clear();
     if (_teselas.length > _maxTeselas) {
       final orden = _teselas.keys.toList()
         ..sort((a, b) => Geo.distancia(cerca, a.centro)
@@ -515,7 +526,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
     try {
       // A mitad del tramo: el error máximo es de 2,5 min de sol.
       final mapas = await _sombrasEnIsolate(
-          [for (final t in ts) _teselas[t]!.edificios],
+          [for (final t in ts) _teselas[t]!.sombras],
           ts.first.centro,
           tramo.add(const Duration(seconds: 150)));
       _calculandoSombras = false;
@@ -654,18 +665,42 @@ class _TerracesScreenState extends State<TerracesScreen> {
     required SunPosition pos,
     required DateTime ocaso,
   }) {
-    final ajustado0 =
-        OsmAreaService.ajustarConIndices(punto0, _indiceEdif, _indiceVias);
-    final punto = ajustado0 ?? punto0;
-    final ajustado = ajustado0 != null && !identical(ajustado0, punto0);
+    // Un local: varios puntos delante de su fachada (donde estarán las
+    // mesas). Un punto libre del mapa: ese punto (o la vía pública más
+    // cercana si cae dentro de un edificio).
+    final terraza = bar == null ? null : _puntosTerraza(bar);
+    final LatLng punto;
+    final bool ajustado;
+    if (terraza != null) {
+      punto = terraza.centro;
+      ajustado = true;
+    } else {
+      final ajustado0 =
+          OsmAreaService.ajustarConIndices(punto0, _indiceEdif, _indiceVias);
+      punto = ajustado0 ?? punto0;
+      ajustado = ajustado0 != null && !identical(ajustado0, punto0);
+    }
 
     // El sol se calcula una vez por recálculo (misma vista ≈ misma posición).
     final esDia = pos.elevationDeg > 0;
-    final tapado = esDia && _enSombra(punto);
+    final double? fraccionSombra;
+    final bool tapado;
+    if (terraza != null && esDia) {
+      var n = 0;
+      for (final q in terraza.puntos) {
+        if (_enSombra(q)) n++;
+      }
+      fraccionSombra = n / terraza.puntos.length;
+      tapado = false;
+    } else {
+      fraccionSombra = null;
+      tapado = esDia && _enSombra(punto);
+    }
 
     final w = _tiempoPara(hora);
     final cloud = w?.sky.cloudFraction;
     final status = combinarSunStatus(
+      fraccionEnSombra: fraccionSombra,
       esDeDia: esDia,
       tapadoPorEdificio: tapado,
       cloudFraction: cloud,
@@ -1670,6 +1705,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
         SunStatus.nublado => l10n.statusNublado,
         SunStatus.sombraPorEdificios => l10n.statusSombra,
         SunStatus.noche => l10n.statusNoche,
+        SunStatus.solParcial => l10n.statusSolParcial,
       };
 
   String _labelWind(AppLocalizations l10n, WindStrength w) => switch (w) {

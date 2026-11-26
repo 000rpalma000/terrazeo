@@ -27,7 +27,7 @@ La misma de las apps (`Tesela`): `i = floor(lat / 0.005)`,
 - `cuadriculas`: las que tienen datos, con una huella (SHA-1, 12 cifras) de
   su archivo. **Una cuadrícula dentro de la cobertura que no esté aquí está
   vacía** (mar, montaña): no hay que pedirla ni a Overpass.
-- Caché HTTP: 1 hora.
+- Caché HTTP: 5 minutos (las apps lo guardan 24 h).
 
 ## `{i}_{j}.json`
 
@@ -45,12 +45,18 @@ La misma de las apps (`Tesela`): `i = floor(lat / 0.005)`,
 | Campo | Contenido |
 |---|---|
 | `id` | id del *way* de OSM |
-| `tipo` | `"b"` edificio · `"h"` vía (`highway`) · `"a"` parque o plaza |
-| `etiquetas` | solo las necesarias: edificios `building`, `height`, `building:height`, `building:levels`, `roof:levels`; vías `highway` (+ `area`); áreas `leisure` o `place` |
+| `tipo` | `"b"` edificio o parte de edificio · `"h"` vía (`highway`) · `"a"` parque o plaza |
+| `etiquetas` | solo las necesarias: edificios `building`, `height`, `building:height`, `building:levels`, `roof:levels`; partes (`building:part`, solo las que tienen `height` o `building:levels`) `building:part`, `height`, `building:levels`, `roof:levels`, `min_height`, `building:min_level`; vías `highway` (+ `area`); áreas `leisure` o `place` |
 | `nodos` | ids de nodo de OSM, solo en vías (grafo peatonal de Alombra); `0` en el resto |
 | `coordenadas` | `[lat0, lon0, dlat1, dlon1, …]` en millonésimas de grado; cada par, diferencia con el anterior |
 
-- Edificios y áreas van en **una** cuadrícula: la de su centro.
+- Edificios, partes y áreas van en **una** cuadrícula: la de su centro.
+- Las partes (Simple 3D Buildings) dan la altura de cada trozo del
+  edificio. Terrazeo las usa para las sombras cuando cubren al menos el
+  80 % de la planta (si no, el contorno con su altura); el contorno se
+  sigue usando para saber si un punto cae dentro de un edificio. Una app
+  que no las conozca debe ignorar los elementos sin `building` ni
+  `highway` que lleven `building:part`.
 - Las vías van en **todas** las cuadrículas que toca su caja, para no
   cortar calles largas. Al juntar cuadrículas hay que quitar repetidas por
   `id`.

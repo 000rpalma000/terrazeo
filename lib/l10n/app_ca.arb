@@ -118,5 +118,6 @@
   "availableCities": "Ciutats disponibles",
   "availableCitiesIntro": "En aquestes ciutats tenim dades pròpies de carrers i edificis, i les ombres surten al moment. A la resta, l'app funciona igual però pot trigar més.",
   "outsideCoverage": "Aquí encara no tenim dades pròpies: els edificis poden trigar a carregar-se o no sortir. Funciona millor a les ciutats disponibles.",
-  "seeCities": "Veure ciutats"
+  "seeCities": "Veure ciutats",
+  "statusSolParcial": "Sol parcial"
 }

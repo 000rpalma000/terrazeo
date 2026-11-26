@@ -19,6 +19,7 @@ class SunBadge extends StatelessWidget {
       SunStatus.nublado => (const Color(0xFF9AA5B1), Icons.cloud),
       SunStatus.sombraPorEdificios => (const Color(0xFF5B6B7B), Icons.apartment),
       SunStatus.noche => (const Color(0xFF33415C), Icons.nightlight_round),
+      SunStatus.solParcial => (const Color(0xFFD9A441), Icons.wb_twilight),
     };
     return Container(
       width: size,

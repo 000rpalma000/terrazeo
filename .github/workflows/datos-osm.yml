@@ -128,7 +128,7 @@ jobs:
 
           aws s3 cp salida/manifest.json "s3://$BUCKET/osm/v1/manifest.json" \
             --endpoint-url "$ENDPOINT" --content-type application/json \
-            --cache-control "public, max-age=3600"
+            --cache-control "public, max-age=300"
           aws s3 cp salida/ciutats.json "s3://$BUCKET/ciutats.json" \
             --endpoint-url "$ENDPOINT" --content-type "application/json; charset=utf-8" \
-            --cache-control "public, max-age=3600"
+            --cache-control "public, max-age=300"

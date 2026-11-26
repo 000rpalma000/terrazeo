@@ -61,6 +61,11 @@ ACCESS_NO = {"private", "no"}
 # Etiquetas que se guardan de cada edificio (las que usa el estimador de
 # alturas de las apps).
 TAGS_EDIFICIO = ("building", "height", "building:height", "building:levels", "roof:levels")
+# Partes de edificio (building:part, Simple 3D Buildings): cada una con sus
+# plantas. En Barcelona vienen del catastro (patios de 1-2 plantas dentro de
+# manzanas de 5-6). Solo se guardan las que tienen altura o plantas.
+TAGS_PARTE = ("building:part", "height", "building:levels", "roof:levels", "min_height",
+              "building:min_level")
 
 
 def tesela(lat: float, lon: float) -> tuple[int, int]:
@@ -160,13 +165,15 @@ class Recolector:
                 return
 
         hw = tags.get("highway")
-        if "building" in tags:
+        es_parte = "building:part" in tags and "building" not in tags and (
+            "height" in tags or "building:levels" in tags)
+        if "building" in tags or es_parte:
             if len(pts) < 3:
                 return
-            tg = {k: tags[k] for k in TAGS_EDIFICIO if k in tags}
+            tg = {k: tags[k] for k in (TAGS_PARTE if es_parte else TAGS_EDIFICIO) if k in tags}
             elem = [w.id, "b", tg, 0, coords_compactas(pts)]
             destino = [tesela(*centro)]  # una sola: por su centro
-            self.cuenta["edificios"] += 1
+            self.cuenta["partes" if es_parte else "edificios"] += 1
         elif hw in VIAS and tags.get("foot") not in FOOT_NO and tags.get("access") not in ACCESS_NO:
             tg = {"highway": hw}
             if tags.get("area") == "yes":
@@ -191,7 +198,7 @@ def generar(pbf: Path, salida: Path, cajas: list, bares_json: Path | None,
             grupo: str = "", fecha_osm: str = "") -> None:
     rec = Recolector(cajas, grupo)
     t0 = time.time()
-    claves = ("building", "highway", "leisure", "place", "amenity")
+    claves = ("building", "building:part", "highway", "leisure", "place", "amenity")
     fp = (
         osmium.FileProcessor(str(pbf), osmium.osm.NODE | osmium.osm.WAY)
         .with_locations()

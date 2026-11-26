@@ -118,5 +118,6 @@
   "availableCities": "Available cities",
   "availableCitiesIntro": "In these cities we have our own street and building data, so shade appears instantly. Elsewhere the app still works but may be slower.",
   "outsideCoverage": "We don't have our own data here yet: buildings may load slowly or not at all. It works best in the available cities.",
-  "seeCities": "See cities"
+  "seeCities": "See cities",
+  "statusSolParcial": "Partial sun"
 }

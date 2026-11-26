@@ -391,4 +391,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get seeCities => 'Veure ciutats';
+
+  @override
+  String get statusSolParcial => 'Sol parcial';
 }

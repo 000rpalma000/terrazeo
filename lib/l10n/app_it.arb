@@ -118,5 +118,6 @@
   "availableCities": "Città disponibili",
   "availableCitiesIntro": "In queste città abbiamo dati propri su strade ed edifici e le ombre compaiono subito. Altrove l'app funziona lo stesso ma può essere più lenta.",
   "outsideCoverage": "Qui non abbiamo ancora dati propri: gli edifici possono tardare a caricarsi o non comparire. Funziona meglio nelle città disponibili.",
-  "seeCities": "Vedi città"
+  "seeCities": "Vedi città",
+  "statusSolParcial": "Sole parziale"
 }

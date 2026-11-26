@@ -180,5 +180,6 @@
   "availableCities": "Verfügbare Städte",
   "availableCitiesIntro": "In diesen Städten haben wir eigene Straßen- und Gebäudedaten, die Schatten erscheinen sofort. Anderswo funktioniert die App auch, kann aber langsamer sein.",
   "outsideCoverage": "Hier haben wir noch keine eigenen Daten: Gebäude laden eventuell langsam oder gar nicht. Am besten funktioniert die App in den verfügbaren Städten.",
-  "seeCities": "Städte ansehen"
+  "seeCities": "Städte ansehen",
+  "statusSolParcial": "Teilweise Sonne"
 }

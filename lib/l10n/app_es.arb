@@ -214,5 +214,6 @@
   "availableCities": "Ciudades disponibles",
   "availableCitiesIntro": "En estas ciudades tenemos datos propios de calles y edificios, y las sombras salen al momento. En el resto, la app funciona igual pero puede tardar más.",
   "outsideCoverage": "Aquí todavía no tenemos datos propios: los edificios pueden tardar en cargarse o no aparecer. Funciona mejor en las ciudades disponibles.",
-  "seeCities": "Ver ciudades"
+  "seeCities": "Ver ciudades",
+  "statusSolParcial": "Sol parcial"
 }

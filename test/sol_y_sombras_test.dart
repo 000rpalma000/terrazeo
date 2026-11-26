@@ -80,6 +80,47 @@ void main() {
     });
   });
 
+  test('extruir solo las aristas del lado de la sombra da la misma sombra '
+      'que extruirlas todas (datos reales, varias horas)', () {
+    final z = OsmAreaService.parsearParaPruebas(DatosLat41.aElementos(
+        File('test/fixtures/plaza_martorell.json').readAsStringSync()));
+    const c = LatLng(41.3841, 2.1690);
+    for (final h in [8, 10, 12, 14, 16]) {
+      final t = DateTime.utc(2026, 11, 26, h);
+      final nuevo = const ShadowService().construir(z.sombras, c, t);
+      // El método anterior: planta + un cuadrilátero por cada arista.
+      final rumbo = (nuevo.sunAzimuthDeg + 180) % 360;
+      final tg = math.tan(nuevo.sunElevationDeg * math.pi / 180);
+      final polys = <ShadowPolygon>[];
+      for (final e in z.sombras) {
+        final largo = (e.heightM / tg).clamp(0.0, 400.0);
+        if (largo < 1) continue;
+        polys.add(ShadowPolygon(e.ring));
+        for (var i = 0; i < e.ring.length - 1; i++) {
+          final a = e.ring[i], b = e.ring[i + 1];
+          if (a == b) continue;
+          polys.add(ShadowPolygon([a, b, Geo.destino(b, rumbo, largo), Geo.destino(a, rumbo, largo)]));
+        }
+      }
+      final viejo = ShadowMap(
+          instante: t,
+          sunAzimuthDeg: nuevo.sunAzimuthDeg,
+          sunElevationDeg: nuevo.sunElevationDeg,
+          polygons: polys);
+      expect(nuevo.polygons.length, lessThan(polys.length * 0.7));
+      var distintos = 0, total = 0;
+      for (var i = -40; i <= 40; i++) {
+        for (var j = -40; j <= 40; j++) {
+          final p = LatLng(c.latitude + i * 0.00003, c.longitude + j * 0.00004);
+          total++;
+          if (nuevo.enSombra(p) != viejo.enSombra(p)) distintos++;
+        }
+      }
+      // Solo pueden diferir puntos exactamente sobre un borde.
+      expect(distintos / total, lessThan(0.001), reason: 'a las $h UTC');
+    }
+  });
+
   group('Plaça de Vicenç Martorell, 26/11/2026 a las 11:30', () {
     // Datos de OSM de la plaza (recorte de 250 m de data.lat41lab.com,
     // noviembre de 2026).
@@ -116,13 +157,6 @@ void main() {
       expect(sombras.enSombra(dondeEvalua('node/673967568')), isFalse); // D'Annunzio
       expect(sombras.enSombra(dondeEvalua('node/672140180')), isFalse); // Kasparo
     });
-
-    test('Bros (lado este) al sol, como se vio en la plaza', () {
-      expect(sombras.enSombra(dondeEvalua('node/4319328292')), isFalse);
-    },
-        skip: 'Con los datos de OSM, la Seu del Districte (6 plantas, a 22 m '
-            'al sur-sureste) da sombra en ese punto. Falta confirmar dónde '
-            'están las mesas de Bros y la altura real de la Seu.');
   });
 }
 

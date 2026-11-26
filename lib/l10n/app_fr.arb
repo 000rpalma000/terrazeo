@@ -118,5 +118,6 @@
   "availableCities": "Villes disponibles",
   "availableCitiesIntro": "Dans ces villes, nous avons nos propres données de rues et de bâtiments : les ombres s'affichent tout de suite. Ailleurs, l'app fonctionne aussi mais peut être plus lente.",
   "outsideCoverage": "Nous n'avons pas encore nos propres données ici : les bâtiments peuvent tarder à s'afficher ou manquer. L'app fonctionne mieux dans les villes disponibles.",
-  "seeCities": "Voir les villes"
+  "seeCities": "Voir les villes",
+  "statusSolParcial": "Soleil partiel"
 }

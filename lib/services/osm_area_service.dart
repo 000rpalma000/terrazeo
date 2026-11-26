@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/bar.dart';
 import '../models/building_height.dart';
 import '../models/geo.dart';
+import '../models/partes_edificio.dart';
 import '../models/indice_espacial.dart';
 import '../models/shadow_map.dart';
 import 'datos_lat41.dart';
@@ -22,7 +23,14 @@ import 'overpass.dart';
 /// público (calles, plazas, parques).
 class ZonaOsm {
   final List<Bar> bares;
+
+  /// Contornos de los edificios: "¿este punto cae dentro de un edificio?",
+  /// fachadas y viento.
   final List<BuildingFootprint> edificios;
+
+  /// Lo que proyecta sombra: los contornos, o sus partes con su altura
+  /// (building:part) cuando las hay (ver [sombrasConPartes]).
+  final List<BuildingFootprint> sombras;
 
   /// Geometrías por las que se puede estar de pie (para "mover al espacio
   /// abierto más cercano").
@@ -31,11 +39,12 @@ class ZonaOsm {
   const ZonaOsm({
     required this.bares,
     required this.edificios,
+    required this.sombras,
     required this.lineasPublicas,
   });
 
   static const vacia =
-      ZonaOsm(bares: [], edificios: [], lineasPublicas: []);
+      ZonaOsm(bares: [], edificios: [], sombras: [], lineasPublicas: []);
 }
 
 /// Un bloque fijo de la rejilla (~555 × 550 m en Barcelona). Las zonas se
@@ -173,7 +182,7 @@ class OsmAreaService {
   static const Duration _ttlCache = Duration(days: 30);
 
   /// Versión del formato de caché: subirla invalida las cachés viejas.
-  static const _versionCache = 'v2';
+  static const _versionCache = 'v3'; // v3: cuadrículas con building:part
 
   static const amenityBares =
       'bar|pub|cafe|restaurant|biergarten|fast_food|ice_cream';
@@ -541,8 +550,8 @@ out center geom tags qt;
 
   static ZonaOsm _parsearElementos(List<dynamic> elements) {
     final bares = <Bar>[];
-    final edificiosCrudos =
-        <({List<LatLng> ring, Map<String, dynamic> tags})>[];
+    final edificiosCrudos = <Crudo>[];
+    final partesCrudas = <Crudo>[];
     final lineas = <List<LatLng>>[];
 
     for (final raw in elements) {
@@ -571,6 +580,12 @@ out center geom tags qt;
 
       if (tags.containsKey('building')) {
         if (pts.length >= 3) edificiosCrudos.add((ring: pts, tags: tags));
+      } else if (tags.containsKey('building:part')) {
+        // Partes con su altura (datos propios); nunca son espacio público.
+        if (pts.length >= 3 &&
+            (tags.containsKey('height') || tags.containsKey('building:levels'))) {
+          partesCrudas.add((ring: pts, tags: tags));
+        }
       } else {
         lineas.add(pts);
       }
@@ -583,7 +598,11 @@ out center geom tags qt;
         BuildingFootprint(ring: e.ring, heightM: estimador.estimar(e.tags)),
     ];
 
-    return ZonaOsm(bares: bares, edificios: edificios, lineasPublicas: lineas);
+    return ZonaOsm(
+        bares: bares,
+        edificios: edificios,
+        sombras: sombrasConPartes(edificiosCrudos, partesCrudas, estimador),
+        lineasPublicas: lineas);
   }
 
   // --- Overpass + caché en disco -----------------------------------------
@@ -617,7 +636,11 @@ out center geom tags qt;
       // Borra cachés de formatos anteriores (zonas circulares, v1…).
       unawaited(d
           .list()
-          .where((f) => !f.path.split('/').last.startsWith('t$_versionCache'))
+          .where((f) {
+            final n = f.path.split('/').last;
+            // El manifiesto de los datos propios vive aquí también.
+            return !n.startsWith('t$_versionCache') && !n.startsWith('lat41_');
+          })
           .forEach((f) => f.delete().catchError((_) => f))
           .catchError((_) {}));
       return _dirCache = d;

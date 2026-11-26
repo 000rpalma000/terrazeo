@@ -392,4 +392,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get seeCities => 'Städte ansehen';
+
+  @override
+  String get statusSolParcial => 'Teilweise Sonne';
 }

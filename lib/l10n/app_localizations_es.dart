@@ -392,4 +392,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get seeCities => 'Ver ciudades';
+
+  @override
+  String get statusSolParcial => 'Sol parcial';
 }

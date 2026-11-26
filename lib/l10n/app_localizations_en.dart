@@ -390,4 +390,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seeCities => 'See cities';
+
+  @override
+  String get statusSolParcial => 'Partial sun';
 }

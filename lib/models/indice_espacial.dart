@@ -98,6 +98,21 @@ class IndiceEdificios {
   }
 
   bool dentroDeAlguno(LatLng p) => edificioEn(p) != null;
+
+  /// Edificios cuya caja queda a menos de [radioM] de [p] (sin repetir).
+  List<BuildingFootprint> cercanos(LatLng p, double radioM) {
+    final vistos = <_Caja>{};
+    final dLat = radioM / 111320.0;
+    final dLon = radioM / (111320.0 * math.cos(p.latitude * math.pi / 180).abs());
+    final out = <BuildingFootprint>[];
+    for (final c in _rejilla.cerca(p, radioM)) {
+      if (!vistos.add(c)) continue;
+      if (c.maxLat < p.latitude - dLat || c.minLat > p.latitude + dLat) continue;
+      if (c.maxLon < p.longitude - dLon || c.minLon > p.longitude + dLon) continue;
+      out.add(c.e);
+    }
+    return out;
+  }
 }
 
 /// Índice espacial de tramos (segmentos) de vías y espacios públicos.
