@@ -9,6 +9,9 @@ Uso:
     python3 tool/datos/generar_teselas.py cataluna-latest.osm.pbf salida/
     python3 tool/datos/generar_teselas.py extracto.pbf salida/ --zona barcelona \\
         --bares assets/data/bares.json
+    # Las ciudades de un grupo de ciudades.json (lo que hace la tarea mensual):
+    python3 tool/datos/generar_teselas.py grupo.pbf salida/ \\
+        --ciudades tool/datos/ciudades.json --grupo gb-leeds
 
 Necesita `pip install osmium` (pyosmium 4).
 """
@@ -34,7 +37,8 @@ VERSION = 1
 TAM_LAT = 0.005
 TAM_LON = 0.0066
 
-# Zonas cubiertas [sur, oeste, norte, este]. Añadir una ciudad = una línea.
+# Zona por defecto para uso local [sur, oeste, norte, este]. La lista de
+# ciudades de la tarea mensual está en ciudades.json.
 ZONAS = {
     "barcelona": (41.317, 2.052, 41.469, 2.229),
 }
@@ -81,26 +85,26 @@ def coords_compactas(pts: list[tuple[float, float]]) -> list[int]:
 
 
 class Recolector:
-    def __init__(self, caja: tuple[float, float, float, float]):
-        s, w, n, e = caja
+    def __init__(self, cajas: list[tuple[float, float, float, float]], grupo: str = ""):
         # Margen de una cuadrícula: vías que entran desde fuera de la zona.
-        self.s, self.w = s - TAM_LAT, w - TAM_LON
-        self.n, self.e = n + TAM_LAT, e + TAM_LON
-        self.cob = {
-            "i0": tesela(s, w)[0], "j0": tesela(s, w)[1],
-            "i1": tesela(n, e)[0], "j1": tesela(n, e)[1],
-        }
+        self.cajas = [(s - TAM_LAT, w - TAM_LON, n + TAM_LAT, e + TAM_LON) for s, w, n, e in cajas]
+        self.cobs = []
+        for s, w, n, e in cajas:
+            c = {"i0": tesela(s, w)[0], "j0": tesela(s, w)[1],
+                 "i1": tesela(n, e)[0], "j1": tesela(n, e)[1]}
+            if grupo:
+                c["g"] = grupo  # para conservarla si un mes falla su tarea
+            self.cobs.append(c)
         self.vias: dict[tuple[int, int], list] = defaultdict(list)
         self.bares: dict[tuple[int, int], list] = defaultdict(list)
         self.filas_bares: list[list] = []
         self.cuenta = defaultdict(int)
 
     def en_cobertura(self, i: int, j: int) -> bool:
-        c = self.cob
-        return c["i0"] <= i <= c["i1"] and c["j0"] <= j <= c["j1"]
+        return any(c["i0"] <= i <= c["i1"] and c["j0"] <= j <= c["j1"] for c in self.cobs)
 
     def dentro(self, lat: float, lon: float) -> bool:
-        return self.s <= lat <= self.n and self.w <= lon <= self.e
+        return any(s <= lat <= n and w <= lon <= e for s, w, n, e in self.cajas)
 
     # --- Locales -----------------------------------------------------------
 
@@ -183,9 +187,9 @@ class Recolector:
                 self.vias[t].append(elem)
 
 
-def generar(pbf: Path, salida: Path, zona: str, bares_json: Path | None) -> None:
-    caja = ZONAS[zona]
-    rec = Recolector(caja)
+def generar(pbf: Path, salida: Path, cajas: list, bares_json: Path | None,
+            grupo: str = "", fecha_osm: str = "") -> None:
+    rec = Recolector(cajas, grupo)
     t0 = time.time()
     claves = ("building", "highway", "leisure", "place", "amenity")
     fp = (
@@ -200,7 +204,9 @@ def generar(pbf: Path, salida: Path, zona: str, bares_json: Path | None) -> None
             rec.via(obj)
     print(f"leído en {time.time() - t0:.0f} s: {dict(rec.cuenta)}", file=sys.stderr)
 
-    fecha_osm = osmium.io.Reader(str(pbf), osmium.osm.NOTHING).header().get(
+    # Los recortes de preparar_grupo.py no conservan la cabecera: entonces
+    # la fecha llega con --fecha-osm.
+    fecha_osm = fecha_osm or osmium.io.Reader(str(pbf), osmium.osm.NOTHING).header().get(
         "osmosis_replication_timestamp", "")
     destino = salida / "osm" / f"v{VERSION}"
     destino.mkdir(parents=True, exist_ok=True)
@@ -224,7 +230,7 @@ def generar(pbf: Path, salida: Path, zona: str, bares_json: Path | None) -> None
         "tam": [TAM_LAT, TAM_LON],
         # Toda cuadrícula dentro de "cobertura" que no esté en "cuadriculas"
         # está vacía (mar, montaña): no hace falta pedirla a ningún sitio.
-        "cobertura": [rec.cob],
+        "cobertura": rec.cobs,
         "cuadriculas": huellas,
     }
     (destino / "manifest.json").write_text(
@@ -233,7 +239,7 @@ def generar(pbf: Path, salida: Path, zona: str, bares_json: Path | None) -> None
 
     if bares_json:
         filas = sorted(rec.filas_bares, key=lambda f: f[0])
-        s, w, n, e = caja
+        s, w, n, e = cajas[0]
         bares_json.write_text(json.dumps(
             {"generado": dt.date.today().isoformat(), "bbox": [s, w, n, e], "bares": filas},
             ensure_ascii=False, separators=(",", ":")))
@@ -245,9 +251,20 @@ def main() -> None:
     ap.add_argument("pbf", type=Path, help="extracto .osm.pbf de Geofabrik")
     ap.add_argument("salida", type=Path, help="carpeta de salida")
     ap.add_argument("--zona", default="barcelona", choices=sorted(ZONAS))
+    ap.add_argument("--ciudades", type=Path, help="ciudades.json (con --grupo)")
+    ap.add_argument("--grupo", help="genera las ciudades de este grupo de ciudades.json")
     ap.add_argument("--bares", type=Path, help="reescribe también este bares.json")
+    ap.add_argument("--fecha-osm", default="", help="fecha de los datos de OSM (si el pbf no la trae)")
     a = ap.parse_args()
-    generar(a.pbf, a.salida, a.zona, a.bares)
+    if a.grupo:
+        ciudades = [c for c in json.loads(a.ciudades.read_text()) if c["grupo"] == a.grupo]
+        if not ciudades:
+            sys.exit(f"no hay ciudades del grupo {a.grupo}")
+        print("ciudades:", ", ".join(c["id"] for c in ciudades), file=sys.stderr)
+        generar(a.pbf, a.salida, [tuple(c["caja"]) for c in ciudades], a.bares, a.grupo,
+                a.fecha_osm)
+    else:
+        generar(a.pbf, a.salida, [ZONAS[a.zona]], a.bares, fecha_osm=a.fecha_osm)
 
 
 if __name__ == "__main__":

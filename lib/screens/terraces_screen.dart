@@ -269,7 +269,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
           .compareTo(Geo.distancia(centro, b.centro)));
     if (faltan.isEmpty) {
       if (_error) setState(() => _error = false); // no falta nada
-      _asegurarCiudad(centro, bounds);
+      unawaited(_asegurarCiudad(centro, bounds));
       return;
     }
 
@@ -313,7 +313,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
       unawaited(_refrescarPorVista());
     } else if (mounted) {
       // Con los edificios ya pedidos, Overpass queda libre para la ciudad.
-      _asegurarCiudad(centro, bounds);
+      unawaited(_asegurarCiudad(centro, bounds));
     }
   }
 
@@ -350,14 +350,15 @@ class _TerracesScreenState extends State<TerracesScreen> {
   /// partir de ahí sus locales salen al instante, como los de Barcelona.
   ///
   /// No hace nada si los locales empaquetados ya cubren la [vista] con
-  /// ~1 km de margen (Barcelona), ni mientras se descargan edificios.
-  void _asegurarCiudad(LatLng p, LatLngBounds vista) {
+  /// ~1 km de margen (Barcelona), si la cubren los datos propios (llegan
+  /// con las cuadrículas), ni mientras se descargan edificios.
+  Future<void> _asegurarCiudad(LatLng p, LatLngBounds vista) async {
     const margen = 0.01; // ~1 km
-    if (_descargando ||
-        _empaquetados.cubreZona(vista.south - margen, vista.west - margen,
-            vista.north + margen, vista.east + margen)) {
-      return;
-    }
+    final s = vista.south - margen, w = vista.west - margen;
+    final n = vista.north + margen, e = vista.east + margen;
+    if (_descargando || _empaquetados.cubreZona(s, w, n, e)) return;
+    if (await _osm.datosPropiosCubren(s, w, n, e)) return;
+    if (_descargando || !mounted) return;
     final r = Region.de(p);
     if (_regionesListas.contains(r) ||
         _regionesEnCurso.contains(r) ||

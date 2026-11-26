@@ -2,7 +2,9 @@
 
 Edificios, calles y locales de OpenStreetMap, cortados en cuadrículas y
 servidos desde Cloudflare R2 en `https://data.lat41lab.com/osm/v1/`. En las
-zonas cubiertas (hoy, Barcelona) **Terrazeo y Alombra los usan en lugar de
+zonas cubiertas (Barcelona y las ciudades de [`ciudades.json`](ciudades.json):
+capitales de la UE, Reino Unido, Noruega y Suiza, y las ciudades europeas de
+más de ~500.000 habitantes) **Terrazeo y Alombra los usan en lugar de
 Overpass**: llegan en unos 100 ms y no dependen de un servicio público
 saturado. Fuera de esas zonas, o si `data.lat41lab.com` falla, las apps
 siguen usando Overpass.
@@ -25,10 +27,47 @@ python3 tool/datos/generar_teselas.py cataluna-latest.osm.pbf /tmp/salida \
 Barcelona (noviembre de 2026): 750 cuadrículas con datos, 99.285 edificios,
 122.802 vías, 8.990 locales; 40 MB (12 MB comprimidos, ~16 KB por cuadrícula).
 
+## Ciudades
+
+[`ciudades.json`](ciudades.json): una línea por ciudad con su centro y un
+radio (15 km las enormes, 10 km de 1 a 3 millones de habitantes, 7 km de
+500.000 a 1 millón, 5 km las capitales pequeñas). La zona cubierta es el
+cuadrado de lado 2 × radio.
+
+Para añadir una: escribir `id`, `nombre`, `pais`, `centro` y `radio_km`
+(el resto, cualquier valor) y recalcular caja, extractos y grupo:
+
+```sh
+curl -o /tmp/index-v1.json https://download.geofabrik.de/index-v1.json
+python3 tool/datos/elegir_extractos.py tool/datos/ciudades.json /tmp/index-v1.json
+```
+
+Cada ciudad usa, para cada parte de su cuadrado, el extracto más pequeño de
+Geofabrik que la contiene (una ciudad junto a una frontera usa dos extractos
+pequeños, no el del país entero). Las que comparten extracto forman un
+**grupo**, que se genera en una misma tarea.
+
+Probar un grupo en local (necesita `osmium-tool`):
+
+```sh
+python3 tool/datos/preparar_grupo.py tool/datos/ciudades.json gb-leeds /tmp/trabajo
+python3 tool/datos/generar_teselas.py /tmp/trabajo/grupo.osm.pbf /tmp/salida \
+    --ciudades tool/datos/ciudades.json --grupo gb-leeds \
+    --fecha-osm "$(cat /tmp/trabajo/fecha_osm.txt)"
+```
+
 ## Actualización
 
 `.github/workflows/datos-osm.yml` lo regenera el día 2 de cada mes (y a mano
-desde la pestaña *Actions*) y lo sube al bucket de R2. Necesita, en el repo
+desde la pestaña *Actions*, para todos los grupos o solo algunos):
+
+1. Una tarea por grupo, hasta 10 a la vez: descarga sus extractos, recorta
+   las ciudades (`osmium extract`), genera y sube sus cuadrículas.
+2. Al final, `unir_manifiestos.py` junta los manifiestos de cada grupo y se
+   sube `manifest.json`, siempre lo último. Si un grupo falla, conserva su
+   cobertura del mes anterior (sus cuadrículas siguen en R2).
+
+Necesita, en el repo
 (*Settings → Secrets and variables → Actions*):
 
 | Tipo | Nombre | Valor |

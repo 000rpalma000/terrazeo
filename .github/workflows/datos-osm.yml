@@ -1,19 +1,54 @@
-# Regenera los datos propios de OpenStreetMap (Barcelona) y los sube a R2.
-# Ver tool/datos/README.md.
+# Regenera los datos propios de OpenStreetMap de las ciudades de
+# tool/datos/ciudades.json y los sube a R2. Ver tool/datos/README.md.
+#
+# Una tarea por grupo de ciudades (las que comparten extracto de Geofabrik),
+# en paralelo. Cada una sube sus cuadrículas; al final se juntan los
+# manifiestos y se sube manifest.json, siempre lo último.
 name: Datos OSM
 
 on:
   schedule:
     - cron: "0 4 2 * *" # día 2 de cada mes, 04:00 UTC
   workflow_dispatch:
+    inputs:
+      grupos:
+        description: "Solo estos grupos (separados por espacios; vacío = todos)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
 jobs:
-  generar:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    outputs:
+      grupos: ${{ steps.grupos.outputs.grupos }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: grupos
+        env:
+          SOLO: ${{ github.event.inputs.grupos }}
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os
+          ciudades = json.load(open("tool/datos/ciudades.json"))
+          grupos = sorted({c["grupo"] for c in ciudades})
+          solo = os.environ.get("SOLO", "").split()
+          if solo:
+              grupos = [g for g in grupos if g in solo]
+          print("grupos=" + json.dumps(grupos))
+          EOF
+
+  generar:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 10 # sin agobiar a Geofabrik
+      matrix:
+        grupo: ${{ fromJson(needs.plan.outputs.grupos) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,20 +56,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Instalar pyosmium
-        run: pip install -r tool/datos/requirements.txt
-
-      - name: Descargar el extracto de Cataluña (Geofabrik)
+      - name: Instalar pyosmium y osmium-tool
         run: |
-          base=https://download.geofabrik.de/europe/spain/cataluna
-          curl -sSfL -A "lat41lab-datos (GitHub Actions)" -o cataluna.osm.pbf "$base/cataluna-latest.osm.pbf"
-          esperado=$(curl -sSfL "$base/cataluna-latest.osm.pbf.md5" | awk '{print $1}')
-          echo "$esperado  cataluna.osm.pbf" | md5sum -c -
+          pip install -r tool/datos/requirements.txt
+          sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool
+
+      - name: Descargar y recortar (Geofabrik)
+        run: python tool/datos/preparar_grupo.py tool/datos/ciudades.json "${{ matrix.grupo }}" trabajo
 
       - name: Generar cuadrículas
-        run: python tool/datos/generar_teselas.py cataluna.osm.pbf salida
+        run: |
+          python tool/datos/generar_teselas.py trabajo/grupo.osm.pbf salida \
+            --ciudades tool/datos/ciudades.json --grupo "${{ matrix.grupo }}" \
+            --fecha-osm "$(cat trabajo/fecha_osm.txt)"
 
-      - name: Subir a R2
+      - name: Subir cuadrículas a R2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -45,11 +81,45 @@ jobs:
           ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           BUCKET: ${{ vars.R2_BUCKET }}
         run: |
-          # Primero las cuadrículas y al final el manifiesto: así nunca apunta
-          # a una cuadrícula que aún no está subida.
           aws s3 sync salida/osm/v1 "s3://$BUCKET/osm/v1" --endpoint-url "$ENDPOINT" \
             --exclude manifest.json --content-type application/json \
-            --cache-control "public, max-age=86400" --no-progress
-          aws s3 cp salida/osm/v1/manifest.json "s3://$BUCKET/osm/v1/manifest.json" \
+            --cache-control "public, max-age=86400" --no-progress --only-show-errors
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manifiesto-${{ matrix.grupo }}
+          path: salida/osm/v1/manifest.json
+          retention-days: 7
+
+  manifiesto:
+    needs: [plan, generar]
+    # También si algún grupo ha fallado: ese grupo conserva el mes anterior.
+    if: ${{ always() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: manifiesto-*
+          path: partes
+
+      - name: Juntar manifiestos
+        run: |
+          curl -sSfL -o anterior.json https://data.lat41lab.com/osm/v1/manifest.json || true
+          python3 tool/datos/unir_manifiestos.py tool/datos/ciudades.json partes \
+            salida/manifest.json --anterior anterior.json
+
+      - name: Subir manifest.json a R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+          ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          BUCKET: ${{ vars.R2_BUCKET }}
+        run: |
+          aws s3 cp salida/manifest.json "s3://$BUCKET/osm/v1/manifest.json" \
             --endpoint-url "$ENDPOINT" --content-type application/json \
             --cache-control "public, max-age=3600"

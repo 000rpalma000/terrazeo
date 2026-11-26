@@ -107,12 +107,20 @@ void main() {
           'center': {'lat': 40.42, 'lon': -3.70},
           'tags': {'amenity': 'cafe', 'outdoor_seating': 'yes'},
         },
+        {
+          'type': 'node', 'id': 9, 'lat': 40.41, 'lon': -3.71,
+          'tags': {'amenity': 'bar', 'outdoor_seating': 'no',
+                   'opening_hours': 'Mo-Su 18:00-02:00'},
+        },
         {'type': 'node', 'id': 8, 'tags': {'amenity': 'bar'}}, // sin coords
       ],
     }));
-    expect(filas.length, 1);
+    expect(filas.length, 2);
     final b = Bar.fromFila(filas.first);
     expect(b.osmId, 'way/7');
     expect(b.terrazaDeclarada, isTrue);
+    final c = Bar.fromFila(filas.last);
+    expect(c.terraza, Terraza.no);
+    expect(c.abiertoEn(DateTime(2026, 11, 25, 1)), isTrue);
   });
 }

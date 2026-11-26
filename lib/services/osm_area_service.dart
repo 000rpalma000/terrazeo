@@ -363,6 +363,21 @@ out center geom tags qt;
     return res;
   }
 
+  /// Si los datos propios cubren toda la caja: entonces sus locales llegan
+  /// con las cuadrículas y no hace falta pedir la ciudad a Overpass.
+  Future<bool> datosPropiosCubren(
+      double s, double w, double n, double e) async {
+    final m = await _datos.manifiesto();
+    if (m == null) return false;
+    final a = Tesela.de(LatLng(s, w)), b = Tesela.de(LatLng(n, e));
+    for (var i = a.i; i <= b.i; i++) {
+      for (var j = a.j; j <= b.j; j++) {
+        if (!m.cubre(i, j)) return false;
+      }
+    }
+    return true;
+  }
+
   /// Locales de toda una [Region] (una sola consulta, solo locales). Se
   /// guardan en disco con el mismo formato compacto que assets/data/bares.json
   /// y duran [_ttlCache]. Lanza si no hay caché y Overpass falla.
@@ -413,7 +428,8 @@ out center geom tags qt;
   }
 
   /// Respuesta de Overpass (locales) → filas compactas
-  /// `[osmId, lat, lon, nombre, amenity, terraza]`.
+  /// `[osmId, lat, lon, nombre, amenity, terraza, horario]` (ver
+  /// tool/datos/FORMATO.md; terraza 1 confirmada, -1 no, 0 sin confirmar).
   @visibleForTesting
   static List<List<dynamic>> filasDeOverpass(String body) {
     final data = jsonDecode(body) as Map<String, dynamic>;
@@ -426,16 +442,20 @@ out center geom tags qt;
       final lon = (el['lon'] ?? c?['lon']) as num?;
       if (lat == null || lon == null) continue;
       final amenity = (tags['amenity'] ?? 'bar').toString();
-      final outdoor = (tags['outdoor_seating'] ?? '').toString().toLowerCase();
+      final terraza =
+          Terraza.deEtiqueta(tags['outdoor_seating']?.toString(), amenity);
       filas.add([
         '${el['type']}/${el['id']}',
         lat.toDouble(),
         lon.toDouble(),
         (tags['name'] ?? '').toString(),
         amenity,
-        outdoor == 'yes' || outdoor == 'terrace' || amenity == 'biergarten'
-            ? 1
-            : 0,
+        switch (terraza) {
+          Terraza.confirmada => 1,
+          Terraza.no => -1,
+          Terraza.sinConfirmar => 0,
+        },
+        (tags['opening_hours'] ?? '').toString().trim(),
       ]);
     }
     return filas;
