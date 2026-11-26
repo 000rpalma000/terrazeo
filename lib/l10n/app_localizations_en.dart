@@ -334,24 +334,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotOpen => 'Couldn\'t open it.';
 
   @override
-  String get recommended => 'Recommended';
+  String get recommended => 'Featured';
 
   @override
-  String get onlyRecommended => 'Recommended only';
+  String get onlyRecommended => 'Featured only';
 
   @override
   String get noRecommendedHere =>
-      'There are no recommended venues in this area yet. Turn off the filter to see all terraces.';
+      'There are no featured venues in this area yet. Turn off the filter to see all terraces.';
 
   @override
   String get recommendedDisclosure =>
-      'Recommended venue: it pays to be highlighted. This doesn\'t change the sun, shade or wind calculation.';
+      'Sponsored · pays to be featured. It doesn\'t change the sun, shade or wind calculation.';
 
   @override
   String get ownerTitle => 'Is this your venue?';
 
   @override
-  String get ownerRecommend => 'Get listed as Recommended';
+  String get ownerRecommend => 'Get Featured';
 
   @override
   String get ownerRecommendDetail =>

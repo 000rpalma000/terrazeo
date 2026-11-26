@@ -61,5 +61,10 @@ void main() {
     expect(u.queryParameters['client_reference_id'], 'node_123');
     expect(LocalesConfig.paginaLocales('ca').toString(),
         'https://lat41lab.com/locals.html?lang=ca');
+    // iPhone: la web; Android: el pago con el local.
+    expect(LocalesConfig.destacarPara('node/1', 'es', ios: true).toString(),
+        'https://lat41lab.com/locals.html?lang=es');
+    expect(LocalesConfig.destacarPara('node/1', 'es', ios: false)
+        .queryParameters['client_reference_id'], 'node_1');
   });
 }

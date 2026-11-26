@@ -338,24 +338,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get couldNotOpen => 'Impossible de l\'ouvrir.';
 
   @override
-  String get recommended => 'Recommandé';
+  String get recommended => 'Mis en avant';
 
   @override
-  String get onlyRecommended => 'Recommandés uniquement';
+  String get onlyRecommended => 'Mis en avant uniquement';
 
   @override
   String get noRecommendedHere =>
-      'Il n\'y a pas encore d\'établissement recommandé dans cette zone. Désactivez le filtre pour voir toutes les terrasses.';
+      'Il n\'y a pas encore d\'établissement mis en avant dans cette zone. Désactivez le filtre pour voir toutes les terrasses.';
 
   @override
   String get recommendedDisclosure =>
-      'Établissement recommandé : il paie pour être mis en avant. Cela ne change pas le calcul du soleil, de l\'ombre ou du vent.';
+      'Sponsorisé · paie pour être mis en avant. Cela ne change pas le calcul du soleil, de l\'ombre ou du vent.';
 
   @override
   String get ownerTitle => 'C\'est votre établissement ?';
 
   @override
-  String get ownerRecommend => 'Apparaître comme Recommandé';
+  String get ownerRecommend => 'Être mis en avant';
 
   @override
   String get ownerRecommendDetail =>

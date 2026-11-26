@@ -685,25 +685,25 @@ abstract class AppLocalizations {
   /// No description provided for @recommended.
   ///
   /// In es, this message translates to:
-  /// **'Recomendado'**
+  /// **'Destacado'**
   String get recommended;
 
   /// No description provided for @onlyRecommended.
   ///
   /// In es, this message translates to:
-  /// **'Solo recomendados'**
+  /// **'Solo destacados'**
   String get onlyRecommended;
 
   /// No description provided for @noRecommendedHere.
   ///
   /// In es, this message translates to:
-  /// **'Todavía no hay ningún local recomendado en esta zona. Quita el filtro para ver todas las terrazas.'**
+  /// **'Todavía no hay ningún local destacado en esta zona. Quita el filtro para ver todas las terrazas.'**
   String get noRecommendedHere;
 
   /// No description provided for @recommendedDisclosure.
   ///
   /// In es, this message translates to:
-  /// **'Local recomendado: paga por aparecer destacado. Esto no cambia el cálculo de sol, sombra ni viento.'**
+  /// **'Patrocinado · paga por aparecer destacado. No cambia el cálculo de sol, sombra ni viento.'**
   String get recommendedDisclosure;
 
   /// No description provided for @ownerTitle.
@@ -715,7 +715,7 @@ abstract class AppLocalizations {
   /// No description provided for @ownerRecommend.
   ///
   /// In es, this message translates to:
-  /// **'Aparece como Recomendado'**
+  /// **'Aparece como Destacado'**
   String get ownerRecommend;
 
   /// No description provided for @ownerRecommendDetail.

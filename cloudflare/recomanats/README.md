@@ -1,4 +1,4 @@
-# "Recomanat per Terrazeo" (Stripe → `recomanats.json`)
+# "Destacat a Terrazeo" (Stripe → `recomanats.json`)
 
 Worker de Cloudflare en `https://pagos.lat41lab.com/stripe/webhook` que
 recibe los webhooks de Stripe y mantiene la lista pública de locales
@@ -9,15 +9,18 @@ recomendados en R2: `https://data.lat41lab.com/recomanats.json`.
 - **Qué local paga:** el enlace lleva `?client_reference_id=node_123` (el id
   de OpenStreetMap con `_` en lugar de `/`, porque Stripe solo admite
   letras, números, `-` y `_`).
-- **Lo que hace la app con los recomendados:** icono destacado, etiqueta
-  "Recomanat" con aviso de que es de pago, primeros a igual confort y filtro
-  "Només recomanats". **Nunca cambia los cálculos de sol, sombra o viento.**
+- **Lo que hace la app con los destacados:** icono con estrella, etiqueta
+  "Destacat" (traducida) con el aviso "Patrocinat · paga per aparèixer
+  destacat…", primeros a igual confort y filtro "Només destacats". **Nunca
+  cambia los cálculos de sol, sombra o viento.**
+- **Desde la ficha:** en Android, el botón abre el pago de Stripe con el
+  local ya indicado; en iPhone, la página `lat41lab.com/locals.html`.
 
 ## Eventos
 
 | Evento de Stripe | Qué hace |
 |---|---|
-| `checkout.session.completed` | Alta del local de `client_reference_id`, activo. Sin `client_reference_id`: no toca la lista y avisa por correo (empresa, correo, suscripción) para asignarlo a mano |
+| `checkout.session.completed` | Alta del local de `client_reference_id`, activo. Sin `client_reference_id`: no toca la lista y lo guarda en KV (empresa, correo, suscripción) para asignarlo a mano |
 | `invoice.paid` | La fecha de fin pasa al final del periodo pagado |
 | `customer.subscription.updated` (impago: `unpaid`, `canceled`…) | Estado `baja`; sigue recomendado hasta la fecha de fin ya pagada |
 | `customer.subscription.deleted` | Estado `baja`; si se cortó antes de tiempo, la fecha de fin pasa al corte |
@@ -63,13 +66,22 @@ suscripción, para que los pagos siguientes amplíen la fecha:
 npx wrangler kv key put --remote --binding PRIVADO "sub:sub_XXXX" '{"osm":"node/123"}'
 ```
 
-## Avisos por correo
+## Pagos sin local por asignar
 
-El aviso de "pago sin local" se envía con [Resend](https://resend.com) si
-existe el secreto `RESEND_API_KEY`, que necesita verificar un dominio de
-envío. Sin él, el aviso queda en los registros del Worker y en KV
-(`aviso:…`). Remitente y destinatario: `AVISOS_DE` y `AVISOS_A` en
-`wrangler.toml`.
+Stripe avisa por correo de cada pago. Los que llegaron sin
+`client_reference_id` (por ejemplo, desde el enlace de la web) quedan
+guardados en el Worker. Para verlos:
+
+```sh
+cd cloudflare/recomanats && npm run pendientes
+```
+
+Para asignar uno, se añade el local a `recomanats.json` y se enlaza la
+suscripción (ver arriba). Después se borra de la lista:
+
+```sh
+npx wrangler kv key delete --remote --binding PRIVADO "sin_local:sub_XXXX"
+```
 
 ## Uso
 

@@ -37,7 +37,7 @@ function nuevoKV() {
 beforeEach(() => {
   r2 = nuevoR2();
   kv = nuevoKV();
-  env = { STRIPE_WEBHOOK_SECRET: SECRETO, DATOS: r2, PRIVADO: kv, AVISOS_A: "hola@lat41lab.com", AVISOS_DE: "avisos@lat41lab.com" };
+  env = { STRIPE_WEBHOOK_SECRET: SECRETO, DATOS: r2, PRIVADO: kv };
 });
 
 let n = 0;
@@ -111,14 +111,14 @@ test("respeta nombre, foto y texto puestos a mano", async () => {
   assert.ok(l.fin > "2026-11-01");
 });
 
-test("pago sin local: no toca la lista y deja un aviso", async () => {
+test("pago sin local: no toca la lista y queda guardado para asignarlo", async () => {
   await enviar("checkout.session.completed", {
     id: "cs_5", subscription: "sub_5", customer_details: { business_name: "Cafè del Mar SL", email: "x@example.com" },
   });
   assert.equal(r2.objetos.size, 0);
-  const aviso = [...kv.m.entries()].find(([k]) => k.startsWith("aviso:"));
-  assert.ok(aviso && aviso[1].includes("Cafè del Mar SL"));
-  assert.ok(kv.m.has("sin_local:sub_5"));
+  const g = JSON.parse(kv.m.get("sin_local:sub_5"));
+  assert.equal(g.empresa, "Cafè del Mar SL");
+  assert.equal(g.suscripcion, "sub_5");
 });
 
 test("un evento repetido se procesa una sola vez", async () => {

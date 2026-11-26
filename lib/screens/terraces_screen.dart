@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -1402,8 +1403,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
               dense: true,
               leading: const Icon(Icons.star_outline, color: _colorRecomanat),
               title: Text(l10n.ownerRecommend),
-              subtitle: Text(l10n.ownerRecommendDetail),
-              onTap: () => _abrir(LocalesConfig.pagoPara(bar.osmId)),
+              // En iPhone no se habla de precio ni de pago: abre la web.
+              subtitle: _esIOS ? null : Text(l10n.ownerRecommendDetail),
+              onTap: () => _abrir(LocalesConfig.destacarPara(bar.osmId,
+                  Localizations.localeOf(context).languageCode,
+                  ios: _esIOS)),
             ),
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -1419,6 +1423,8 @@ class _TerracesScreenState extends State<TerracesScreen> {
       ),
     );
   }
+
+  static bool get _esIOS => defaultTargetPlatform == TargetPlatform.iOS;
 
   Future<void> _abrir(Uri destino) async {
     var ok = false;

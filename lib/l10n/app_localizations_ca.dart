@@ -335,24 +335,24 @@ class AppLocalizationsCa extends AppLocalizations {
   String get couldNotOpen => 'No s\'ha pogut obrir.';
 
   @override
-  String get recommended => 'Recomanat';
+  String get recommended => 'Destacat';
 
   @override
-  String get onlyRecommended => 'Només recomanats';
+  String get onlyRecommended => 'Només destacats';
 
   @override
   String get noRecommendedHere =>
-      'Encara no hi ha cap local recomanat en aquesta zona. Treu el filtre per veure totes les terrasses.';
+      'Encara no hi ha cap local destacat en aquesta zona. Treu el filtre per veure totes les terrasses.';
 
   @override
   String get recommendedDisclosure =>
-      'Local recomanat: paga per aparèixer destacat. Això no canvia el càlcul de sol, ombra ni vent.';
+      'Patrocinat · paga per aparèixer destacat. No canvia el càlcul de sol, ombra ni vent.';
 
   @override
   String get ownerTitle => 'És el teu local?';
 
   @override
-  String get ownerRecommend => 'Apareix com a Recomanat';
+  String get ownerRecommend => 'Apareix com a Destacat';
 
   @override
   String get ownerRecommendDetail =>

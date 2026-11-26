@@ -17,14 +17,11 @@ routes = [
 binding = "DATOS"
 bucket_name = "lat41lab-datos"
 
-# Privado: suscripción de Stripe → local, eventos ya procesados y avisos.
+# Privado: suscripción de Stripe → local, eventos ya procesados y pagos
+# sin local por asignar.
 [[kv_namespaces]]
 binding = "PRIVADO"
-id = "PENDIENTE_DE_CREAR"
-
-[vars]
-AVISOS_A = "hola@lat41lab.com"
-AVISOS_DE = "Terrazeo <avisos@lat41lab.com>"
+id = "b1e6fb851d6f4b03925c5f6273cb30c5"
 
 [observability]
 enabled = true

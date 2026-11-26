@@ -6,15 +6,14 @@
 // público.
 //
 // - checkout.session.completed: alta. El local llega en client_reference_id
-//   (node_123 → node/123). Si no llega, aviso por correo para asignarlo a mano.
+//   (node_123 → node/123). Si no llega, se guarda en KV (sin_local:…) para
+//   asignarlo a mano; Stripe ya avisa por correo de cada pago.
 // - invoice.paid: amplía la fecha de fin hasta el final del periodo pagado.
 // - customer.subscription.deleted / .updated (impago, cancelada): estado
 //   "baja"; sigue recomendado hasta la fecha de fin ya pagada y luego deja
 //   de serlo solo (la app solo enseña los que tienen fin > ahora).
 //
-// Secretos (wrangler secret put): STRIPE_WEBHOOK_SECRET, y opcional
-// RESEND_API_KEY para los avisos por correo (sin ella, el aviso queda en KV
-// y en los registros del Worker).
+// Secreto (wrangler secret put): STRIPE_WEBHOOK_SECRET.
 
 const OBJETO = "recomanats.json";
 const TOLERANCIA_S = 300; // firma de Stripe: como mucho 5 min de diferencia
@@ -56,12 +55,9 @@ export async function procesar(evento, env, ctx) {
           empresa: cd.business_name || cd.name || "", correo: cd.email || "",
           sesion: o.id, suscripcion: sub, referencia: o.client_reference_id ?? null,
         };
+        datos.fecha = new Date().toISOString();
         await env.PRIVADO.put(`sin_local:${sub ?? o.id}`, JSON.stringify(datos));
-        await avisar(env, ctx, "Terrazeo: pago sin local asignado",
-          `Ha llegado un pago de "Recomanat per Terrazeo" sin local (client_reference_id).\n\n` +
-          `Empresa: ${datos.empresa || "(sin nombre)"}\nCorreo: ${datos.correo || "(sin correo)"}\n` +
-          `Suscripción: ${sub ?? "-"}\nSesión: ${o.id}\nReferencia recibida: ${datos.referencia ?? "(ninguna)"}\n\n` +
-          `Hay que asignarlo a mano (ver cloudflare/recomanats/README.md).`);
+        console.log(`Pago sin local: ${JSON.stringify(datos)}`);
         return;
       }
       const osm = `${m[1]}/${m[2]}`;
@@ -128,19 +124,6 @@ export async function actualizar(env, osm, cambio) {
     if (r) return despues;
   }
   throw new Error("recomanats.json cambia demasiado a la vez");
-}
-
-async function avisar(env, ctx, asunto, texto) {
-  console.log(`AVISO: ${asunto}\n${texto}`);
-  await env.PRIVADO.put(`aviso:${Date.now()}`, JSON.stringify({ asunto, texto }),
-    { expirationTtl: 90 * 24 * 3600 });
-  if (!env.RESEND_API_KEY) return;
-  const envio = fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify({ from: env.AVISOS_DE, to: [env.AVISOS_A], subject: asunto, text: texto }),
-  }).then((r) => { if (!r.ok) console.log(`Resend: HTTP ${r.status}`); });
-  ctx?.waitUntil ? ctx.waitUntil(envio) : await envio;
 }
 
 /** Firma de Stripe: HMAC-SHA256 de "t.cuerpo" con el secreto del webhook. */

@@ -15,6 +15,13 @@ class LocalesConfig {
   static Uri pagoPara(String osmId) => Uri.parse(
       '$_pago?client_reference_id=${Uri.encodeQueryComponent(osmId.replaceAll('/', '_'))}');
 
+  /// Botón "Aparecer como destacado" de la ficha: en iPhone abre la página
+  /// para locales de la web (sin enlazar el pago desde la app, por las
+  /// normas de Apple); en Android, directamente el pago de Stripe con el
+  /// local ya indicado.
+  static Uri destacarPara(String osmId, String idioma, {required bool ios}) =>
+      ios ? paginaLocales(idioma) : pagoPara(osmId);
+
   /// Página para los locales en la web, en el idioma de la app.
   static Uri paginaLocales(String idioma) =>
       Uri.https('lat41lab.com', '/locals.html', {'lang': idioma});

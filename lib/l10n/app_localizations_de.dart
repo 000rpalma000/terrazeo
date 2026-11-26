@@ -336,24 +336,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get couldNotOpen => 'Konnte nicht geöffnet werden.';
 
   @override
-  String get recommended => 'Empfohlen';
+  String get recommended => 'Hervorgehoben';
 
   @override
-  String get onlyRecommended => 'Nur empfohlene';
+  String get onlyRecommended => 'Nur hervorgehobene';
 
   @override
   String get noRecommendedHere =>
-      'In dieser Gegend gibt es noch keine empfohlenen Lokale. Schalte den Filter aus, um alle Terrassen zu sehen.';
+      'In dieser Gegend gibt es noch keine hervorgehobenen Lokale. Schalte den Filter aus, um alle Terrassen zu sehen.';
 
   @override
   String get recommendedDisclosure =>
-      'Empfohlenes Lokal: Es zahlt dafür, hervorgehoben zu werden. Das ändert nichts an der Berechnung von Sonne, Schatten und Wind.';
+      'Gesponsert · zahlt, um hervorgehoben zu werden. Ändert nichts an der Berechnung von Sonne, Schatten und Wind.';
 
   @override
   String get ownerTitle => 'Ist das dein Lokal?';
 
   @override
-  String get ownerRecommend => 'Als Empfohlen erscheinen';
+  String get ownerRecommend => 'Hervorgehoben werden';
 
   @override
   String get ownerRecommendDetail =>
