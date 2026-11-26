@@ -534,6 +534,11 @@ out center geom tags qt;
 
   static final _reBares = RegExp('^($amenityBares)\$');
 
+  /// El mismo procesado que usa la app, para las pruebas con datos reales.
+  @visibleForTesting
+  static ZonaOsm parsearParaPruebas(List<dynamic> elementos) =>
+      _parsearElementos(elementos);
+
   static ZonaOsm _parsearElementos(List<dynamic> elements) {
     final bares = <Bar>[];
     final edificiosCrudos =
