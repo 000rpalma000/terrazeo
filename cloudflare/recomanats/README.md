@@ -16,6 +16,19 @@ recomendados en R2: `https://data.lat41lab.com/recomanats.json`.
 - **Desde la ficha:** en Android, el botón abre el pago de Stripe con el
   local ya indicado; en iPhone, la página `lat41lab.com/locals.html`.
 
+## Modo real y modo de prueba
+
+- **Secretos:** el Worker acepta la firma de dos webhooks de Stripe:
+  `STRIPE_WEBHOOK_SECRET` (el de prueba) y `STRIPE_WEBHOOK_SECRET_LIVE` (el
+  real).
+- **Eventos reales** (`livemode: true`): van a `recomanats.json`, que es la
+  lista que lee la app.
+- **Eventos de prueba:** van a `recomanats_prueba.json`
+  (`https://data.lat41lab.com/recomanats_prueba.json`) y a claves de KV con
+  el prefijo `prueba:`. Nunca salen en la app publicada.
+- **Ver los de prueba en la app:** se compila con
+  `--dart-define=RECOMANATS_URL=https://data.lat41lab.com/recomanats_prueba.json`.
+
 ## Eventos
 
 | Evento de Stripe | Qué hace |
@@ -89,5 +102,6 @@ npx wrangler kv key delete --remote --binding PRIVADO "sin_local:sub_XXXX"
 npm install
 npm test                                          # pruebas sin red
 npx wrangler deploy                               # Worker y pagos.lat41lab.com
-npx wrangler secret put STRIPE_WEBHOOK_SECRET     # pide el "whsec_…" (no se ve)
+npx wrangler secret put STRIPE_WEBHOOK_SECRET       # secreto del webhook de prueba
+npx wrangler secret put STRIPE_WEBHOOK_SECRET_LIVE  # secreto del webhook real
 ```

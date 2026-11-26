@@ -31,6 +31,7 @@ function nuevoKV() {
     m,
     async get(k, tipo) { const v = m.get(k); return v == null ? null : tipo === "json" ? JSON.parse(v) : v; },
     async put(k, v) { m.set(k, v); },
+    async delete(k) { m.delete(k); },
   };
 }
 
@@ -41,9 +42,9 @@ beforeEach(() => {
 });
 
 let n = 0;
-async function enviar(type, object, { firma = true, t = Math.floor(Date.now() / 1000) } = {}) {
-  const cuerpo = JSON.stringify({ id: `evt_${++n}`, type, data: { object } });
-  const v1 = createHmac("sha256", SECRETO).update(`${t}.${cuerpo}`).digest("hex");
+async function enviar(type, object, { firma = true, t = Math.floor(Date.now() / 1000), livemode = true, secreto = SECRETO } = {}) {
+  const cuerpo = JSON.stringify({ id: `evt_${++n}`, type, livemode, data: { object } });
+  const v1 = createHmac("sha256", secreto).update(`${t}.${cuerpo}`).digest("hex");
   const headers = firma ? { "stripe-signature": `t=${t},v1=${v1}` } : {};
   return worker.fetch(new Request("https://pagos.lat41lab.com/stripe/webhook", { method: "POST", body: cuerpo, headers }), env, {});
 }
@@ -122,7 +123,7 @@ test("pago sin local: no toca la lista y queda guardado para asignarlo", async (
 });
 
 test("un evento repetido se procesa una sola vez", async () => {
-  const cuerpo = JSON.stringify({ id: "evt_rep", type: "checkout.session.completed",
+  const cuerpo = JSON.stringify({ id: "evt_rep", type: "checkout.session.completed", livemode: true,
     data: { object: { id: "cs_6", client_reference_id: "node_6", subscription: "sub_6" } } });
   const t = Math.floor(Date.now() / 1000);
   const v1 = createHmac("sha256", SECRETO).update(`${t}.${cuerpo}`).digest("hex");
@@ -141,4 +142,31 @@ test("escrituras simultáneas no se pisan", async () => {
     enviar("checkout.session.completed", { id: "c", client_reference_id: "node_3", subscription: "s_c" }),
   ]);
   assert.deepEqual(locales().map((l) => l.osm).sort(), ["node/1", "node/2", "node/3"]);
+});
+
+test("eventos de prueba: a recomanats_prueba.json y claves aparte, nunca a la lista real", async () => {
+  await enviar("checkout.session.completed", { id: "cs_p", client_reference_id: "node_77", subscription: "sub_p" }, { livemode: false });
+  assert.ok(!r2.objetos.has("recomanats.json"));
+  const prueba = JSON.parse(r2.objetos.get("recomanats_prueba.json").cuerpo).locales;
+  assert.equal(prueba[0].osm, "node/77");
+  assert.ok(kv.m.has("prueba:sub:sub_p"));
+  assert.ok(!kv.m.has("sub:sub_p"));
+  await enviar("checkout.session.completed", { id: "cs_p2", subscription: "sub_p2" }, { livemode: false });
+  assert.ok(kv.m.has("prueba:sin_local:sub_p2"));
+});
+
+test("acepta la firma del secreto real y la del de prueba", async () => {
+  env.STRIPE_WEBHOOK_SECRET_LIVE = "whsec_real";
+  const r1 = await enviar("checkout.session.completed", { id: "cs_r", client_reference_id: "node_8", subscription: "s_r" }, { secreto: "whsec_real" });
+  assert.equal(r1.status, 200);
+  const r2b = await enviar("checkout.session.completed", { id: "cs_t", client_reference_id: "node_9", subscription: "s_t" }, { secreto: SECRETO, livemode: false });
+  assert.equal(r2b.status, 200);
+  assert.equal((await enviar("invoice.paid", {}, { secreto: "whsec_otro" })).status, 400);
+});
+
+test("si se cancela un pago sin local, sale de pendientes", async () => {
+  await enviar("checkout.session.completed", { id: "cs_x", subscription: "sub_x", customer_details: { name: "Prova SL" } });
+  assert.ok(kv.m.has("sin_local:sub_x"));
+  await enviar("customer.subscription.deleted", { id: "sub_x", status: "canceled", ended_at: Math.floor(Date.now() / 1000) });
+  assert.ok(!kv.m.has("sin_local:sub_x"));
 });
