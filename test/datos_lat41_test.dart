@@ -31,6 +31,7 @@ void main() {
     'n': [
       ['node/55', 41.3831, 2.1751, 'Bar Gòtic', 'bar', 1],
       ['way/66', 41.3832, 2.1752, '', 'cafe', 0],
+      ['node/77', 41.3833, 2.1753, 'Sin terraza', 'bar', -1, 'Mo-Su 10:00-20:00'],
     ],
   });
 
@@ -70,6 +71,29 @@ void main() {
     expect(b2.osmId, 'way/66');
     expect(b2.nombre, isNotEmpty); // sin nombre: el genérico de su tipo
     expect(b2.terrazaDeclarada, isFalse);
+  });
+
+  test('Terraza confirmada, sin confirmar y "no", y horario', () {
+    final els = DatosLat41.aElementos(cuerpo);
+    Bar bar(int id) => Bar.fromOverpass(els.firstWhere((e) => e['id'] == id));
+    expect(bar(55).terraza, Terraza.confirmada);
+    expect(bar(66).terraza, Terraza.sinConfirmar);
+    expect(bar(77).terraza, Terraza.no);
+    expect(bar(66).horario, isNull);
+    expect(bar(77).abiertoEn(DateTime(2026, 11, 25, 12)), isTrue);
+    expect(bar(77).abiertoEn(DateTime(2026, 11, 25, 21)), isFalse);
+    // Las filas de bares.json, igual.
+    final f = Bar.fromFila(
+        ['node/77', 41.3833, 2.1753, 'Sin terraza', 'bar', -1, 'Mo-Su 10:00-20:00']);
+    expect(f.terraza, Terraza.no);
+    expect(f.horario, isNotNull);
+    // Filas del formato anterior (sin horario).
+    expect(Bar.fromFila(['node/1', 41.0, 2.0, '', 'bar', 1]).terraza,
+        Terraza.confirmada);
+    // Otros valores de outdoor_seating que significan terraza.
+    for (final v in ['sidewalk', 'pedestrian_zone', 'parklet', 'only', 'Yes']) {
+      expect(Terraza.deEtiqueta(v, 'cafe'), Terraza.confirmada, reason: v);
+    }
   });
 
   test('Manifiesto: cubiertas, con datos y vacías', () {

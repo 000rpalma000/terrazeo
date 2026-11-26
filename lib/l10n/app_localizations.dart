@@ -615,6 +615,72 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos.'**
   String get computingShadeDetail;
+
+  /// No description provided for @onlyConfirmedTerraces.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo terrazas confirmadas'**
+  String get onlyConfirmedTerraces;
+
+  /// No description provided for @terraceUnconfirmedShort.
+  ///
+  /// In es, this message translates to:
+  /// **'terraza sin confirmar'**
+  String get terraceUnconfirmedShort;
+
+  /// No description provided for @hoursUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Horario no disponible.'**
+  String get hoursUnavailable;
+
+  /// No description provided for @hoursTerraceCaveat.
+  ///
+  /// In es, this message translates to:
+  /// **'Abierto a esta hora según OpenStreetMap. La terraza puede cerrar antes que el local.'**
+  String get hoursTerraceCaveat;
+
+  /// No description provided for @reportError.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisar de un error'**
+  String get reportError;
+
+  /// No description provided for @reportOsm.
+  ///
+  /// In es, this message translates to:
+  /// **'Corregir en OpenStreetMap'**
+  String get reportOsm;
+
+  /// No description provided for @reportOsmDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Abre una nota en openstreetmap.org en este punto. Las notas son públicas: cualquiera puede leerlas.'**
+  String get reportOsmDetail;
+
+  /// No description provided for @reportEmail.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribir a Lat41 Lab'**
+  String get reportEmail;
+
+  /// No description provided for @reportEmailSubject.
+  ///
+  /// In es, this message translates to:
+  /// **'Error en Terrazeo: {name}'**
+  String reportEmailSubject(String name);
+
+  /// No description provided for @reportEmailBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Local: {name}\n{url}\n\n¿Qué está mal?\n'**
+  String reportEmailBody(String name, String url);
+
+  /// No description provided for @couldNotOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'No se ha podido abrir.'**
+  String get couldNotOpen;
 }
 
 class _AppLocalizationsDelegate

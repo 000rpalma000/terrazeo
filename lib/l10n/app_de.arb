@@ -153,5 +153,16 @@
   "openSettings": "Einstellungen",
   "retry": "Erneut versuchen",
   "computingShade": "Schatten wird berechnet…",
-  "computingShadeDetail": "Die Gebäude in dieser Gegend werden noch geladen. Der Schatten wird in wenigen Sekunden aktualisiert."
+  "computingShadeDetail": "Die Gebäude in dieser Gegend werden noch geladen. Der Schatten wird in wenigen Sekunden aktualisiert.",
+  "onlyConfirmedTerraces": "Nur bestätigte Terrassen",
+  "terraceUnconfirmedShort": "Terrasse unbestätigt",
+  "hoursUnavailable": "Öffnungszeiten nicht verfügbar.",
+  "hoursTerraceCaveat": "Laut OpenStreetMap zu dieser Zeit geöffnet. Die Terrasse kann früher schließen als das Lokal.",
+  "reportError": "Fehler melden",
+  "reportOsm": "Auf OpenStreetMap korrigieren",
+  "reportOsmDetail": "Öffnet eine Notiz auf openstreetmap.org an dieser Stelle. Notizen sind öffentlich: Jeder kann sie lesen.",
+  "reportEmail": "Lat41 Lab schreiben",
+  "reportEmailSubject": "Fehler in Terrazeo: {name}",
+  "reportEmailBody": "Lokal: {name}\n{url}\n\nWas stimmt nicht?\n",
+  "couldNotOpen": "Konnte nicht geöffnet werden."
 }

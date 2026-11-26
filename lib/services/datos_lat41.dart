@@ -140,6 +140,8 @@ class DatosLat41 {
           if ((f[3] as String).isNotEmpty) 'name': f[3],
           'amenity': f[4],
           if (f[5] == 1) 'outdoor_seating': 'yes',
+          if (f[5] == -1) 'outdoor_seating': 'no',
+          if (f.length > 6 && (f[6] as String).isNotEmpty) 'opening_hours': f[6],
         },
       });
     }

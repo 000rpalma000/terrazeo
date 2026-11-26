@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config/map_config.dart';
 import '../l10n/app_localizations.dart';
@@ -95,6 +96,11 @@ class _TerracesScreenState extends State<TerracesScreen> {
   bool _capaLocales = true;
   static const _kCapaLocales = 'capa_locales';
 
+  /// Solo locales con `outdoor_seating` confirmado (por defecto se ven
+  /// también los que no tienen la etiqueta, en un estilo más discreto).
+  bool _soloConfirmadas = false;
+  static const _kSoloConfirmadas = 'solo_confirmadas';
+
   bool _cargando = true; // carga inicial (overlay)
   bool _cargandoZona = false; // descarga incremental al mover el mapa
   bool _error = false;
@@ -123,7 +129,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
   Future<void> _cargarPrefs() async {
     final sp = await SharedPreferences.getInstance();
     if (mounted) {
-      setState(() => _capaLocales = sp.getBool(_kCapaLocales) ?? true);
+      setState(() {
+        _capaLocales = sp.getBool(_kCapaLocales) ?? true;
+        _soloConfirmadas = sp.getBool(_kSoloConfirmadas) ?? false;
+      });
     }
     // La introducción sale en cada apertura.
     if (mounted) {
@@ -141,6 +150,23 @@ class _TerracesScreenState extends State<TerracesScreen> {
     final sp = await SharedPreferences.getInstance();
     await sp.setBool(_kCapaLocales, _capaLocales);
     _recalcularVisible();
+  }
+
+  Future<void> _toggleSoloConfirmadas() async {
+    setState(() => _soloConfirmadas = !_soloConfirmadas);
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kSoloConfirmadas, _soloConfirmadas);
+    _recalcularVisible();
+  }
+
+  /// Si el local se enseña a la hora [hora]: nunca los que dicen no tener
+  /// terraza; los sin confirmar según el interruptor; y no los que su
+  /// horario dice cerrados a esa hora (sin horario, o si no se entiende, sí
+  /// se enseñan).
+  bool _seMuestra(Bar b, DateTime hora) {
+    if (b.terraza == Terraza.no) return false;
+    if (_soloConfirmadas && b.terraza != Terraza.confirmada) return false;
+    return b.abiertoEn(hora) != false;
   }
 
   @override
@@ -463,8 +489,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
     // grueso del cálculo); la app queda como "toca un punto".
     final reports = <PointReport>[];
     if (_capaLocales) {
-      var visibles =
-          _baresPorId.values.where((b) => bounds.contains(b.punto)).toList();
+      var visibles = _baresPorId.values
+          .where((b) => bounds.contains(b.punto) && _seMuestra(b, hora))
+          .toList();
       if (visibles.length > _maxTerrazas) {
         visibles.sort((a, b) => Geo.distancia(centroV, a.punto)
             .compareTo(Geo.distancia(centroV, b.punto)));
@@ -483,6 +510,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
         if (a.provisional != b.provisional) return a.provisional ? 1 : -1;
         var c = a.comfort.level.index.compareTo(b.comfort.level.index);
         if (c != 0) return c;
+        // A igual confort, primero las terrazas confirmadas.
+        final ca = a.bar?.terrazaDeclarada ?? false;
+        final cb = b.bar?.terrazaDeclarada ?? false;
+        if (ca != cb) return ca ? -1 : 1;
         c = (a.bar?.prioridadTipo ?? 2).compareTo(b.bar?.prioridadTipo ?? 2);
         if (c != 0) return c;
         return Geo.distancia(centroV, a.punto)
@@ -869,9 +900,16 @@ class _TerracesScreenState extends State<TerracesScreen> {
                   height: 26,
                   child: GestureDetector(
                     onTap: () => _seleccionarBar(r),
+                    // Terraza sin confirmar: icono hueco y algo más pequeño.
                     child: Icon(
-                      Icons.local_cafe,
-                      size: r.bar?.osmId == sel?.bar?.osmId ? 26 : 20,
+                      r.bar!.terrazaDeclarada
+                          ? Icons.local_cafe
+                          : Icons.local_cafe_outlined,
+                      size: r.bar?.osmId == sel?.bar?.osmId
+                          ? 26
+                          : r.bar!.terrazaDeclarada
+                              ? 20
+                              : 17,
                       color: _colorReporte(r),
                     ),
                   ),
@@ -961,6 +999,15 @@ class _TerracesScreenState extends State<TerracesScreen> {
                       height: 14,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
+                  const Spacer(),
+                  FilterChip(
+                    label: Text(l10n.onlyConfirmedTerraces),
+                    selected: _soloConfirmadas,
+                    onSelected: (_) => _toggleSoloConfirmadas(),
+                    visualDensity: VisualDensity.compact,
+                    labelStyle: Theme.of(context).textTheme.labelSmall,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                 ],
               ),
               const SizedBox(height: 6),
@@ -1025,7 +1072,10 @@ class _TerracesScreenState extends State<TerracesScreen> {
                       ),
                       Text(
                         '${r.temperatureC != null ? '${l10n.temperature(r.temperatureC!.round())} · ' : ''}'
-                        '${_distancia(l10n, r.punto)}',
+                        '${_distancia(l10n, r.punto)}'
+                        '${r.bar!.terrazaDeclarada ? '' : ' · ${l10n.terraceUnconfirmedShort}'}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -1097,15 +1147,83 @@ class _TerracesScreenState extends State<TerracesScreen> {
               child: Text(l10n.terraceNotConfirmed,
                   style: Theme.of(context).textTheme.bodySmall),
             ),
+          if (r.bar != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                  r.bar!.horario == null
+                      ? l10n.hoursUnavailable
+                      : l10n.hoursTerraceCaveat,
+                  style: Theme.of(context).textTheme.bodySmall),
+            ),
           if (r.ajustado)
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(l10n.movedToOpenSpace,
                   style: Theme.of(context).textTheme.bodySmall),
             ),
+          if (r.bar != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _avisarError(r.bar!),
+                icon: const Icon(Icons.flag_outlined, size: 18),
+                label: Text(l10n.reportError),
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  /// "Avisar de un error": nota pública en OpenStreetMap o correo a Lat41
+  /// Lab. La app solo abre el navegador o el correo; no envía nada.
+  Future<void> _avisarError(Bar bar) async {
+    final l10n = AppLocalizations.of(context);
+    final lat = bar.punto.latitude.toStringAsFixed(6);
+    final lon = bar.punto.longitude.toStringAsFixed(6);
+    final enOsm = 'https://www.openstreetmap.org/${bar.osmId}';
+    final destino = await showModalBottomSheet<Uri>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.map_outlined),
+              title: Text(l10n.reportOsm),
+              subtitle: Text(l10n.reportOsmDetail),
+              onTap: () => Navigator.pop(
+                  ctx,
+                  Uri.https('www.openstreetmap.org', '/note/new',
+                          {'lat': lat, 'lon': lon})
+                      .replace(fragment: 'map=19/$lat/$lon')),
+            ),
+            ListTile(
+              leading: const Icon(Icons.mail_outline),
+              title: Text(l10n.reportEmail),
+              subtitle: const Text('hola@lat41lab.com'),
+              onTap: () => Navigator.pop(
+                  ctx,
+                  Uri.parse('mailto:hola@lat41lab.com'
+                      '?subject=${Uri.encodeComponent(l10n.reportEmailSubject(bar.nombre))}'
+                      '&body=${Uri.encodeComponent(l10n.reportEmailBody(bar.nombre, enOsm))}')),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (destino == null) return;
+    var ok = false;
+    try {
+      ok = await launchUrl(destino, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.couldNotOpen)));
+    }
   }
 
   Widget _tarjetaConfort(AppLocalizations l10n, PointReport r) {

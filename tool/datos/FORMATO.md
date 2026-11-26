@@ -34,7 +34,7 @@ La misma de las apps (`Tesela`): `i = floor(lat / 0.005)`,
   "v": 1,
   "t": "8276_329",
   "w": [[id, tipo, etiquetas, nodos, coordenadas], …],
-  "n": [["node/123", 41.38, 2.17, "nombre", "bar", 1], …]
+  "n": [["node/123", 41.38, 2.17, "nombre", "bar", 1, "Mo-Su 09:00-23:00"], …]
 }
 ```
 
@@ -60,7 +60,16 @@ La misma de las apps (`Tesela`): `i = floor(lat / 0.005)`,
 ### `n`: locales
 
 Igual que `assets/data/bares.json`: `[osmId, lat, lon, nombre, amenity,
-terraza]` (`terraza` = 1 si `outdoor_seating=yes|terrace` o biergarten).
+terraza, horario]`.
+
+- `terraza`: `1` confirmada (`outdoor_seating` = `yes`, `terrace`,
+  `sidewalk`, `street`, `pedestrian_zone`, `parklet` u `only`, o
+  `amenity=biergarten`); `-1` sin terraza (`outdoor_seating=no`); `0` sin
+  etiqueta (sin confirmar).
+- `horario`: `opening_hours` tal cual, o `""` si no tiene.
+
+Las apps anteriores leen solo los seis primeros campos y tratan como "sin
+terraza declarada" todo lo que no sea `1`, así que el cambio es compatible.
 Los locales que son *ways* usan el centro de su caja.
 
 - Caché HTTP: 1 día. Las apps los guardan 30 días.

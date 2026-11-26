@@ -49,6 +49,8 @@ VIAS = set(
 )
 OCIO = {"park", "garden", "common", "playground"}
 RE_BARES = re.compile(r"^(bar|pub|cafe|restaurant|biergarten|fast_food|ice_cream)$")
+# Valores de outdoor_seating que significan "tiene terraza".
+TERRAZA_SI = {"yes", "terrace", "sidewalk", "street", "pedestrian_zone", "parklet", "only"}
 FOOT_NO = {"no", "private"}
 ACCESS_NO = {"private", "no"}
 
@@ -104,14 +106,21 @@ class Recolector:
 
     def bar(self, tipo: str, ident: int, lat: float, lon: float, tags) -> None:
         amenity = tags.get("amenity", "")
-        outdoor = tags.get("outdoor_seating", "").lower()
+        outdoor = tags.get("outdoor_seating", "").strip().lower()
+        if outdoor in TERRAZA_SI or amenity == "biergarten":
+            terraza = 1
+        elif outdoor == "no":
+            terraza = -1
+        else:
+            terraza = 0  # sin etiqueta: terraza sin confirmar
         fila = [
             f"{tipo}/{ident}",
             round(lat, 6),
             round(lon, 6),
             tags.get("name", ""),
             amenity,
-            1 if outdoor in ("yes", "terrace") or amenity == "biergarten" else 0,
+            terraza,
+            tags.get("opening_hours", "").strip(),
         ]
         i, j = tesela(lat, lon)
         if self.en_cobertura(i, j):

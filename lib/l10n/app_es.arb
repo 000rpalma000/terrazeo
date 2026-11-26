@@ -153,5 +153,33 @@
   "openSettings": "Ajustes",
   "retry": "Reintentar",
   "computingShade": "Calculando sombra…",
-  "computingShadeDetail": "Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos."
+  "computingShadeDetail": "Aún estoy descargando los edificios de esta zona. La sombra se actualizará en unos segundos.",
+  "onlyConfirmedTerraces": "Solo terrazas confirmadas",
+  "terraceUnconfirmedShort": "terraza sin confirmar",
+  "hoursUnavailable": "Horario no disponible.",
+  "hoursTerraceCaveat": "Abierto a esta hora según OpenStreetMap. La terraza puede cerrar antes que el local.",
+  "reportError": "Avisar de un error",
+  "reportOsm": "Corregir en OpenStreetMap",
+  "reportOsmDetail": "Abre una nota en openstreetmap.org en este punto. Las notas son públicas: cualquiera puede leerlas.",
+  "reportEmail": "Escribir a Lat41 Lab",
+  "reportEmailSubject": "Error en Terrazeo: {name}",
+  "@reportEmailSubject": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportEmailBody": "Local: {name}\n{url}\n\n¿Qué está mal?\n",
+  "@reportEmailBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotOpen": "No se ha podido abrir."
 }

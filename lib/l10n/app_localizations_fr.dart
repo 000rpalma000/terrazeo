@@ -297,4 +297,43 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get computingShadeDetail =>
       'Téléchargement des bâtiments du quartier en cours. L\'ombre se mettra à jour dans quelques secondes.';
+
+  @override
+  String get onlyConfirmedTerraces => 'Terrasses confirmées uniquement';
+
+  @override
+  String get terraceUnconfirmedShort => 'terrasse non confirmée';
+
+  @override
+  String get hoursUnavailable => 'Horaires non disponibles.';
+
+  @override
+  String get hoursTerraceCaveat =>
+      'Ouvert à cette heure selon OpenStreetMap. La terrasse peut fermer avant l\'établissement.';
+
+  @override
+  String get reportError => 'Signaler une erreur';
+
+  @override
+  String get reportOsm => 'Corriger sur OpenStreetMap';
+
+  @override
+  String get reportOsmDetail =>
+      'Ouvre une note sur openstreetmap.org à cet endroit. Les notes sont publiques : tout le monde peut les lire.';
+
+  @override
+  String get reportEmail => 'Écrire à Lat41 Lab';
+
+  @override
+  String reportEmailSubject(String name) {
+    return 'Erreur dans Terrazeo : $name';
+  }
+
+  @override
+  String reportEmailBody(String name, String url) {
+    return 'Établissement : $name\n$url\n\nQu\'est-ce qui ne va pas ?\n';
+  }
+
+  @override
+  String get couldNotOpen => 'Impossible de l\'ouvrir.';
 }

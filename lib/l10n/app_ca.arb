@@ -91,5 +91,16 @@
   "openSettings": "Ajustos",
   "retry": "Torna-ho a provar",
   "computingShade": "Calculant l'ombra…",
-  "computingShadeDetail": "Encara estic baixant els edificis d'aquesta zona. L'ombra s'actualitzarà d'aquí a uns segons."
+  "computingShadeDetail": "Encara estic baixant els edificis d'aquesta zona. L'ombra s'actualitzarà d'aquí a uns segons.",
+  "onlyConfirmedTerraces": "Només terrasses confirmades",
+  "terraceUnconfirmedShort": "terrassa sense confirmar",
+  "hoursUnavailable": "Horari no disponible.",
+  "hoursTerraceCaveat": "Obert a aquesta hora segons OpenStreetMap. La terrassa pot tancar abans que el local.",
+  "reportError": "Avisar d'un error",
+  "reportOsm": "Corregir a OpenStreetMap",
+  "reportOsmDetail": "Obre una nota a openstreetmap.org en aquest punt. Les notes són públiques: qualsevol les pot llegir.",
+  "reportEmail": "Escriure a Lat41 Lab",
+  "reportEmailSubject": "Error a Terrazeo: {name}",
+  "reportEmailBody": "Local: {name}\n{url}\n\nQuè hi ha malament?\n",
+  "couldNotOpen": "No s'ha pogut obrir."
 }
