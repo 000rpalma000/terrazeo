@@ -24,6 +24,10 @@ from pathlib import Path
 GEOFABRIK = "https://download.geofabrik.de/"
 AGENTE = "lat41lab-datos (GitHub Actions)"
 MARGEN = 0.02  # grados alrededor de cada caja: calles que entran desde fuera
+# Geofabrik a veces rechaza conexiones si llegan muchas a la vez: reintentos
+# con espera, también ante "connection refused".
+CURL = ["curl", "-sSfL", "--retry", "6", "--retry-delay", "30", "--retry-all-errors",
+        "-A", AGENTE]
 
 
 def run(*cmd: str) -> None:
@@ -50,9 +54,9 @@ def main() -> None:
     fuentes = []
     for k, ruta in enumerate(extractos):
         destino = trabajo / f"fuente{k}.osm.pbf"
-        run("curl", "-sSfL", "--retry", "3", "-A", AGENTE, "-o", str(destino), GEOFABRIK + ruta)
+        run(*CURL, "-o", str(destino), GEOFABRIK + ruta)
         esperado = subprocess.run(
-            ["curl", "-sSfL", "--retry", "3", "-A", AGENTE, GEOFABRIK + ruta + ".md5"],
+            [*CURL, GEOFABRIK + ruta + ".md5"],
             check=True, capture_output=True, text=True).stdout.split()[0]
         if md5(destino) != esperado:
             sys.exit(f"MD5 distinto en {ruta}")
@@ -64,18 +68,16 @@ def main() -> None:
     else:
         fuente = fuentes[0]
 
-    # Un recorte por ciudad, en una sola pasada por el extracto.
-    config = {"directory": str(trabajo), "extracts": []}
+    # Un recorte por ciudad, de uno en uno: varios a la vez sobre un
+    # extracto grande (Ucrania, 7 ciudades) agotan la memoria del runner.
+    recortes = []
     for c in ciudades:
         s, w, n, e = c["caja"]
-        config["extracts"].append({
-            "output": f"ciudad_{c['id']}.osm.pbf",
-            "bbox": [w - MARGEN, s - MARGEN, e + MARGEN, n + MARGEN],
-        })
-    (trabajo / "recortes.json").write_text(json.dumps(config))
-    run("osmium", "extract", "--overwrite", "--strategy", "complete_ways",
-        "-c", str(trabajo / "recortes.json"), str(fuente))
-    recortes = [str(trabajo / x["output"]) for x in config["extracts"]]
+        salida_c = trabajo / f"ciudad_{c['id']}.osm.pbf"
+        run("osmium", "extract", "--overwrite", "--strategy", "complete_ways",
+            "-b", f"{w - MARGEN},{s - MARGEN},{e + MARGEN},{n + MARGEN}",
+            "-o", str(salida_c), str(fuente))
+        recortes.append(str(salida_c))
     salida = trabajo / "grupo.osm.pbf"
     if len(recortes) > 1:
         run("osmium", "merge", "--overwrite", "-o", str(salida), *recortes)

@@ -61,7 +61,7 @@ python3 tool/datos/generar_teselas.py /tmp/trabajo/grupo.osm.pbf /tmp/salida \
 `.github/workflows/datos-osm.yml` lo regenera el día 2 de cada mes (y a mano
 desde la pestaña *Actions*, para todos los grupos o solo algunos):
 
-1. Una tarea por grupo, hasta 10 a la vez: descarga sus extractos, recorta
+1. Una tarea por grupo, hasta 5 a la vez: descarga sus extractos, recorta
    las ciudades (`osmium extract`), genera y sube sus cuadrículas.
 2. Al final, `unir_manifiestos.py` junta los manifiestos de cada grupo y se
    sube `manifest.json`, siempre lo último. Si un grupo falla, conserva su
@@ -84,6 +84,42 @@ a los usuarios en, como mucho, un mes.
 
 Una línea en `ZONAS` de `generar_teselas.py` (y otro extracto de Geofabrik
 si queda fuera de Cataluña). El manifiesto admite varias zonas.
+
+## `ciutats.json`
+
+Al final de cada ejecución, `generar_ciutats.py` publica
+`https://data.lat41lab.com/ciutats.json` con las ciudades que de verdad
+tienen datos ese mes: nombre en ca/es/en, país (código y nombre), centro,
+caja y `venda_recomanats` (si allí se ofrece "Recomanat"; de momento solo
+España, campo de `ciudades.json`).
+
+- **En las apps:** apartado "Ciutats disponibles" de "Sobre l'app", aviso
+  fuera de cobertura y botón "Apareix com a Recomanat" solo donde se vende.
+- **En lat41lab.com:** se puede leer desde el navegador, siempre que el
+  bucket de R2 permita la web como origen. Esto se configura en Cloudflare →
+  R2 → `lat41lab-datos` → Settings → CORS policy:
+
+  ```json
+  [{"AllowedOrigins": ["https://lat41lab.com", "https://www.lat41lab.com"],
+    "AllowedMethods": ["GET"], "MaxAgeSeconds": 86400}]
+  ```
+
+  y en la página, por ejemplo:
+
+  ```html
+  <ul id="ciutats"></ul>
+  <script>
+    const idioma = new URLSearchParams(location.search).get("lang") || "ca";
+    fetch("https://data.lat41lab.com/ciutats.json").then(r => r.json()).then(d => {
+      const ul = document.getElementById("ciutats");
+      for (const c of d.ciutats) {
+        const li = document.createElement("li");
+        li.textContent = `${c.nom[idioma] || c.nom.en} (${c.pais_nom[idioma] || c.pais_nom.en})`;
+        ul.appendChild(li);
+      }
+    });
+  </script>
+  ```
 
 ## Licencia
 

@@ -2,7 +2,8 @@
 """Recalcula en ciudades.json la caja, los extractos de Geofabrik y el grupo
 de cada ciudad.
 
-Uso (tras añadir o cambiar una ciudad: id, nombre, pais, centro, radio_km):
+Uso (tras añadir o cambiar una ciudad: id, nombre, nombres {ca, es, en},
+pais, centro, radio_km y venda_recomanats):
     curl -o /tmp/index-v1.json https://download.geofabrik.de/index-v1.json
     python3 tool/datos/elegir_extractos.py tool/datos/ciudades.json /tmp/index-v1.json
 
@@ -104,8 +105,9 @@ def main() -> None:
         primero.setdefault(r, c)
         c["grupo"] = f"{primero[r]['pais']}-{primero[r]['id']}"
 
-    claves = ["id", "nombre", "pais", "centro", "radio_km", "caja", "extractos", "grupo"]
-    ruta.write_text("[\n" + ",\n".join(json.dumps({k: c[k] for k in claves}, ensure_ascii=False)
+    claves = ["id", "nombre", "nombres", "pais", "centro", "radio_km", "caja", "extractos",
+              "grupo", "venda_recomanats"]
+    ruta.write_text("[\n" + ",\n".join(json.dumps({k: c.get(k) for k in claves}, ensure_ascii=False)
                                        for c in ciudades) + "\n]\n")
     print(f"{len(ciudades)} zonas, {len({c['grupo'] for c in ciudades})} grupos, "
           f"{len(por_ext)} extractos", file=sys.stderr)
