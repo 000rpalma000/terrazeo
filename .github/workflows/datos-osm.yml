@@ -104,16 +104,7 @@ jobs:
           pattern: manifiesto-*
           path: partes
 
-      - name: Juntar manifiestos
-        run: |
-          curl -sSfL -o anterior.json https://data.lat41lab.com/osm/v1/manifest.json || true
-          python3 tool/datos/unir_manifiestos.py tool/datos/ciudades.json partes \
-            salida/manifest.json --anterior anterior.json
-          # Las ciudades que de verdad tienen datos (apps y lat41lab.com).
-          python3 tool/datos/generar_ciutats.py tool/datos/ciudades.json \
-            salida/manifest.json salida/ciutats.json
-
-      - name: Subir manifest.json a R2
+      - name: Juntar manifiestos y subirlos a R2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -123,6 +114,18 @@ jobs:
           ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           BUCKET: ${{ vars.R2_BUCKET }}
         run: |
+          # El manifiesto anterior, directamente de R2: el de data.lat41lab.com
+          # puede ser una copia vieja de la caché de Cloudflare (y entonces se
+          # perderían las ciudades que no se generan en esta ejecución).
+          # Si no se puede leer, mejor fallar que publicar uno incompleto.
+          aws s3 cp "s3://$BUCKET/osm/v1/manifest.json" anterior.json \
+            --endpoint-url "$ENDPOINT" --only-show-errors
+          python3 tool/datos/unir_manifiestos.py tool/datos/ciudades.json partes \
+            salida/manifest.json --anterior anterior.json
+          # Las ciudades que de verdad tienen datos (apps y lat41lab.com).
+          python3 tool/datos/generar_ciutats.py tool/datos/ciudades.json \
+            salida/manifest.json salida/ciutats.json
+
           aws s3 cp salida/manifest.json "s3://$BUCKET/osm/v1/manifest.json" \
             --endpoint-url "$ENDPOINT" --content-type application/json \
             --cache-control "public, max-age=3600"

@@ -26,7 +26,7 @@ AGENTE = "lat41lab-datos (GitHub Actions)"
 MARGEN = 0.02  # grados alrededor de cada caja: calles que entran desde fuera
 # Geofabrik a veces rechaza conexiones si llegan muchas a la vez: reintentos
 # con espera, también ante "connection refused".
-CURL = ["curl", "-sSfL", "--retry", "6", "--retry-delay", "30", "--retry-all-errors",
+CURL = ["curl", "-sSfL", "--retry", "10", "--retry-delay", "60", "--retry-all-errors",
         "-A", AGENTE]
 
 
