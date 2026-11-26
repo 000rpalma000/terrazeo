@@ -859,6 +859,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
           urlTemplate: MapConfig.urlTemplate,
           userAgentPackageName: MapConfig.userAgent,
           retinaMode: RetinaMode.isHighDensity(context),
+          tileProvider: MapConfig.proveedorTeselas(),
         ),
         if (haciaSol != null)
           PolylineLayer(polylines: [
@@ -924,6 +925,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
               ),
           ],
         ),
+        ?MapConfig.logoProveedor(),
         // Siempre visible, como pide OpenStreetMap (y el proveedor del mapa).
         Align(
           alignment: Alignment.bottomRight,
