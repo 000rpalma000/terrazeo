@@ -82,22 +82,23 @@ open build/ios/archive/Runner.xcarchive   # Xcode → Distribute App → App Sto
    días seguidos**. Ve buscando 12 amigos con Android (solo tienen que
    apuntarse con su Gmail e instalarla). Cuenta ese tiempo en el plan.
 
-### Clave de firma (una sola vez por app; ¡guárdala bien!)
-```sh
-cd android
-keytool -genkey -v -keystore ~/claves/terrazeo-upload.jks -keyalg RSA \
-        -keysize 2048 -validity 10000 -alias upload
-```
-Crea `android/key.properties` (ya está en `.gitignore`, **no se sube**):
-```
-storePassword=…
-keyPassword=…
-keyAlias=upload
-storeFile=/Users/<tú>/claves/terrazeo-upload.jks
-```
-Con ese archivo, `build.gradle.kts` firma solo con tu clave. Activa **Play App
-Signing** (viene por defecto): Google guarda la clave final y, si pierdes la
-de subida, se puede reponer.
+### Clave de subida (hecha el 27/11/2026)
+Está **fuera del repo**, en `~/keys/lat41lab/terrazeo/`:
+
+| Archivo | Qué es |
+|---|---|
+| `upload-keystore.jks` | clave de subida (PKCS12, RSA 4096, alias `upload`, válida hasta 2054) |
+| `key.properties` | contraseña, alias y ruta; lo lee `android/app/build.gradle.kts` |
+| `upload_certificate.pem` | certificado público (para pedir a Google un cambio de clave si se pierde) |
+| `huellas.txt` | huellas SHA-1 y SHA-256 del certificado |
+
+Guarda la contraseña (está en `key.properties`) y una copia del `.jks` en el
+gestor de contraseñas. Con **Play App Signing** Google guarda la clave de
+firma; si se pierde la de subida, se pide otra desde Play Console
+(Configuración → Integridad de la app) con un `upload_certificate.pem` nuevo.
+
+Sin `key.properties`, `flutter build appbundle` **falla** a propósito (un AAB
+firmado con la clave de debug no sirve para Google Play).
 
 ### Crear la app y subir
 1. Play Console → Crear app → nombre, idioma (español), app, gratis.
@@ -110,8 +111,11 @@ de subida, se puede reponer.
    móvil, descripción breve (80) y completa.
 4. Compila:
    ```sh
-   flutter build appbundle --release --dart-define-from-file=dart_defines.json
+   flutter build appbundle --release --build-name=1.0.0 --build-number=1 \
+       --dart-define-from-file=dart_defines.json
    ```
+   (sube `--build-number` en cada envío: Google Play no acepta dos AAB con el
+   mismo versionCode).
    y sube `build/app/outputs/bundle/release/app-release.aab` a **Pruebas →
    Prueba cerrada**, añade a los 12 testers y espera los 14 días.
 5. Después: **Solicitar acceso a producción** → revisión (unos días) →

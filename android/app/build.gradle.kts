@@ -6,10 +6,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Clave de subida a Google Play (NO se sube al repo: ver .gitignore).
+// Clave de subida a Google Play (Play App Signing: Google guarda la de
+// firma). Fuera del repo, en ~/keys/lat41lab/terrazeo/key.properties; también
+// vale android/key.properties (excluido en .gitignore). Ver PUBLICAR.md.
 val keystoreProperties = Properties().apply {
-    val f = rootProject.file("key.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
+    val f = listOf(
+        File(System.getProperty("user.home"), "keys/lat41lab/terrazeo/key.properties"),
+        rootProject.file("key.properties"),
+    ).firstOrNull { it.exists() }
+    if (f != null) f.inputStream().use { load(it) }
 }
 
 android {
@@ -46,14 +51,25 @@ android {
 
     buildTypes {
         release {
-            // Con android/key.properties (ver PUBLICAR.md) firma con tu clave de
-            // subida; sin él, con la de debug (solo para probar).
+            // Con la clave de subida firma con ella; sin ella, con la de debug
+            // (solo para probar con `flutter run --release`: el AAB para Google
+            // Play no se deja generar así, ver abajo).
             signingConfig = if (keystoreProperties.isEmpty) {
                 signingConfigs.getByName("debug")
             } else {
                 signingConfigs.getByName("release")
             }
         }
+    }
+}
+
+// Un AAB firmado con la clave de debug lo rechaza Google Play: mejor fallar.
+gradle.taskGraph.whenReady {
+    if (keystoreProperties.isEmpty && allTasks.any { it.name == "bundleRelease" }) {
+        throw GradleException(
+            "Falta la clave de subida (~/keys/lat41lab/terrazeo/key.properties): " +
+                "no se genera un AAB de release firmado con la clave de debug.",
+        )
     }
 }
 

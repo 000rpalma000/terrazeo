@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'l10n/app_localizations.dart';
@@ -5,6 +6,9 @@ import 'screens/terraces_screen.dart';
 import 'services/locale_controller.dart';
 
 Future<void> main() async {
+  // En la versión publicada, los mensajes de diagnóstico no van al registro
+  // del sistema (logcat / consola).
+  if (kReleaseMode) debugPrint = (String? message, {int? wrapWidth}) {};
   WidgetsFlutterBinding.ensureInitialized();
   final localeController = LocaleController();
   await localeController.cargar();
