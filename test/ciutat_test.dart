@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
@@ -36,5 +37,35 @@ void main() {
     expect(c[1].paisNom('ca'), 'Regne Unit');
     expect(c[0].vendaRecomanats, isTrue);
     expect(c[1].vendaRecomanats, isFalse);
+  });
+
+  test('Regió Metropolitana: dentro de la caja solo cuenta el contorno real',
+      () {
+    // ciutats.json generado por generar_ciutats.py (Barcelona y Madrid).
+    final c = Ciutat.parse(File('test/fixtures/ciutats_regio.json').readAsStringSync());
+    final bcn = c.firstWhere((x) => x.id == 'barcelona');
+    final mad = c.firstWhere((x) => x.id == 'madrid');
+    expect(bcn.contorn, isNotEmpty);
+    expect(mad.contorn, isEmpty); // ciudad con caja: como siempre
+    expect(bcn.nom('ca'), 'Barcelona i àrea metropolitana');
+    for (final (nom, p) in [
+      ('Barcelona', const LatLng(41.3874, 2.1686)),
+      ('Granollers', const LatLng(41.608, 2.287)),
+      ('Vilafranca del Penedès', const LatLng(41.346, 1.698)),
+      ('Sitges', const LatLng(41.237, 1.805)),
+      ('Castellterçol', const LatLng(41.751, 2.120)),
+    ]) {
+      expect(bcn.conte(p), isTrue, reason: nom);
+    }
+    // Dentro de la caja de la Regió, pero fuera de sus 164 municipios.
+    for (final (nom, p) in [
+      ('Igualada', const LatLng(41.579, 1.617)),
+      ('Moià', const LatLng(41.811, 2.096)),
+      ('Manresa', const LatLng(41.728, 1.824)),
+      ('Mar, a 20 km de la costa', const LatLng(41.30, 2.50)),
+    ]) {
+      expect(bcn.conte(p), isFalse, reason: nom);
+    }
+    expect(mad.conte(const LatLng(40.4168, -3.7038)), isTrue);
   });
 }

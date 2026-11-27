@@ -20,6 +20,11 @@ Uso (herramienta local; la tarea mensual solo lee el resultado):
   [i0, i1, j0, j1] (inclusive): tramos de cada fila, juntando las filas
   seguidas con el mismo tramo.
 
+- contorno: el de la zona, ensanchado 300 m y simplificado (~100 m), para
+  el aviso de "fuera de cobertura" de las apps (va en ciutats.json).
+  Polígonos [lat0, lon0, lat1, lon1, …] con 4 decimales, solo el anillo
+  exterior.
+
 Los límites casi nunca cambian: basta con rehacerlo si cambia la zona.
 """
 
@@ -118,6 +123,9 @@ def main() -> None:
         s, w, n, e = min(s, cs), min(w, cw), max(n, cn), max(e, ce)
 
     rects = rectangulos(celdas)
+    simple = zona.buffer(0.003).simplify(0.001)
+    contorno = [[round(v, 4) for x, y in pol.exterior.coords for v in (y, x)]
+                for pol in getattr(simple, "geoms", [simple])]
     assert {(i, j) for i0, i1, j0, j1 in rects
             for i in range(i0, i1 + 1) for j in range(j0, j1 + 1)} == celdas
     km2 = zona.area * 111.32 ** 2 * math.cos(math.radians((s + n) / 2))
@@ -131,9 +139,11 @@ def main() -> None:
         "caja": [round(s, 4), round(w, 4), round(n, 4), round(e, 4)],
         "cuadriculas": len(celdas),
         "rects": rects,
+        "contorno": contorno,
     }, ensure_ascii=False, indent=1))
     print(f"{a.nombre}: {len(partes)} límites, {km2:.0f} km², {len(celdas)} cuadrículas "
-          f"en {len(rects)} rectángulos → {a.salida}", file=sys.stderr)
+          f"en {len(rects)} rectángulos, contorno de {sum(len(c) // 2 for c in contorno)} "
+          f"puntos → {a.salida}", file=sys.stderr)
 
 
 if __name__ == "__main__":

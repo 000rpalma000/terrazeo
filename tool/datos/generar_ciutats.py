@@ -14,7 +14,12 @@ Formato:
     {"v": 1, "generado": "...", "ciutats": [
       {"id": "barcelona", "nom": {"ca": "Barcelona", "es": "...", "en": "..."},
        "pais": "es", "pais_nom": {"ca": "Espanya", "es": "España", "en": "Spain"},
-       "centre": [41.39, 2.17], "caixa": [s, w, n, e], "venda_recomanats": true}, …]}
+       "centre": [41.39, 2.17], "caixa": [s, w, n, e], "venda_recomanats": true,
+       "contorn": [[lat0, lon0, lat1, lon1, …], …]}, …]}
+
+"contorn" (opcional): solo en las zonas hechas con límites oficiales (la
+Regió Metropolitana de Barcelona). Polígonos simplificados, anillo
+exterior: un punto está en la ciudad si está en la caja y en alguno.
 """
 
 from __future__ import annotations
@@ -48,7 +53,8 @@ PAISOS = {
 
 
 def main() -> None:
-    ciudades = json.loads(Path(sys.argv[1]).read_text())
+    ruta = Path(sys.argv[1])
+    ciudades = json.loads(ruta.read_text())
     manifiesto = json.loads(Path(sys.argv[2]).read_text())
     # Sin "g": manifiesto de antes de las ciudades (solo Barcelona).
     cob = manifiesto.get("cobertura", [])
@@ -64,6 +70,9 @@ def main() -> None:
         if c["grupo"] not in con_datos or not cubierta(*c["centro"]):
             continue
         ca, es, en = PAISOS[c["pais"]]
+        extra = {}
+        if c.get("limites"):
+            extra["contorn"] = json.loads((ruta.parent / c["limites"]).read_text())["contorno"]
         ciutats.append({
             "id": c["id"],
             "nom": c["nombres"],
@@ -72,6 +81,7 @@ def main() -> None:
             "centre": c["centro"],
             "caixa": c["caja"],
             "venda_recomanats": bool(c.get("venda_recomanats")),
+            **extra,
         })
     salida = {
         "v": 1,
