@@ -23,7 +23,11 @@ class DatosLat41 {
   /// Carpeta donde guardar el manifiesto (para arrancar sin red).
   final Future<Directory?> Function()? directorio;
 
-  static const _vigenciaManifiesto = Duration(hours: 24);
+  /// Durante este tiempo se usa el manifiesto guardado sin preguntar nada.
+  /// Pasado, se pregunta a Cloudflare si ha cambiado (`If-None-Match`): si no,
+  /// responde 304 sin cuerpo y se sigue con el guardado. Así una zona nueva
+  /// llega como mucho en 1 hora, sin bajar los ~3 MB del manifiesto cada vez.
+  static const _vigenciaManifiesto = Duration(hours: 1);
 
   Future<Manifiesto?>? _manifiesto;
 
@@ -38,7 +42,8 @@ class DatosLat41 {
   Future<Manifiesto?> _cargarManifiesto() async {
     final dir = await directorio?.call();
     final f = dir == null ? null : File('${dir.path}/lat41_manifest.json');
-    String? guardado;
+    final fEtag = dir == null ? null : File('${dir.path}/lat41_manifest.etag');
+    String? guardado, etag;
     if (f != null && await f.exists()) {
       try {
         guardado = await f.readAsString();
@@ -46,18 +51,33 @@ class DatosLat41 {
             _vigenciaManifiesto) {
           return Manifiesto.parse(guardado);
         }
+        if (await fEtag!.exists()) etag = (await fEtag.readAsString()).trim();
       } catch (_) {}
     }
     try {
-      final r = await _client
-          .get(Uri.parse('$base/manifest.json'))
-          .timeout(const Duration(seconds: 8));
+      final r = await _client.get(Uri.parse('$base/manifest.json'), headers: {
+        if (guardado != null && etag != null && etag.isNotEmpty)
+          'If-None-Match': etag,
+      }).timeout(const Duration(seconds: 8));
+      if (r.statusCode == 304 && guardado != null) {
+        final m = Manifiesto.parse(guardado);
+        try {
+          await f!.setLastModified(DateTime.now()); // otra hora sin preguntar
+        } catch (_) {}
+        return m;
+      }
       if (r.statusCode == 200) {
         final txt = utf8.decode(r.bodyBytes);
         final m = Manifiesto.parse(txt);
         if (f != null) {
           try {
             await f.writeAsString(txt);
+            final nueva = r.headers['etag'];
+            if (nueva != null) {
+              await fEtag!.writeAsString(nueva);
+            } else if (await fEtag!.exists()) {
+              await fEtag.delete();
+            }
           } catch (_) {}
         }
         return m;

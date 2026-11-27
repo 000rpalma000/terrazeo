@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:terrazeo/models/bar.dart';
 import 'package:terrazeo/services/datos_lat41.dart';
 
@@ -111,5 +114,45 @@ void main() {
     expect(m.vacia(8270, 335), isTrue); // cubierta y sin nada: mar
     expect(m.cubre(8082, -561), isFalse); // Madrid: por Overpass
     expect(m.vacia(8082, -561), isFalse);
+  });
+
+  test('Manifiesto: pasada 1 hora pregunta con ETag; 304 usa el guardado', () async {
+    final dir = await Directory.systemTemp.createTemp('lat41_');
+    addTearDown(() => dir.delete(recursive: true));
+    String manif(int i1) => jsonEncode({
+          'v': 1,
+          'cobertura': [
+            {'i0': 8263, 'i1': i1, 'j0': 310, 'j1': 337},
+          ],
+          'cuadriculas': <String, String>{},
+        });
+    final pedidas = <String?>[];
+    var actual = manif(8280), etag = '"a"';
+    final cliente = MockClient((req) async {
+      final si = req.headers['If-None-Match'];
+      pedidas.add(si);
+      if (si == etag) return http.Response('', 304);
+      return http.Response(actual, 200, headers: {'etag': etag});
+    });
+    Future<Manifiesto?> cargar() =>
+        DatosLat41(cliente, base: 'https://x', directorio: () async => dir)
+            .manifiesto();
+    final f = File('${dir.path}/lat41_manifest.json');
+
+    expect((await cargar())!.cubre(8290, 330), isFalse);
+    expect(pedidas, [null]);
+    // Dentro de la hora: ni pregunta.
+    await cargar();
+    expect(pedidas, [null]);
+    // Pasada la hora, sin cambios: 304 y sigue con el guardado.
+    await f.setLastModified(DateTime.now().subtract(const Duration(hours: 2)));
+    expect((await cargar())!.cubre(8290, 330), isFalse);
+    expect(pedidas, [null, '"a"']);
+    // Zona nueva publicada: llega a la hora siguiente.
+    actual = manif(8295);
+    etag = '"b"';
+    await f.setLastModified(DateTime.now().subtract(const Duration(hours: 2)));
+    expect((await cargar())!.cubre(8290, 330), isTrue);
+    expect(pedidas, [null, '"a"', '"a"']);
   });
 }
