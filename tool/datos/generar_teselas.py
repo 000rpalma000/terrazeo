@@ -90,23 +90,35 @@ def coords_compactas(pts: list[tuple[float, float]]) -> list[int]:
 
 
 class Recolector:
-    def __init__(self, cajas: list[tuple[float, float, float, float]], grupo: str = ""):
+    def __init__(self, cajas: list[tuple[float, float, float, float]], grupo: str = "",
+                 rects: list[list[list[int]] | None] | None = None):
+        """[cajas]: una por zona. [rects]: para las zonas con límites
+        (zona_limites.py), sus rectángulos de cuadrículas [i0, i1, j0, j1];
+        `None` en las zonas que son una caja."""
+        rects = rects or [None] * len(cajas)
         # Margen de una cuadrícula: vías que entran desde fuera de la zona.
         self.cajas = [(s - TAM_LAT, w - TAM_LON, n + TAM_LAT, e + TAM_LON) for s, w, n, e in cajas]
         self.cobs = []
-        for s, w, n, e in cajas:
-            c = {"i0": tesela(s, w)[0], "j0": tesela(s, w)[1],
-                 "i1": tesela(n, e)[0], "j1": tesela(n, e)[1]}
-            if grupo:
-                c["g"] = grupo  # para conservarla si un mes falla su tarea
-            self.cobs.append(c)
+        for (s, w, n, e), rs in zip(cajas, rects):
+            if rs is None:
+                rs = [[tesela(s, w)[0], tesela(n, e)[0], tesela(s, w)[1], tesela(n, e)[1]]]
+            for i0, i1, j0, j1 in rs:
+                c = {"i0": i0, "j0": j0, "i1": i1, "j1": j1}
+                if grupo:
+                    c["g"] = grupo  # para conservarla si un mes falla su tarea
+                self.cobs.append(c)
+        # Conjunto de cuadrículas cubiertas: con límites son cientos de
+        # rectángulos y se consulta por cada edificio.
+        self.cubiertas = {(i, j) for c in self.cobs
+                          for i in range(c["i0"], c["i1"] + 1)
+                          for j in range(c["j0"], c["j1"] + 1)}
         self.vias: dict[tuple[int, int], list] = defaultdict(list)
         self.bares: dict[tuple[int, int], list] = defaultdict(list)
         self.filas_bares: list[list] = []
         self.cuenta = defaultdict(int)
 
     def en_cobertura(self, i: int, j: int) -> bool:
-        return any(c["i0"] <= i <= c["i1"] and c["j0"] <= j <= c["j1"] for c in self.cobs)
+        return (i, j) in self.cubiertas
 
     def dentro(self, lat: float, lon: float) -> bool:
         return any(s <= lat <= n and w <= lon <= e for s, w, n, e in self.cajas)
@@ -195,8 +207,8 @@ class Recolector:
 
 
 def generar(pbf: Path, salida: Path, cajas: list, bares_json: Path | None,
-            grupo: str = "", fecha_osm: str = "") -> None:
-    rec = Recolector(cajas, grupo)
+            grupo: str = "", fecha_osm: str = "", rects: list | None = None) -> None:
+    rec = Recolector(cajas, grupo, rects)
     t0 = time.time()
     claves = ("building", "building:part", "highway", "leisure", "place", "amenity")
     fp = (
@@ -268,8 +280,10 @@ def main() -> None:
         if not ciudades:
             sys.exit(f"no hay ciudades del grupo {a.grupo}")
         print("ciudades:", ", ".join(c["id"] for c in ciudades), file=sys.stderr)
+        rects = [json.loads((a.ciudades.parent / c["limites"]).read_text())["rects"]
+                 if c.get("limites") else None for c in ciudades]
         generar(a.pbf, a.salida, [tuple(c["caja"]) for c in ciudades], a.bares, a.grupo,
-                a.fecha_osm)
+                a.fecha_osm, rects)
     else:
         generar(a.pbf, a.salida, [ZONAS[a.zona]], a.bares, fecha_osm=a.fecha_osm)
 

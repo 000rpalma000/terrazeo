@@ -21,8 +21,9 @@ La misma de las apps (`Tesela`): `i = floor(lat / 0.005)`,
 }
 ```
 
-- `cobertura`: zonas cubiertas, en índices de cuadrícula (inclusive), una
-  por ciudad. `g` es el grupo de ciudades.json que la genera (las apps no
+- `cobertura`: zonas cubiertas, en índices de cuadrícula (inclusive): un
+  rectángulo por ciudad, o varios cientos en las zonas hechas con límites
+  oficiales (la Regió Metropolitana de Barcelona). Pueden solaparse. `g` es el grupo de ciudades.json que la genera (las apps no
   lo usan; sirve para conservarla si un mes falla su tarea).
 - `cuadriculas`: las que tienen datos, con una huella (SHA-1, 12 cifras) de
   su archivo. **Una cuadrícula dentro de la cobertura que no esté aquí está

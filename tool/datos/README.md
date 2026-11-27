@@ -34,6 +34,34 @@ radio (15 km las enormes, 10 km de 1 a 3 millones de habitantes, 7 km de
 500.000 a 1 millón, 5 km las capitales pequeñas). La zona cubierta es el
 cuadrado de lado 2 × radio.
 
+En España, además: todas las ciudades de más de 100.000 habitantes (7 km
+las de más de 200.000, 5 km las demás) y la **Regió Metropolitana de
+Barcelona** completa.
+
+### Zonas por límites oficiales
+
+Una zona puede ser un conjunto de límites administrativos de OSM en lugar de
+un cuadrado: campo `"limites"` con un archivo de [`zonas/`](zonas/). Así es
+Barcelona: los 164 municipios de la Regió Metropolitana (Barcelonès, Baix
+Llobregat, Vallès Occidental, Vallès Oriental, Maresme, Garraf y Alt
+Penedès, más Castellcir, Castellterçol, Granera y Sant Quirze Safaja, que
+pasaron al Moianès en 2015) y la caja de Barcelona ciudad de antes. Entra
+toda cuadrícula que toca la zona; el archivo la guarda como rectángulos de
+cuadrículas y la tarea mensual solo lo lee. Se rehace (si cambian los
+límites) con:
+
+```sh
+pip install shapely
+python3 tool/datos/zona_limites.py cataluna-latest.osm.pbf tool/datos/zonas/barcelona.json \
+    --nombre "Regió Metropolitana de Barcelona" \
+    --wikidata Q15348 Q15351 Q13948 Q14303 Q12600 Q15354 Q15355 Q15407 Q15408 Q15418 Q15452 \
+    --caja-extra 41.317 2.052 41.469 2.229
+python3 tool/datos/elegir_extractos.py tool/datos/ciudades.json /tmp/index-v1.json
+```
+
+Las ciudades que quedan dentro (L'Hospitalet, Badalona, Terrassa,
+Sabadell, Mataró, Santa Coloma) no tienen zona propia.
+
 Para añadir una: escribir `id`, `nombre`, `pais`, `centro` y `radio_km`
 (el resto, cualquier valor) y recalcular caja, extractos y grupo:
 
@@ -62,7 +90,10 @@ python3 tool/datos/generar_teselas.py /tmp/trabajo/grupo.osm.pbf /tmp/salida \
 desde la pestaña *Actions*, para todos los grupos o solo algunos):
 
 1. Una tarea por grupo, hasta 5 a la vez: descarga sus extractos, recorta
-   las ciudades (`osmium extract`), genera y sube sus cuadrículas.
+   las ciudades (`osmium extract`) y genera sus cuadrículas. Sube **solo
+   las que han cambiado** (`cambiadas.py`: huella nueva frente a la del
+   manifiesto publicado, leído de R2). Cada subida es una escritura de
+   clase A en R2 (gratis hasta 1 millón al mes); en un mes cambia ~15 %.
 2. Al final, `unir_manifiestos.py` junta los manifiestos de cada grupo y se
    sube `manifest.json`, siempre lo último. Si un grupo falla, conserva su
    cobertura del mes anterior (sus cuadrículas siguen en R2).
@@ -79,11 +110,6 @@ Necesita, en el repo
 
 Las apps guardan cada cuadrícula 30 días, así que los cambios de OSM llegan
 a los usuarios en, como mucho, un mes.
-
-## Añadir otra ciudad
-
-Una línea en `ZONAS` de `generar_teselas.py` (y otro extracto de Geofabrik
-si queda fuera de Cataluña). El manifiesto admite varias zonas.
 
 ## `ciutats.json`
 

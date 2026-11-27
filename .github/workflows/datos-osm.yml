@@ -81,9 +81,19 @@ jobs:
           ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
           BUCKET: ${{ vars.R2_BUCKET }}
         run: |
-          aws s3 sync salida/osm/v1 "s3://$BUCKET/osm/v1" --endpoint-url "$ENDPOINT" \
-            --exclude manifest.json --content-type application/json \
-            --cache-control "public, max-age=86400" --no-progress --only-show-errors
+          # Solo las cuadrículas que han cambiado desde el manifiesto publicado
+          # (leído de R2, no de la caché de Cloudflare): cada subida es una
+          # escritura de clase A. Si no se puede leer, se suben todas.
+          aws s3 cp "s3://$BUCKET/osm/v1/manifest.json" anterior.json \
+            --endpoint-url "$ENDPOINT" --only-show-errors || rm -f anterior.json
+          python3 tool/datos/cambiadas.py salida/osm/v1 anterior.json subir/osm/v1
+          # cp --recursive y no sync: sync lista todo osm/v1 en R2 (más de
+          # 100 páginas de listado, también de clase A) para comparar.
+          if [ -n "$(ls -A subir/osm/v1)" ]; then
+            aws s3 cp subir/osm/v1 "s3://$BUCKET/osm/v1" --recursive --endpoint-url "$ENDPOINT" \
+              --content-type application/json \
+              --cache-control "public, max-age=86400" --no-progress --only-show-errors
+          fi
 
       - uses: actions/upload-artifact@v4
         with:

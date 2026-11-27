@@ -5,7 +5,8 @@ Uso:
     python3 tool/datos/generar_ciutats.py tool/datos/ciudades.json manifest.json ciutats.json
 
 Una ciudad entra si el manifiesto publicado tiene la cobertura de su grupo
-(si un grupo falla un mes y no hay copia anterior, sus ciudades no salen).
+y la cuadrícula de su centro está en ella (si un grupo falla un mes y no
+hay copia anterior, o una ciudad nueva aún no se ha generado, no sale).
 Lo usan las apps ("Ciutats disponibles", aviso fuera de cobertura y si se
 vende "Recomanat" en esa ciudad) y la web lat41lab.com.
 
@@ -20,6 +21,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -49,10 +51,17 @@ def main() -> None:
     ciudades = json.loads(Path(sys.argv[1]).read_text())
     manifiesto = json.loads(Path(sys.argv[2]).read_text())
     # Sin "g": manifiesto de antes de las ciudades (solo Barcelona).
-    con_datos = {c.get("g", "es-barcelona") for c in manifiesto.get("cobertura", [])}
+    cob = manifiesto.get("cobertura", [])
+    con_datos = {c.get("g", "es-barcelona") for c in cob}
+    tam_lat, tam_lon = manifiesto.get("tam", [0.005, 0.0066])
+
+    def cubierta(lat: float, lon: float) -> bool:
+        i, j = math.floor(lat / tam_lat), math.floor(lon / tam_lon)
+        return any(r["i0"] <= i <= r["i1"] and r["j0"] <= j <= r["j1"] for r in cob)
+
     ciutats = []
     for c in ciudades:
-        if c["grupo"] not in con_datos:
+        if c["grupo"] not in con_datos or not cubierta(*c["centro"]):
             continue
         ca, es, en = PAISOS[c["pais"]]
         ciutats.append({
