@@ -718,12 +718,6 @@ abstract class AppLocalizations {
   /// **'Aparece como Destacado'**
   String get ownerRecommend;
 
-  /// No description provided for @ownerRecommendDetail.
-  ///
-  /// In es, this message translates to:
-  /// **'5 € al mes, IVA incluido. Se paga en la web de Stripe y te puedes dar de baja cuando quieras.'**
-  String get ownerRecommendDetail;
-
   /// No description provided for @ownerClaim.
   ///
   /// In es, this message translates to:

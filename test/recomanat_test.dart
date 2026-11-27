@@ -55,16 +55,8 @@ void main() {
     expect(Recomanat.parse('{"locales": 3}', ahora), isEmpty);
   });
 
-  test('el enlace de pago lleva el local en client_reference_id', () {
-    final u = LocalesConfig.pagoPara('node/123');
-    expect(u.host, 'buy.stripe.com');
-    expect(u.queryParameters['client_reference_id'], 'node_123');
+  test('el botón de destacar abre la web, nunca el pago', () {
     expect(LocalesConfig.paginaLocales('ca').toString(),
-        'https://lat41lab.com/locals.html?lang=ca');
-    // iPhone: la web; Android: el pago con el local.
-    expect(LocalesConfig.destacarPara('node/1', 'es', ios: true).toString(),
-        'https://lat41lab.com/locals.html?lang=es');
-    expect(LocalesConfig.destacarPara('node/1', 'es', ios: false)
-        .queryParameters['client_reference_id'], 'node_1');
+        'https://lat41lab.com/locals?lang=ca');
   });
 }

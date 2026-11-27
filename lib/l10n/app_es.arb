@@ -188,7 +188,6 @@
   "recommendedDisclosure": "Patrocinado · paga por aparecer destacado. No cambia el cálculo de sol, sombra ni viento.",
   "ownerTitle": "¿Es tu local?",
   "ownerRecommend": "Aparece como Destacado",
-  "ownerRecommendDetail": "5 € al mes, IVA incluido. Se paga en la web de Stripe y te puedes dar de baja cuando quieras.",
   "ownerClaim": "Reclámalo gratis",
   "ownerClaimDetail": "Escríbenos para confirmar que es tuyo y corregir sus datos.",
   "ownerClaimSubject": "Reclamo mi local en Terrazeo: {name}",

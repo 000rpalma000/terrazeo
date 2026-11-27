@@ -356,10 +356,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get ownerRecommend => 'Appari in evidenza';
 
   @override
-  String get ownerRecommendDetail =>
-      '5 € al mese, IVA inclusa. Si paga sul sito di Stripe e puoi disdire quando vuoi.';
-
-  @override
   String get ownerClaim => 'Rivendicalo gratis';
 
   @override

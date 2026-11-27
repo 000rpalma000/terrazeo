@@ -109,7 +109,6 @@
   "recommendedDisclosure": "Patrocinat · paga per aparèixer destacat. No canvia el càlcul de sol, ombra ni vent.",
   "ownerTitle": "És el teu local?",
   "ownerRecommend": "Apareix com a Destacat",
-  "ownerRecommendDetail": "5 € al mes, IVA inclòs. Es paga a la web de Stripe i et pots donar de baixa quan vulguis.",
   "ownerClaim": "Reclama'l gratis",
   "ownerClaimDetail": "Escriu-nos per confirmar que és teu i corregir-ne les dades.",
   "ownerClaimSubject": "Reclamo el meu local a Terrazeo: {name}",

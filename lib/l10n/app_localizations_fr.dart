@@ -358,10 +358,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ownerRecommend => 'Être mis en avant';
 
   @override
-  String get ownerRecommendDetail =>
-      '5 € par mois, TVA incluse. Paiement sur le site de Stripe, résiliable à tout moment.';
-
-  @override
   String get ownerClaim => 'Le revendiquer gratuitement';
 
   @override

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -1420,7 +1419,7 @@ class _TerracesScreenState extends State<TerracesScreen> {
     );
   }
 
-  /// "¿Es tu local?": aparecer como recomendado (pago en la web de Stripe)
+  /// "¿Es tu local?": aparecer como recomendado (se paga en la web, fuera de la app)
   /// o reclamarlo gratis por correo. La app solo abre el navegador o el
   /// correo: no hay pagos dentro de la app.
   Widget _pieDueno(AppLocalizations l10n, Bar bar) {
@@ -1438,11 +1437,9 @@ class _TerracesScreenState extends State<TerracesScreen> {
               dense: true,
               leading: const Icon(Icons.star_outline, color: _colorRecomanat),
               title: Text(l10n.ownerRecommend),
-              // En iPhone no se habla de precio ni de pago: abre la web.
-              subtitle: _esIOS ? null : Text(l10n.ownerRecommendDetail),
-              onTap: () => _abrir(LocalesConfig.destacarPara(bar.osmId,
-                  Localizations.localeOf(context).languageCode,
-                  ios: _esIOS)),
+              // Ni precio ni pago en la app: abre la página de la web.
+              onTap: () => _abrir(LocalesConfig.paginaLocales(
+                  Localizations.localeOf(context).languageCode)),
             ),
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -1458,8 +1455,6 @@ class _TerracesScreenState extends State<TerracesScreen> {
       ),
     );
   }
-
-  static bool get _esIOS => defaultTargetPlatform == TargetPlatform.iOS;
 
   Future<void> _abrir(Uri destino) async {
     var ok = false;

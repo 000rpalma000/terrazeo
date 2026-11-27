@@ -356,10 +356,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get ownerRecommend => 'Hervorgehoben werden';
 
   @override
-  String get ownerRecommendDetail =>
-      '5 € im Monat inkl. MwSt. Bezahlt wird auf der Website von Stripe, jederzeit kündbar.';
-
-  @override
   String get ownerClaim => 'Kostenlos beanspruchen';
 
   @override

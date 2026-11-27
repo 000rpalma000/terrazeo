@@ -354,10 +354,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ownerRecommend => 'Get Featured';
 
   @override
-  String get ownerRecommendDetail =>
-      '€5 a month, VAT included. Paid on Stripe\'s website; cancel any time.';
-
-  @override
   String get ownerClaim => 'Claim it for free';
 
   @override
