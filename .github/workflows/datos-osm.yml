@@ -42,68 +42,54 @@ jobs:
 
   generar:
     needs: plan
+    if: ${{ needs.plan.outputs.grupos != '[]' }}
+    uses: ./.github/workflows/generar-grupos.yml
+    with:
+      grupos: ${{ needs.plan.outputs.grupos }}
+    secrets: inherit
+
+  # Los grupos sin manifiesto parcial han fallado (casi siempre, Geofabrik
+  # rechazando la descarga): se reintentan una vez, tras 10 minutos, en
+  # máquinas nuevas.
+  repaso:
+    needs: [plan, generar]
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      max-parallel: 5 # sin agobiar a Geofabrik
-      matrix:
-        grupo: ${{ fromJson(needs.plan.outputs.grupos) }}
+    outputs:
+      grupos: ${{ steps.faltan.outputs.grupos }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: actions/download-artifact@v4
+        continue-on-error: true # si no ha salido ninguno, faltan todos
         with:
-          python-version: "3.12"
-
-      - name: Instalar pyosmium y osmium-tool
-        run: |
-          pip install -r tool/datos/requirements.txt
-          sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool
-
-      - name: Descargar y recortar (Geofabrik)
-        run: python tool/datos/preparar_grupo.py tool/datos/ciudades.json "${{ matrix.grupo }}" trabajo
-
-      - name: Generar cuadrículas
-        run: |
-          python tool/datos/generar_teselas.py trabajo/grupo.osm.pbf salida \
-            --ciudades tool/datos/ciudades.json --grupo "${{ matrix.grupo }}" \
-            --fecha-osm "$(cat trabajo/fecha_osm.txt)"
-
-      - name: Subir cuadrículas a R2
+          pattern: manifiesto-*
+          path: partes
+      - id: faltan
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          # R2 no acepta las sumas de comprobación nuevas por defecto del AWS CLI.
-          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
-          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
-          ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          BUCKET: ${{ vars.R2_BUCKET }}
+          TODOS: ${{ needs.plan.outputs.grupos }}
         run: |
-          # Solo las cuadrículas que han cambiado desde el manifiesto publicado
-          # (leído de R2, no de la caché de Cloudflare): cada subida es una
-          # escritura de clase A. Si no se puede leer, se suben todas.
-          aws s3 cp "s3://$BUCKET/osm/v1/manifest.json" anterior.json \
-            --endpoint-url "$ENDPOINT" --only-show-errors || rm -f anterior.json
-          python3 tool/datos/cambiadas.py salida/osm/v1 anterior.json subir/osm/v1
-          # cp --recursive y no sync: sync lista todo osm/v1 en R2 (más de
-          # 100 páginas de listado, también de clase A) para comparar.
-          if [ -n "$(ls -A subir/osm/v1)" ]; then
-            aws s3 cp subir/osm/v1 "s3://$BUCKET/osm/v1" --recursive --endpoint-url "$ENDPOINT" \
-              --content-type application/json \
-              --cache-control "public, max-age=86400" --no-progress --only-show-errors
-          fi
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json, os
+          from pathlib import Path
+          hechos = {p.name.removeprefix("manifiesto-") for p in Path("partes").glob("manifiesto-*")}
+          faltan = [g for g in json.loads(os.environ["TODOS"]) if g not in hechos]
+          print("grupos=" + json.dumps(faltan))
+          EOF
+          cat "$GITHUB_OUTPUT"
+      - name: Esperar antes de reintentar
+        if: ${{ steps.faltan.outputs.grupos != '[]' }}
+        run: sleep 600
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: manifiesto-${{ matrix.grupo }}
-          path: salida/osm/v1/manifest.json
-          retention-days: 7
+  reintentar:
+    needs: repaso
+    if: ${{ always() && needs.repaso.result == 'success' && needs.repaso.outputs.grupos != '[]' }}
+    uses: ./.github/workflows/generar-grupos.yml
+    with:
+      grupos: ${{ needs.repaso.outputs.grupos }}
+    secrets: inherit
 
   manifiesto:
-    needs: [plan, generar]
-    # También si algún grupo ha fallado: ese grupo conserva el mes anterior.
+    needs: [plan, generar, repaso, reintentar]
+    # También si algún grupo ha fallado dos veces: conserva el mes anterior.
     if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     steps:

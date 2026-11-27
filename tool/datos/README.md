@@ -94,7 +94,11 @@ desde la pestaña *Actions*, para todos los grupos o solo algunos):
    las que han cambiado** (`cambiadas.py`: huella nueva frente a la del
    manifiesto publicado, leído de R2). Cada subida es una escritura de
    clase A en R2 (gratis hasta 1 millón al mes); en un mes cambia ~15 %.
-2. Al final, `unir_manifiestos.py` junta los manifiestos de cada grupo y se
+2. Los grupos que fallan (casi siempre porque Geofabrik rechaza durante un
+   rato las conexiones de esa máquina de GitHub) se reintentan solos una
+   vez, 10 minutos después y en máquinas nuevas
+   (`generar-grupos.yml`, llamado dos veces).
+3. Al final, `unir_manifiestos.py` junta los manifiestos de cada grupo y se
    sube `manifest.json`, siempre lo último. Si un grupo falla, conserva su
    cobertura del mes anterior (sus cuadrículas siguen en R2).
 
